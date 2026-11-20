@@ -58,14 +58,14 @@
 ## Phase 1 — Inventory and overview (§18)
 
 ### Data
-- [ ] **P1.1** Enforced morph map (§3).
-- [ ] **P1.2** `Status` enum with `rank()` and `isFailure()` (§4.2).
-- [ ] **P1.3** Migrations + models: `choices` (§3.4) with seeds; `servers` (soft deletes, §3.2, `versions_token` encrypted cast, hidden from serialisation); `server_addresses` (§3.3); `server_backup_location` pivot; `external_services` (soft deletes, §3.5) with the Cloudflare seed; `domains` (§3.6); `sites` (§3.7: `front_service_id`, `server_id`, `description`, `github_url`).
-- [ ] **P1.4** Soft-delete uniqueness via stored generated `active_*` columns on `servers.name`, `external_services.name`, `domains.name`, `sites.hostname` (§3.17).
-- [ ] **P1.5** Validation: IP belongs to at most one non-deleted server and not inside any external service's ranges (§3.3); domain with live sites can't be deleted; external service used by sites can't be deleted; choice in use can't be deleted; `github_url` format.
+- [x] **P1.1** Enforced morph map (§3).
+- [x] **P1.2** `Status` enum with `rank()` and `isFailure()` (§4.2).
+- [x] **P1.3** Migrations + models: `choices` (§3.4) with seeds; `servers` (soft deletes, §3.2, `versions_token` encrypted cast, hidden from serialisation); `server_addresses` (§3.3); `server_backup_location` pivot; `external_services` (soft deletes, §3.5) with the Cloudflare seed; `domains` (§3.6); `sites` (§3.7: `front_service_id`, `server_id`, `description`, `github_url`).
+- [x] **P1.4** Soft-delete uniqueness via stored generated `active_*` columns on `servers.name`, `external_services.name`, `domains.name`, `sites.hostname` (§3.17).
+- [x] **P1.5** Validation: IP belongs to at most one non-deleted server and not inside any external service's ranges (§3.3); domain with live sites can't be deleted; external service used by sites can't be deleted; choice in use can't be deleted; `github_url` format.
 - [ ] **P1.6** `activities` table and `ActivityRecorder::record(...)` (§3.13, §8.1).
 - [ ] **P1.7** Observers on `Server`, `ServerAddress`, `ExternalService`, `Domain`, `Site`, `User` and the backup pivot, including special types `site.path_changed`, `server.address_added/removed`, `server.backup_locations_changed`, `user.role_changed`; exclude secrets and system-maintained columns (§8.2).
-- [ ] **P1.8** Accessors: `$site->url`; Unicode display via `idn_to_utf8()`; `$site->servingPath()` returning front + backend.
+- [x] **P1.8** Accessors: `$site->url`; Unicode display via `idn_to_utf8()`; `$site->servingPath()` returning front + backend.
 - [ ] **P1.9** laravel-data classes for every page's rows and forms; generated TypeScript types used by pages.
 
 ### Pages (admin-only actions behind `EnsureAdmin`, §13.3)
@@ -264,6 +264,10 @@ Found in Phase 0 (2026-11-20):
 - [x] The P0.11 demo table needs a seeded table without a throwaway migration (migrations are append-only once merged). Decision: it lists `users` (name, role, added; no email, since the users list is admin only), seeded locally with `DemoTableSeeder`. Its admin-only "ping" action is the sample mutation for the Phase 0 exit check.
 - [x] `.eu` has no RDAP service and EURid's WHOIS publishes no expiry date (`docs/spikes/rdap.md`). Resolved: Media24 uses `.si`, `.com`, `.me`, `.work` and `.dev`, no `.eu` (`docs/spikes/tlds.md`).
 - [ ] The Sextant server has no IPv6 (`docs/spikes/icmp.md`: "Address family not supported by protocol"). SPEC assumes Sextant can reach IPv6 addresses (`server.tcp`/`server.ping` with `-6`, §9.1, §9.2, §9.0). Until the server gets IPv6, any check that has to connect over IPv6 must throw CheckCouldNotRun ("Sextant has no IPv6 connectivity") and stay Unknown, and default monitors should target the server's IPv4 address. Confirm, or enable IPv6 on the Sextant server.
+- [x] SPEC §4.2 puts `Status` in `App\Checks`; it lives in `App\Enums\Status` with the other enums. `CheckResult` and the checkers (P3.2) import it from there.
+- [x] P1.1's morph map lists `monitor`, `incident` and `minimum_version`, whose models arrive in Phases 3, 4 and 7. `Relation::enforceMorphMap()` needs real classes, so each joins the map with its model.
+- [x] The choices seeds (§3.4) and the Cloudflare row (§3.5) are reference data that production needs, but deploys run `migrate`, not `db:seed`. Decision: the create-table migrations insert them.
+- [x] P1.5's "IP not inside any external service's ranges" can only check admin-entered `ranges` until `proxies:refresh` caches the published ranges (P2.3/P2.4). `IpAddressIsFree` has a `// SPEC:` note; P2.3 extends it.
 
 Carried over from the previous version of this list (still open in SPEC v0.2):
 

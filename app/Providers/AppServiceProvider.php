@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\Domain;
+use App\Models\ExternalService;
+use App\Models\Server;
+use App\Models\Site;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -26,7 +31,23 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureMorphMap();
         $this->configureAuthorization();
+    }
+
+    /**
+     * Polymorphic types are stored as these keys, never class names (SPEC §3).
+     * monitor, incident and minimum_version join when their models exist.
+     */
+    protected function configureMorphMap(): void
+    {
+        Relation::enforceMorphMap([
+            'server' => Server::class,
+            'external_service' => ExternalService::class,
+            'domain' => Domain::class,
+            'site' => Site::class,
+            'user' => User::class,
+        ]);
     }
 
     /**

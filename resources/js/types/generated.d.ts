@@ -21,7 +21,10 @@ created_at: string | null,
 };
 }
 namespace Enums {
+export type ChoiceList = 'os' | 'backup_location';
 export type Confidence = 'detected' | 'suggested' | 'not_found';
+export type ExternalServiceKind = 'cdn' | 'proxy' | 'other';
+export type RangeSource = 'cloudflare' | 'fastly' | 'cloudfront';
 export type Status = 'ok' | 'warning' | 'error' | 'unknown';
 export type UserRole = 'admin' | 'reader';
 }
