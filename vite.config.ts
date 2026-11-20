@@ -81,6 +81,8 @@ export default defineConfig({
             'resources/js/types/generated.d.ts',
             'resources/js/components/ui/*',
             'resources/views/mail/*',
+            // Recorded API responses stay exactly as received.
+            'tests/Fixtures/**',
         ],
         sortTailwindcss: {
             functions: ['clsx', 'cn', 'cva'],
