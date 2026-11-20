@@ -9,3 +9,6 @@
 CHANGELOG.md export-ignore
 README.md export-ignore
 .github/workflows/browser-tests.yml export-ignore
+
+# Recorded responses stay byte-for-byte (WHOIS answers with CRLF).
+tests/Fixtures/** -text
