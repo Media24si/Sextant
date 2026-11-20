@@ -41,13 +41,13 @@
 - [x] **P0.10** Shared components (§13.4): `DataTable` (§13.5), `StatusBadge`, `StatusDot`, `SeverityBadge`, `ServingPath`, `ConfidenceBadge`, `VersionCell`, `RelativeTime`, `ConfirmDialog`, `PageHeader`, `Breadcrumbs`, `EmptyState`, `RepoLink`, form field wrappers (label, input, error) on shadcn-vue.
 - [x] **P0.11** A temporary demo page using `DataTable` against a seeded table, proving server-side sort, filter chips, search and pagination via query string.
 - [x] **P0.12** CI: Pint, Larastan, Pest against a **MySQL 9.7** service container, ESLint, `vue-tsc --noEmit`, Vitest.
-- [ ] **P0.13** Spikes, each in `docs/spikes/<name>.md`:
+- [x] **P0.13** Spikes, each in `docs/spikes/<name>.md`:
   - [x] MySQL 9.7: stored generated column + unique index for soft-delete uniqueness; `open_monitor_id` unique index; `RESTRICT` FK on its base column (§3.11, §3.17).
   - [x] Net_DNS2: custom resolvers, timeouts, CNAME chain, authoritative SOA query.
   - [x] TLS: verifying connection plus `spatie/ssl-certificate` fields.
   - [x] RDAP via IANA bootstrap; record the `svet24.si` response as a fixture (date-only events).
-  - [ ] **[HUMAN]** List every TLD Media24 uses; confirm RDAP or WHOIS parsing for each.
-  - [ ] **[HUMAN]** Confirm ICMP `ping` works for the php-fpm and Horizon users on the Sextant server.
+  - [x] **[HUMAN]** List every TLD Media24 uses; confirm RDAP or WHOIS parsing for each.
+  - [x] **[HUMAN]** Confirm ICMP `ping` works for the php-fpm and Horizon users on the Sextant server.
   - [x] Pin package versions in `composer.json` / `package.json`; list them in `docs/spikes/versions.md`.
 - [ ] **P0.14** **[HUMAN]** Deploy to the dedicated Sextant server (§16): nginx + php-fpm, MySQL 9.7, Redis, Horizon and `schedule:work` under supervisor/systemd; outbound firewall per §16.
 - [x] **P0.15** **[HUMAN]** Export the prototype's artboards as PNG into `docs/design/` (Overview, Servers, Server detail, Domains, Add domain, Add server, Add site).
@@ -262,7 +262,8 @@ Found in Phase 0 (2026-11-20):
 - [x] The `Status` enum belongs to P1.2, but the shell and P0.10 components need its TypeScript type. Decision: `App\Enums\Status` (values only) added in P0.9; P1.2 adds `rank()` and `isFailure()`.
 - [x] `ConfidenceBadge` and `ServingPath` (P0.10) need types that SPEC defines for Phases 1–2. Decision: `App\Enums\Confidence` (`detected`, `suggested`, `not_found`, §10.1) and `App\Data\ServingPathData` (front and backend names) added now; "Chosen by you" is a UI state (`chosen` prop), not a confidence. P1.8/P1.9 build on them.
 - [x] The P0.11 demo table needs a seeded table without a throwaway migration (migrations are append-only once merged). Decision: it lists `users` (name, role, added; no email, since the users list is admin only), seeded locally with `DemoTableSeeder`. Its admin-only "ping" action is the sample mutation for the Phase 0 exit check.
-- [ ] `.eu` has no RDAP service and EURid's WHOIS publishes no expiry date (`docs/spikes/rdap.md`), so `domain.expiration` (§9.3) would stay Unknown for `.eu` domains forever. Needs a decision once the TLD list (`docs/spikes/tlds.md`) shows whether Media24 has `.eu` domains, e.g. don't attach `domain.expiration` for TLDs without an expiry source, or let an admin enter the expiry date.
+- [x] `.eu` has no RDAP service and EURid's WHOIS publishes no expiry date (`docs/spikes/rdap.md`). Resolved: Media24 uses `.si`, `.com`, `.me`, `.work` and `.dev`, no `.eu` (`docs/spikes/tlds.md`).
+- [ ] The Sextant server has no IPv6 (`docs/spikes/icmp.md`: "Address family not supported by protocol"). SPEC assumes Sextant can reach IPv6 addresses (`server.tcp`/`server.ping` with `-6`, §9.1, §9.2, §9.0). Until the server gets IPv6, any check that has to connect over IPv6 must throw CheckCouldNotRun ("Sextant has no IPv6 connectivity") and stay Unknown, and default monitors should target the server's IPv4 address. Confirm, or enable IPv6 on the Sextant server.
 
 Carried over from the previous version of this list (still open in SPEC v0.2):
 
