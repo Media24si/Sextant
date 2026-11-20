@@ -31,8 +31,8 @@
 
 - [x] **P0.1** New app from Laravel's **Vue starter kit** (TypeScript). PHP ≥ 8.4 with `intl`, `openssl`, `curl`, `redis`, `pdo_mysql`. `APP_TIMEZONE=UTC`. Remove registration routes, pages and tests.
 - [x] **P0.2** MySQL 9.7: `.env.example` for socket or TLS; document creating the user with `caching_sha2_password` (§16).
-- [ ] **P0.3** `users.role` (`admin`/`reader`, default `reader`); `EnsureAdmin` middleware; policy scaffold; `HandleInertiaRequests` shares `auth.user` (id, name, role) and `can.manage` (§13.2).
-- [ ] **P0.4** `php artisan sextant:create-admin` (name, email, password prompt).
+- [x] **P0.3** `users.role` (`admin`/`reader`, default `reader`); `EnsureAdmin` middleware; policy scaffold; `HandleInertiaRequests` shares `auth.user` (id, name, role) and `can.manage` (§13.2).
+- [x] **P0.4** `php artisan sextant:create-admin` (name, email, password prompt).
 - [ ] **P0.5** Redis + Horizon with supervisors `checks` (5–20), `checks-slow` (2), `notifications` (1), `default` (2); job timeout 60 s, `retry_after` 90 s; `/horizon` admin only (§16).
 - [ ] **P0.6** Sentry with `SENTRY_TRACES_SAMPLE_RATE=0` and one scheduled task using `->sentryMonitor()`. Scheduler documented for `schedule:work` (§14).
 - [x] **P0.7** `config/sextant.php` skeleton exactly as §15.1; `.env.example` with every variable in §15.2.

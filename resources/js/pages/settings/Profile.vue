@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { Form, Head, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { Form, Head } from '@inertiajs/vue3';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -20,8 +19,9 @@ defineOptions({
     },
 });
 
-const page = usePage();
-const user = computed(() => page.props.auth.user);
+defineProps<{
+    profile: App.Data.ProfileData;
+}>();
 </script>
 
 <template>
@@ -47,7 +47,7 @@ const user = computed(() => page.props.auth.user);
                     id="name"
                     class="mt-1 block w-full"
                     name="name"
-                    :default-value="user.name"
+                    :default-value="profile.name"
                     required
                     autocomplete="name"
                     placeholder="Full name"
@@ -62,7 +62,7 @@ const user = computed(() => page.props.auth.user);
                     type="email"
                     class="mt-1 block w-full"
                     name="email"
-                    :default-value="user.email"
+                    :default-value="profile.email"
                     required
                     autocomplete="username"
                     placeholder="Email address"

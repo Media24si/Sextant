@@ -1,3 +1,19 @@
+declare namespace App {
+namespace Data {
+export type AuthUserData = {
+id: number,
+name: string,
+role: App.Enums.UserRole,
+};
+export type ProfileData = {
+name: string,
+email: string,
+};
+}
+namespace Enums {
+export type UserRole = 'admin' | 'reader';
+}
+}
 declare namespace Illuminate {
 export type CursorPaginator<TKey, TValue> = {
 data: TKey extends string ? Record<TKey, TValue> : TValue[],

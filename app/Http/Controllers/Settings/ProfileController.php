@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Data\ProfileData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -13,9 +15,11 @@ class ProfileController extends Controller
     /**
      * Show the user's profile settings page.
      */
-    public function edit(): Response
+    public function edit(Request $request): Response
     {
-        return Inertia::render('settings/Profile');
+        return Inertia::render('settings/Profile', [
+            'profile' => ProfileData::fromModel($request->user()),
+        ]);
     }
 
     /**
