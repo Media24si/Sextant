@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Server web02</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F5F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Inter, system-ui, sans-serif; color: #0F172A; background: #F5F6F8; font-size: 14px">
+
+<nav aria-label="Main" style="flex: 1 1 220px; background: #0B1220; color: #CBD5E1; padding: 20px 14px; display: flex; flex-direction: column; gap: 2px; box-sizing: border-box">
+  <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px 20px">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg>
+    <span style="font-weight: 700; font-size: 17px; color: #FFFFFF; letter-spacing: -0.01em">Sextant</span>
+  </div>
+  <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Overview</a>
+  <a href="Servers.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #FFFFFF; background: #1E293B; font-weight: 500">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="1.5"></rect><rect x="3" y="13" width="18" height="7" rx="1.5"></rect><path d="M7 7.5h.01M7 16.5h.01"></path></svg>Servers<span style="margin-left: auto; font-size: 12px; color: #94A3B8">22</span></a>
+  <a href="Domains.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"></path></svg>Domains<span style="margin-left: auto; font-size: 12px; color: #94A3B8">31</span></a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 16H3z"></path><path d="M12 10v4M12 17h.01"></path></svg>Incidents<span style="margin-left: auto; font-size: 12px; color: #FCA5A5">5</span></a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"></path></svg>Activity</a>
+  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; padding: 22px 10px 6px">Admin</div>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"></path></svg>Minimum versions</a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"></rect></svg>External services</a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 010 7M18 14.8c2 .7 3.2 2.5 3.6 5.2"></path></svg>Users</a>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+  <header style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 32px; background: #FFFFFF; border-bottom: 1px solid #E2E8F0">
+    <a href="Main.dc.html" style="flex: 1 1 340px; max-width: 580px; display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px 0 14px; box-sizing: border-box; border: 1px solid #CBD5E1; border-radius: 10px; background: #F8FAFC; color: #64748B; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <span>Search servers, domains, IPs, versions…</span>
+      <span style="margin-left: auto; font-size: 12px; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 2px 7px; background: #FFFFFF">Ctrl K</span>
+    </a>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="width: 34px; height: 34px; border-radius: 50%; background: #DBEAFE; color: #1E3A8A; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px" aria-hidden="true">AN</span>
+      <div style="display: flex; flex-direction: column; line-height: 1.25">
+        <span style="font-weight: 600; font-size: 13px">Ana Novak</span>
+        <span style="font-size: 12px; color: #475569">Admin</span>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 24px; max-width: 1280px; width: 100%; box-sizing: border-box">
+
+    <nav aria-label="Breadcrumb" style="font-size: 13px; color: #475569"><a href="Servers.dc.html" style="text-decoration: none">Servers</a> / web02</nav>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; align-items: flex-start">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+          <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; font-family: 'JetBrains Mono', monospace">web02</h1>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #9A3412; background: #FFEDD5; border-radius: 999px; padding: 4px 10px"><span style="width: 7px; height: 7px; border-radius: 50%; background: #EA580C" aria-hidden="true"></span>Warning</span>        </div>
+        <div style="display: flex; gap: 18px; flex-wrap: wrap; color: #334155; font-size: 13px">
+          <span>web02.media24.si</span>
+          <span><span style="font-family: 'JetBrains Mono', monospace">192.0.2.12</span> primary</span>
+          <span style="font-family: 'JetBrains Mono', monospace">192.0.2.112</span>
+          <span style="font-family: 'JetBrains Mono', monospace">2001:db8:24::12</span>
+          <span>Provider: Hetzner</span>
+          <span>Ubuntu 24.04 LTS</span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12px">
+          <span style="color: #475569">Backups stored on</span>
+          <span style="border: 1px solid #CBD5E1; border-radius: 999px; padding: 3px 10px; color: #334155; background: #FFFFFF">Provider snapshots</span>
+          <span style="border: 1px solid #CBD5E1; border-radius: 999px; padding: 3px 10px; color: #334155; background: #FFFFFF">Backup server</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap">
+        <button type="button" style="height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-weight: 500; color: #0F172A; cursor: pointer">Run checks now</button>
+        <button type="button" style="height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-weight: 500; color: #0F172A; cursor: pointer">Mute until…</button>
+        <button type="button" style="height: 40px; padding: 0 16px; border-radius: 8px; border: 0; background: #1D4ED8; font: inherit; font-weight: 500; color: #FFFFFF; cursor: pointer">Edit server</button>
+      </div>
+    </div>
+
+    <section aria-labelledby="conn-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px">
+      <h2 id="conn-h" style="margin: 0 0 4px; font-size: 16px; font-weight: 600">How traffic reaches web02</h2>
+      <p style="margin: 0 0 18px; color: #475569; font-size: 13px">24 sites use web02 as their backend. Dashed boxes are external services Sextant doesn't check directly.</p>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px">
+        <div style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1.5px dashed #94A3B8; border-radius: 10px; padding: 12px 14px">
+            <div><div style="font-weight: 600">Varnish</div><div style="font-size: 12px; color: #475569">External server · 3 sites</div></div>
+            <span style="font-size: 12px; color: #475569; font-family: 'JetBrains Mono', monospace">svet24.si +2</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1.5px dashed #94A3B8; border-radius: 10px; padding: 12px 14px">
+            <div><div style="font-weight: 600">Cloudflare</div><div style="font-size: 12px; color: #475569">External CDN · 8 sites</div></div>
+            <span style="font-size: 12px; color: #475569; font-family: 'JetBrains Mono', monospace">necenzurirano.si +7</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid #E2E8F0; background: #F8FAFC; border-radius: 10px; padding: 12px 14px">
+            <div><div style="font-weight: 600">Direct</div><div style="font-size: 12px; color: #475569">DNS points straight at web02 · 13 sites</div></div>
+            <span style="font-size: 12px; color: #475569; font-family: 'JetBrains Mono', monospace">media24.si +12</span>
+          </div>
+        </div>
+        <svg width="64" height="24" viewBox="0 0 64 24" fill="none" stroke="#94A3B8" stroke-width="1.5" aria-hidden="true" style="flex: none"><path d="M2 12h58M52 5l8 7-8 7"></path></svg>
+        <div style="flex: 1 1 220px; border: 2px solid #1D4ED8; background: #EFF6FF; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 6px">
+          <div style="font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 16px">web02</div>
+          <div style="font-size: 13px; color: #1E3A8A">nginx 1.26.2 · PHP 8.3.14, 8.2.20</div>
+          <div style="font-size: 13px; color: #1E3A8A">24 sites built here</div>
+        </div>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+      <section aria-labelledby="sites-h" style="flex: 3 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+          <h2 id="sites-h" style="margin: 0; font-size: 16px; font-weight: 600">Sites served</h2>
+          <span style="font-size: 13px; color: #475569">6 of 24</span>
+        </div>
+        <div style="overflow-x: auto">
+          <table style="width: 100%; min-width: 560px; border-collapse: collapse; font-size: 13px">
+            <thead>
+              <tr style="text-align: left; color: #475569; background: #F8FAFC">
+                <th scope="col" style="padding: 10px 20px; font-weight: 500">Site</th>
+                <th scope="col" style="padding: 10px 8px; font-weight: 500">Serving path</th>
+                <th scope="col" style="padding: 10px 20px 10px 8px; font-weight: 500">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{sites}}" as="s" hint-placeholder-count="6">
+                <tr style="border-top: 1px solid #F1F5F9">
+                  <td style="padding: 12px 20px; font-family: 'JetBrains Mono', monospace">{{s.host}}</td>
+                  <td style="padding: 12px 8px">
+                    <span style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap">
+                      <sc-if value="{{s.hasFront}}" hint-placeholder-val="{{ true }}">
+                        <span style="font-size: 12px; border: 1.5px dashed #94A3B8; border-radius: 6px; padding: 2px 8px; color: #334155">{{s.front}}</span>
+                        <span style="color: #94A3B8" aria-hidden="true">→</span>
+                      </sc-if>
+                      <span style="font-size: 12px; font-family: 'JetBrains Mono', monospace; border: 1px solid #93C5FD; background: #EFF6FF; border-radius: 6px; padding: 2px 8px; color: #1E3A8A">web02</span>
+                    </span>
+                  </td>
+                  <td style="padding: 12px 20px 12px 8px"><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #334155"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{s.dot}}" aria-hidden="true"></span>{{s.status}}</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding: 12px 20px; border-top: 1px solid #F1F5F9"><a href="Domains.dc.html" style="font-size: 13px; text-decoration: none">Show all 24 sites</a></div>
+      </section>
+
+      <section aria-labelledby="ver-h" style="flex: 2 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0; gap: 12px; flex-wrap: wrap">
+          <div>
+            <h2 id="ver-h" style="margin: 0; font-size: 16px; font-weight: 600">Software versions</h2>
+            <div style="font-size: 12px; color: #475569; margin-top: 3px">{{readLabel}}</div>
+          </div>
+          <button type="button" onClick="{{refresh}}" style="height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-weight: 500; color: #0F172A; cursor: pointer">Refresh now</button>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px">
+          <thead>
+            <tr style="text-align: left; color: #475569">
+              <th scope="col" style="padding: 10px 20px; font-weight: 500">Software</th>
+              <th scope="col" style="padding: 10px 8px; font-weight: 500">Installed</th>
+              <th scope="col" style="padding: 10px 20px 10px 8px; font-weight: 500">Minimum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">Operating system</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace">Ubuntu 24.04.1 LTS</td><td style="padding: 10px 20px 10px 8px; color: #475569">matches setting</td></tr>
+            <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">Kernel (running)</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace">6.8.0-49-generic</td><td style="padding: 10px 20px 10px 8px; color: #475569">not set</td></tr>
+            <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">nginx</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace">1.26.2</td><td style="padding: 10px 20px 10px 8px; font-family: 'JetBrains Mono', monospace; color: #166534">1.26.2 ✓</td></tr>
+            <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">PHP 8.3 (CLI, FPM)</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace">8.3.14</td><td style="padding: 10px 20px 10px 8px; font-family: 'JetBrains Mono', monospace; color: #166534">8.3.14 ✓</td></tr>
+            <tr style="border-top: 1px solid #F1F5F9; background: #FFF7ED"><td style="padding: 10px 20px; font-weight: 600; color: #9A3412">PHP 8.2 (CLI, FPM)</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #9A3412">8.2.20</td><td style="padding: 10px 20px 10px 8px; font-family: 'JetBrains Mono', monospace; color: #9A3412">8.2.26 · below</td></tr>
+            <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">MySQL</td><td style="padding: 10px 8px; color: #475569">not installed</td><td style="padding: 10px 20px 10px 8px; color: #475569">—</td></tr>
+            <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">OpenSSL</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace">3.0.15</td><td style="padding: 10px 20px 10px 8px; font-family: 'JetBrains Mono', monospace; color: #166534">3.0.15 ✓</td></tr>
+          </tbody>
+        </table>
+        <div style="border-top: 1px solid #E2E8F0; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; background: #F8FAFC">
+          <div style="font-size: 12px; color: #475569">Versions endpoint</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; word-break: break-all">https://web02.media24.si/.sextant/versions.php</div>
+          <div style="font-size: 12px; color: #475569">Bearer token <span style="font-family: 'JetBrains Mono', monospace; color: #0F172A">sxt_••••••••••••a91f</span></div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px">
+            <a href="#" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #0F172A; text-decoration: none; font-size: 13px; font-weight: 500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>sextant-collect.sh</a>
+            <a href="#" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #0F172A; text-decoration: none; font-size: 13px; font-weight: 500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>versions.php</a>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section aria-labelledby="mon-h" style="flex: 3 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+          <h2 id="mon-h" style="margin: 0; font-size: 16px; font-weight: 600">Monitors</h2>
+          <button type="button" style="height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 500; color: #0F172A; cursor: pointer">+ Add monitor</button>
+        </div>
+        <div style="font-size: 13px">
+          <div style="display: flex; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap"><span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A" aria-hidden="true"></span><span style="flex: 1 1 200px; font-weight: 500">TCP port · SSH (22)</span><span style="color: #475569">Port 22 open (11 ms) · every 1 min</span></div>
+          <div style="display: flex; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap"><span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A" aria-hidden="true"></span><span style="flex: 1 1 200px; font-weight: 500">TCP port · HTTP (80)</span><span style="color: #475569">Port 80 open (10 ms) · every 1 min</span></div>
+          <div style="display: flex; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap"><span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A" aria-hidden="true"></span><span style="flex: 1 1 200px; font-weight: 500">TCP port · HTTPS (443)</span><span style="color: #475569">Port 443 open (12 ms) · every 1 min</span></div>
+          <div style="display: flex; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap"><span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A" aria-hidden="true"></span><span style="flex: 1 1 200px; font-weight: 500">Ping</span><span style="color: #475569">0% loss, 9 ms · every 5 min</span></div>
+          <div style="display: flex; gap: 12px; align-items: center; padding: 12px 20px; flex-wrap: wrap"><span style="width: 8px; height: 8px; border-radius: 50%; background: #EA580C" aria-hidden="true"></span><span style="flex: 1 1 200px; font-weight: 500">Software versions</span><span style="color: #9A3412">PHP 8.2.20 below minimum 8.2.26 · daily</span></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="act-h" style="flex: 2 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+        <div style="padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+          <h2 id="act-h" style="margin: 0; font-size: 16px; font-weight: 600">Incidents and changes</h2>
+        </div>
+        <div style="padding: 6px 20px 12px; font-size: 13px">
+          <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9"><span style="width: 8px; height: 8px; border-radius: 50%; background: #EA580C; margin-top: 5px; flex: none" aria-hidden="true"></span><span>PHP 8.2 below minimum · open 2 days · acknowledged by Marko Kranjc</span></div>
+          <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9"><span style="width: 8px; height: 8px; border-radius: 50%; background: #3B82F6; margin-top: 5px; flex: none" aria-hidden="true"></span><span>nginx 1.24.0 → 1.26.2 · today 21:00</span></div>
+          <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9"><span style="width: 8px; height: 8px; border-radius: 50%; background: #94A3B8; margin-top: 5px; flex: none" aria-hidden="true"></span><span>Marko Kranjc moved necenzurirano.si here (Cloudflare → web02) · 18:05</span></div>
+          <div style="display: flex; gap: 10px; padding: 10px 0"><span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A; margin-top: 5px; flex: none" aria-hidden="true"></span><span>TCP port (HTTPS) resolved after 3 min · 12 Nov</span></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1420}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { refreshed: false };
+  }
+  renderVals() {
+    var dot = { OK: '#16A34A', Warning: '#EA580C', Error: '#DC2626' };
+    var sites = [
+      { host: 'svet24.si', front: 'Varnish', status: 'Warning' },
+      { host: 'podjetje.svet24.si', front: 'Varnish', status: 'OK' },
+      { host: 'njena.svet24.si', front: 'Varnish', status: 'OK' },
+      { host: 'necenzurirano.si', front: 'Cloudflare', status: 'OK' },
+      { host: 'www.necenzurirano.si', front: 'Cloudflare', status: 'OK' },
+      { host: 'media24.si', front: '', status: 'OK' }
+    ].map(function (s) { return Object.assign({}, s, { hasFront: !!s.front, dot: dot[s.status] }); });
+    return {
+      sites: sites,
+      readLabel: this.state.refreshed ? 'Read just now · collector ran 21:00' : 'Read today 06:00 · collector ran 06:00',
+      refresh: () => this.setState({ refreshed: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

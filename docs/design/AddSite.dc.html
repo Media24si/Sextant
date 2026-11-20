@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add site</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F5F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Inter, system-ui, sans-serif; color: #0F172A; background: #F5F6F8; font-size: 14px">
+
+<nav aria-label="Main" style="flex: 1 1 220px; background: #0B1220; color: #CBD5E1; padding: 20px 14px; display: flex; flex-direction: column; gap: 2px; box-sizing: border-box">
+  <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px 20px">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg>
+    <span style="font-weight: 700; font-size: 17px; color: #FFFFFF; letter-spacing: -0.01em">Sextant</span>
+  </div>
+  <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Overview</a>
+  <a href="Servers.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="1.5"></rect><rect x="3" y="13" width="18" height="7" rx="1.5"></rect><path d="M7 7.5h.01M7 16.5h.01"></path></svg>Servers<span style="margin-left: auto; font-size: 12px; color: #94A3B8">22</span></a>
+  <a href="Domains.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #FFFFFF; background: #1E293B; font-weight: 500">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"></path></svg>Domains<span style="margin-left: auto; font-size: 12px; color: #94A3B8">31</span></a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 16H3z"></path><path d="M12 10v4M12 17h.01"></path></svg>Incidents<span style="margin-left: auto; font-size: 12px; color: #FCA5A5">5</span></a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"></path></svg>Activity</a>
+  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; padding: 22px 10px 6px">Admin</div>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"></path></svg>Minimum versions</a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"></rect></svg>External services</a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 010 7M18 14.8c2 .7 3.2 2.5 3.6 5.2"></path></svg>Users</a>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+  <header style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 32px; background: #FFFFFF; border-bottom: 1px solid #E2E8F0">
+    <a href="Main.dc.html" style="flex: 1 1 340px; max-width: 580px; display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px 0 14px; box-sizing: border-box; border: 1px solid #CBD5E1; border-radius: 10px; background: #F8FAFC; color: #64748B; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <span>Search servers, domains, IPs, versions…</span>
+      <span style="margin-left: auto; font-size: 12px; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 2px 7px; background: #FFFFFF">Ctrl K</span>
+    </a>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="width: 34px; height: 34px; border-radius: 50%; background: #DBEAFE; color: #1E3A8A; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px" aria-hidden="true">AN</span>
+      <div style="display: flex; flex-direction: column; line-height: 1.25">
+        <span style="font-weight: 600; font-size: 13px">Ana Novak</span>
+        <span style="font-size: 12px; color: #475569">Admin</span>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 20px; max-width: 1280px; width: 100%; box-sizing: border-box">
+    <nav aria-label="Breadcrumb" style="font-size: 13px; color: #475569"><a href="Domains.dc.html" style="text-decoration: none">Domains</a> / Add site</nav>
+    <div>
+      <h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Add site</h1>
+      <p style="margin: 6px 0 0; color: #475569">Paste the site's URL. Sextant works out the domain, what sits in front and which server builds it. Nothing is saved until you confirm.</p>
+    </div>
+
+    <sc-if value="{{saved}}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 14px 18px; color: #166534">
+        <strong style="font-weight: 600">{{savedText}}</strong>
+        <span>{{savedDetail}}</span>
+        <a href="Domains.dc.html" style="margin-left: auto; font-weight: 500">Go to Domains</a>
+      </div>
+    </sc-if>
+
+    <section aria-labelledby="u-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <h2 id="u-h" style="margin: 0; font-size: 16px; font-weight: 600">Site URL</h2>
+      <form onSubmit="{{onSubmit}}" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 0">
+        <label for="site-url" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Site URL</label>
+        <input id="site-url" type="text" inputmode="url" autocomplete="off" value="{{url}}" onChange="{{onUrl}}" placeholder="https://vestnik.svet24.si" style="flex: 1 1 380px; height: 48px; padding: 0 14px; border: 1px solid #CBD5E1; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #0F172A">
+        <button type="submit" style="height: 48px; padding: 0 20px; border-radius: 10px; border: 0; background: #0F172A; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">Detect</button>
+      </form>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+        <span style="font-size: 12px; color: #475569">Try:</span>
+        <sc-for list="{{examples}}" as="ex" hint-placeholder-count="5">
+          <button type="button" onClick="{{ex.pick}}" style="height: 32px; padding: 0 10px; border-radius: 999px; border: 1px solid #CBD5E1; background: {{ex.bg}}; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #0F172A; cursor: pointer">{{ex.label}}</button>
+        </sc-for>
+      </div>
+    </section>
+
+    <sc-if value="{{showInvalid}}" hint-placeholder-val="{{ false }}">
+      <div role="alert" style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; padding: 14px 18px; color: #991B1B">That doesn't look like a hostname. Enter a full URL such as https://vestnik.svet24.si.</div>
+    </sc-if>
+
+    <sc-if value="{{showDup}}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 14px 18px; color: #1E3A8A">
+        <strong style="font-weight: 600">{{host}} is already in Sextant.</strong>
+        <span>{{dupPath}}</span>
+        <a href="Domains.dc.html" style="margin-left: auto; font-weight: 500">Open site</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{showResult}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+        <div style="flex: 3 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+
+          <section aria-labelledby="d-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+            <div style="padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+              <h2 id="d-h" style="margin: 0; font-size: 16px; font-weight: 600">What Sextant found</h2>
+            </div>
+            <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
+              <div style="display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 4px 16px; padding: 14px 20px; border-bottom: 1px solid #F1F5F9">
+                <span style="font-size: 13px; color: #475569; padding-top: 2px">{{f.label}}</span>
+                <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; word-break: break-all">{{f.value}}</span>
+                    <span style="font-size: 11px; font-weight: 700; color: {{f.fg}}; background: {{f.bg}}; border-radius: 999px; padding: 3px 9px">{{f.badge}}</span>
+                  </div>
+                  <span style="font-size: 12px; color: #475569">{{f.how}}</span>
+                </div>
+              </div>
+            </sc-for>
+
+            <div style="display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 4px 16px; padding: 14px 20px; background: {{backendRowBg}}">
+              <label for="backend" style="font-size: 13px; color: #475569; padding-top: 10px">Backend server</label>
+              <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+                  <select id="backend" value="{{backend}}" onChange="{{onBackend}}" style="height: 40px; min-width: 220px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; background: #FFFFFF; color: #0F172A">
+                    <option value="">Not assigned</option>
+                    <option value="web01">web01</option>
+                    <option value="web02">web02</option>
+                    <option value="web03">web03</option>
+                    <option value="web04">web04</option>
+                    <option value="web05">web05</option>
+                  </select>
+                  <span style="font-size: 11px; font-weight: 700; color: {{backendFg}}; background: {{backendBg}}; border-radius: 999px; padding: 3px 9px">{{backendBadge}}</span>
+                </div>
+                <span style="font-size: 12px; color: #475569">{{backendHow}}</span>
+                <sc-if value="{{backendUnknown}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                    <a href="AddServer.dc.html" style="display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #0F172A; text-decoration: none; font-size: 13px; font-weight: 500">Add {{ip}} as a new server</a>
+                    <a href="#" style="display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #0F172A; text-decoration: none; font-size: 13px; font-weight: 500">It's an external service</a>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="p-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+            <h2 id="p-h" style="margin: 0; font-size: 16px; font-weight: 600">Serving path</h2>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; border: 1px solid #E2E8F0; background: #F8FAFC; border-radius: 8px; padding: 8px 12px">{{host}}</span>
+              <span style="color: #94A3B8" aria-hidden="true">→</span>
+              <sc-if value="{{hasFront}}" hint-placeholder-val="{{ true }}">
+                <span style="font-size: 13px; border: 1.5px dashed #94A3B8; border-radius: 8px; padding: 8px 12px; color: #334155">{{front}} <span style="color: #475569; font-size: 12px">external</span></span>
+                <span style="color: #94A3B8" aria-hidden="true">→</span>
+              </sc-if>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; border: {{pathBackendBorder}}; background: {{pathBackendBg}}; border-radius: 8px; padding: 8px 12px; color: {{pathBackendFg}}">{{pathBackend}}</span>
+            </div>
+          </section>
+
+          <section aria-labelledby="c-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+            <div style="padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+              <h2 id="c-h" style="margin: 0; font-size: 16px; font-weight: 600">First probe</h2>
+            </div>
+            <sc-for list="{{probes}}" as="p" hint-placeholder-count="3">
+              <div style="display: flex; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: {{p.dot}}; flex: none" aria-hidden="true"></span>
+                <span style="flex: 0 0 120px; font-weight: 500; font-size: 13px">{{p.label}}</span>
+                <span style="flex: 1 1 260px; font-size: 13px; color: #334155">{{p.value}}</span>
+              </div>
+            </sc-for>
+          </section>
+
+          <section aria-labelledby="i-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+            <h2 id="i-h" style="margin: 0; font-size: 16px; font-weight: 600">Details <span style="font-weight: 400; color: #475569; font-size: 13px">optional</span></h2>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="site-desc" style="font-size: 13px; font-weight: 500">Description</label>
+              <textarea id="site-desc" rows="2" placeholder="What is this site? e.g. Regional news section" style="padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font: inherit; color: #0F172A; resize: vertical"></textarea>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="site-repo" style="font-size: 13px; font-weight: 500">GitHub repository</label>
+              <input id="site-repo" type="url" placeholder="https://github.com/org/repository" style="height: 42px; padding: 0 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #0F172A">
+              <span style="font-size: 12px; color: #475569">Shown as a link on the site and in the Domains list.</span>
+            </div>
+          </section>
+
+          <section aria-labelledby="m-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+            <h2 id="m-h" style="margin: 0; font-size: 16px; font-weight: 600">Checks to attach</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; font-size: 13px">
+              <sc-for list="{{monitors}}" as="m" hint-placeholder-count="4">
+                <label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">{{m.label}}</label>
+              </sc-for>
+            </div>
+            <sc-if value="{{offerWww}}" hint-placeholder-val="{{ false }}">
+              <label style="display: flex; gap: 10px; align-items: center; min-height: 36px; font-size: 13px; border-top: 1px solid #F1F5F9; padding-top: 12px"><input type="checkbox" checked="{{www}}" onChange="{{toggleWww}}" style="width: 18px; height: 18px">Also add <span style="font-family: 'JetBrains Mono', monospace">{{wwwHost}}</span> as a site</label>
+            </sc-if>
+          </section>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap">
+            <a href="Domains.dc.html" style="display: inline-flex; align-items: center; height: 42px; padding: 0 16px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #0F172A; text-decoration: none; font-weight: 500">Cancel</a>
+            <button type="button" onClick="{{save}}" style="height: 42px; padding: 0 18px; border-radius: 8px; border: 0; background: #1D4ED8; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">Add site</button>
+          </div>
+        </div>
+
+        <aside aria-labelledby="how-h" style="flex: 1 1 280px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <h2 id="how-h" style="margin: 0; font-size: 16px; font-weight: 600">How detection works</h2>
+          <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: #334155; line-height: 1.5">
+            <li>The URL is cleaned up: lower case, no path, international names converted.</li>
+            <li>The domain comes from the Public Suffix List, so <span style="font-family: 'JetBrains Mono', monospace">vestnik.svet24.si</span> belongs to <span style="font-family: 'JetBrains Mono', monospace">svet24.si</span>. A new domain is created with it.</li>
+            <li>DNS shows where the hostname points.</li>
+            <li>That address is matched to our servers and to external services such as Cloudflare and Varnish.</li>
+            <li>Behind an external service the backend can't be seen, so Sextant suggests the server the domain's other sites use. You confirm it.</li>
+            <li>A first HTTP and certificate probe runs, and redirects are recorded.</li>
+          </ol>
+          <div style="background: #EFF6FF; border-radius: 10px; padding: 12px; font-size: 12px; color: #1E3A8A; line-height: 1.5">Badges: <b>Detected</b> means Sextant is sure, <b>Suggested</b> means please confirm, <b>Not found</b> means you choose.</div>
+        </aside>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1560}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    var url = 'https://vestnik.svet24.si';
+    var r = this.analyse(url);
+    this.state = { url: url, result: r, backend: r && r.backend ? r.backend : '', www: true, saved: false };
+  }
+  analyse(raw) {
+    var s = (raw || '').trim().toLowerCase();
+    if (!s) return null;
+    var rest = s.replace(/^[a-z]+:\/\//, '');
+    var hostPart = rest.split('/')[0].split('?')[0].split('#')[0];
+    var host = hostPart.split(':')[0].replace(/\.$/, '');
+    var path = rest.slice(hostPart.length).split('?')[0].split('#')[0] || '/';
+    if (!host || host.indexOf('.') === -1 || /^[0-9.]+$/.test(host)) return { invalid: true, host: host };
+    var domain = host.split('.').slice(-2).join('.');
+    var domains = { 'svet24.si': 5, 'necenzurirano.si': 2, 'reporter.si': 2, 'media24.si': 2 };
+    var sites = {
+      'svet24.si': 'Varnish → web02', 'podjetje.svet24.si': 'Varnish → web02', 'njena.svet24.si': 'Varnish → web02',
+      'ekipa.svet24.si': 'Varnish → web03', 'vreme.svet24.si': 'Varnish → web03',
+      'necenzurirano.si': 'Cloudflare → web02', 'www.necenzurirano.si': 'Cloudflare → web02',
+      'reporter.si': 'Cloudflare → web03', 'www.reporter.si': 'Cloudflare → web03',
+      'media24.si': 'direct → web02', 'oglasi.media24.si': 'direct → web04'
+    };
+    if (sites[host]) return { duplicate: true, host: host, dupPath: 'Served ' + sites[host] + '.' };
+    var known = {
+      'vestnik.svet24.si': { ip: '203.0.113.80', front: 'Varnish', frontHow: '203.0.113.80 belongs to the external service Varnish.', mode: 'suggested', backend: 'web02', backendHow: 'Sextant can’t see behind Varnish. 3 of the 5 svet24.si sites behind Varnish use web02.', http: '200 in 184 ms', tls: 'Let’s Encrypt · valid until 2 Feb 2027 (74 days)', redirect: 'No redirect' },
+      'kviz.necenzurirano.si': { ip: '104.21.38.12, 172.67.140.9', front: 'Cloudflare', frontHow: 'Both addresses are in Cloudflare’s published IP ranges.', mode: 'suggested', backend: 'web02', backendHow: 'Sextant can’t see behind Cloudflare. Both other necenzurirano.si sites behind Cloudflare use web02.', http: '200 in 96 ms', tls: 'Cloudflare edge certificate · valid until 14 Jan 2027', redirect: 'No redirect' },
+      'oglasi24.si': { ip: '198.51.100.21', front: '', mode: 'detected', backend: 'web04', backendHow: '198.51.100.21 is the primary address of web04.', http: '200 in 121 ms after 1 redirect', tls: 'Let’s Encrypt · valid until 9 Feb 2027 (81 days)', redirect: 'Redirects to https://www.oglasi24.si/ · saved as the expected target', www: true }
+    };
+    var k = known[host] || { ip: '203.0.113.99', front: '', mode: 'unknown', backend: '', backendHow: '203.0.113.99 isn’t an address of our servers or of a known external service.', http: 'Responded 200 in 312 ms', tls: 'Valid certificate · details after saving', redirect: 'No redirect' };
+    return Object.assign({ host: host, path: path, domain: domain, domainCount: domains[domain] || 0 }, k);
+  }
+  detect(url) {
+    var r = this.analyse(url);
+    this.setState({ url: url, result: r, backend: r && r.backend ? r.backend : '', www: true, saved: false });
+  }
+  renderVals() {
+    var self = this;
+    var r = this.state.result;
+    var B = {
+      detected: { label: 'Detected', fg: '#166534', bg: '#DCFCE7' },
+      found: { label: 'Found', fg: '#166534', bg: '#DCFCE7' },
+      fresh: { label: 'New', fg: '#1E40AF', bg: '#DBEAFE' },
+      suggested: { label: 'Suggested · confirm', fg: '#9A3412', bg: '#FFEDD5' },
+      unknown: { label: 'Not found', fg: '#334155', bg: '#E2E8F0' },
+      direct: { label: 'Direct', fg: '#334155', bg: '#E2E8F0' }
+    };
+    function fact(label, value, kind, how) { var b = B[kind]; return { label: label, value: value, badge: b.label, fg: b.fg, bg: b.bg, how: how }; }
+    var exDefs = ['vestnik.svet24.si', 'kviz.necenzurirano.si', 'oglasi24.si', 'shop.example.org', 'podjetje.svet24.si'];
+    var current = r && r.host ? r.host : '';
+    var examples = exDefs.map(function (h) {
+      return { label: h, bg: h === current ? '#E2E8F0' : '#FFFFFF', pick: function () { self.detect('https://' + h); } };
+    });
+    var ok = !!(r && !r.invalid && !r.duplicate);
+    var vals = {
+      url: this.state.url,
+      onUrl: function (e) { self.setState({ url: e.target.value, result: null, saved: false }); },
+      onSubmit: function (e) { if (e && e.preventDefault) e.preventDefault(); self.detect(self.state.url); },
+      examples: examples,
+      showInvalid: !!(r && r.invalid),
+      showDup: !!(r && r.duplicate),
+      dupPath: r && r.dupPath ? r.dupPath : '',
+      showResult: ok,
+      host: r && r.host ? r.host : '',
+      saved: this.state.saved
+    };
+    if (!ok) return Object.assign(vals, { facts: [], probes: [], monitors: [], hasFront: false, backendUnknown: false, offerWww: false });
+
+    var facts = [
+      fact('Hostname', r.host, 'detected', r.path === '/' ? 'From the URL. The HTTP check will use the path /.' : 'From the URL. The HTTP check will use the path ' + r.path + '.'),
+      r.domainCount
+        ? fact('Domain', r.domain, 'found', 'Already in Sextant with ' + r.domainCount + ' sites. The new site is added under it.')
+        : fact('Domain', r.domain, 'fresh', 'Not in Sextant yet. It will be created, with expiry and registrar read from the registry.'),
+      fact('DNS', r.ip, 'detected', 'A and AAAA records for ' + r.host + '.'),
+      r.front
+        ? fact('In front', r.front + ' (external)', 'detected', r.frontHow)
+        : fact('In front', 'Nothing', 'direct', 'DNS points straight at the server.')
+    ];
+    var mode = r.mode;
+    var chosen = this.state.backend;
+    var changed = mode !== 'unknown' && chosen !== r.backend;
+    var bKind = changed ? 'detected' : mode;
+    var bb = B[bKind];
+    var monitors = [{ label: 'HTTP · every minute' }, { label: 'SSL certificate · every 12 h' }, { label: 'Serving path matches DNS · every 15 min' }, { label: 'Redirect · hourly' }];
+    if (!r.domainCount) { monitors.push({ label: 'Domain expiration · daily' }); monitors.push({ label: 'Nameservers · hourly' }); }
+    var probes = [
+      { label: 'HTTP', value: r.http, dot: '#16A34A' },
+      { label: 'Certificate', value: r.tls, dot: '#16A34A' },
+      { label: 'Redirect', value: r.redirect, dot: '#94A3B8' }
+    ];
+    var wwwOn = !!r.www && this.state.www;
+    var count = monitors.length + (wwwOn ? 4 : 0);
+    var pathText = (r.front ? r.front + ' → ' : '') + (chosen || 'no backend yet');
+    return Object.assign(vals, {
+      facts: facts,
+      ip: r.ip,
+      backend: chosen,
+      onBackend: function (e) { self.setState({ backend: e.target.value }); },
+      backendBadge: changed ? 'Chosen by you' : bb.label,
+      backendFg: bb.fg,
+      backendBg: bb.bg,
+      backendHow: r.backendHow,
+      backendRowBg: mode === 'detected' || changed ? '#FFFFFF' : (mode === 'suggested' ? '#FFFBF5' : '#F8FAFC'),
+      backendUnknown: mode === 'unknown' && !chosen,
+      hasFront: !!r.front,
+      front: r.front,
+      pathBackend: chosen || 'backend not assigned',
+      pathBackendBorder: chosen ? '1px solid #93C5FD' : '1.5px dashed #CBD5E1',
+      pathBackendBg: chosen ? '#EFF6FF' : '#FFFFFF',
+      pathBackendFg: chosen ? '#1E3A8A' : '#64748B',
+      probes: probes,
+      monitors: monitors,
+      offerWww: !!r.www,
+      www: this.state.www,
+      wwwHost: 'www.' + r.host,
+      toggleWww: function () { self.setState({ www: !self.state.www }); },
+      save: function () { self.setState({ saved: true }); },
+      savedText: r.host + (wwwOn ? ' and www.' + r.host : '') + ' added to ' + r.domain + '.',
+      savedDetail: 'Path ' + pathText + ' · ' + count + ' monitors running their first checks now.'
+    });
+  }
+}
+</script>
+</body>
+</html>

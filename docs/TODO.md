@@ -50,7 +50,7 @@
   - [ ] **[HUMAN]** Confirm ICMP `ping` works for the php-fpm and Horizon users on the Sextant server.
   - [ ] Pin package versions in `composer.json` / `package.json`; list them in `docs/spikes/versions.md`.
 - [ ] **P0.14** **[HUMAN]** Deploy to the dedicated Sextant server (§16): nginx + php-fpm, MySQL 9.7, Redis, Horizon and `schedule:work` under supervisor/systemd; outbound firewall per §16.
-- [ ] **P0.15** **[HUMAN]** Export the prototype's artboards as PNG into `docs/design/` (Overview, Servers, Server detail, Domains, Add domain, Add server, Add site).
+- [x] **P0.15** **[HUMAN]** Export the prototype's artboards as PNG into `docs/design/` (Overview, Servers, Server detail, Domains, Add domain, Add server, Add site).
 - [ ] **Exit P0**: deployed; an admin and a reader can log in; the reader sees no edit controls and gets 403 on a sample mutation; the demo `DataTable` works server-side; a Sentry cron check-in is visible; spike notes written.
 
 ---

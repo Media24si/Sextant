@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sextant overview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F5F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Inter, system-ui, sans-serif; color: #0F172A; background: #F5F6F8; font-size: 14px">
+
+<nav aria-label="Main" style="flex: 1 1 220px; background: #0B1220; color: #CBD5E1; padding: 20px 14px; display: flex; flex-direction: column; gap: 2px; box-sizing: border-box">
+  <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px 20px">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg>
+    <span style="font-weight: 700; font-size: 17px; color: #FFFFFF; letter-spacing: -0.01em">Sextant</span>
+  </div>
+  <a href="Main.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #FFFFFF; background: #1E293B; font-weight: 500">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Overview</a>
+  <a href="Servers.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="1.5"></rect><rect x="3" y="13" width="18" height="7" rx="1.5"></rect><path d="M7 7.5h.01M7 16.5h.01"></path></svg>Servers<span style="margin-left: auto; font-size: 12px; color: #94A3B8">22</span></a>
+  <a href="Domains.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"></path></svg>Domains<span style="margin-left: auto; font-size: 12px; color: #94A3B8">31</span></a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 16H3z"></path><path d="M12 10v4M12 17h.01"></path></svg>Incidents<span style="margin-left: auto; font-size: 12px; color: #FCA5A5">5</span></a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"></path></svg>Activity</a>
+  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; padding: 22px 10px 6px">Admin</div>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"></path></svg>Minimum versions</a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"></rect></svg>External services</a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 010 7M18 14.8c2 .7 3.2 2.5 3.6 5.2"></path></svg>Users</a>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+  <header style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 32px; background: #FFFFFF; border-bottom: 1px solid #E2E8F0">
+    <div style="position: relative; flex: 1 1 340px; max-width: 580px">
+      <label for="global-search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search servers, domains, IPs and versions</label>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" aria-hidden="true" style="position: absolute; left: 14px; top: 13px"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <input id="global-search" type="search" autocomplete="off" placeholder="Search servers, domains, IPs, versions…" value="{{q}}" onChange="{{onQuery}}" onFocus="{{openSearch}}" style="width: 100%; box-sizing: border-box; height: 44px; padding: 0 84px 0 42px; border: 1px solid #CBD5E1; border-radius: 10px; font: inherit; font-size: 14px; color: #0F172A; background: #F8FAFC">
+      <span style="position: absolute; right: 10px; top: 11px; font-size: 12px; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 2px 7px; background: #FFFFFF">Ctrl K</span>
+      <sc-if value="{{searchOpen}}" hint-placeholder-val="{{ false }}">
+        <div style="position: absolute; z-index: 20; top: 52px; left: 0; right: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 12px 32px rgba(15,23,42,0.14); padding: 8px">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px 8px">
+            <span style="font-size: 12px; color: #475569">{{resultsLabel}}</span>
+            <button type="button" onClick="{{closeSearch}}" style="border: 0; background: transparent; color: #475569; font: inherit; font-size: 12px; cursor: pointer; padding: 6px 8px; border-radius: 6px">Close</button>
+          </div>
+          <sc-for list="{{results}}" as="r" hint-placeholder-count="5">
+            <a href="{{r.href}}" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; text-decoration: none; color: #0F172A; min-height: 44px; box-sizing: border-box">
+              <span style="width: 9px; height: 9px; border-radius: 50%; background: {{r.dot}}; flex: none" aria-hidden="true"></span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500">{{r.name}}</span>
+              <span style="font-size: 12px; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.meta}}</span>
+              <span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #334155; background: #F1F5F9; border-radius: 999px; padding: 3px 9px; flex: none">{{r.type}}</span>
+            </a>
+          </sc-for>
+          <sc-if value="{{noResults}}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 16px 10px; color: #475569">Nothing matches “{{q}}”.</div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
+      <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #166534; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 999px; padding: 6px 12px"><span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A" aria-hidden="true"></span>Checks running · network OK</span>
+      <div style="display: flex; align-items: center; gap: 10px">
+        <span style="width: 34px; height: 34px; border-radius: 50%; background: #DBEAFE; color: #1E3A8A; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px" aria-hidden="true">AN</span>
+        <div style="display: flex; flex-direction: column; line-height: 1.25">
+          <span style="font-weight: 600; font-size: 13px">Ana Novak</span>
+          <span style="font-size: 12px; color: #475569">Admin</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 24px; max-width: 1280px; width: 100%; box-sizing: border-box">
+
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div>
+        <h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Overview</h1>
+        <p style="margin: 6px 0 0; color: #475569">Live · updates every 10 seconds · last check 21:24:08</p>
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap">
+        <a href="AddServer.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #0F172A; text-decoration: none; font-weight: 500">+ Add server</a>
+        <a href="AddDomain.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #0F172A; text-decoration: none; font-weight: 500">+ Add domain</a>
+        <a href="AddSite.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; background: #1D4ED8; color: #FFFFFF; text-decoration: none; font-weight: 500">+ Add site</a>
+      </div>
+    </div>
+
+    <section aria-label="Totals" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
+      <a href="Servers.dc.html" style="display: flex; flex-direction: column; gap: 10px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; text-decoration: none; color: #0F172A">
+        <span style="font-size: 13px; color: #475569; font-weight: 500">Servers</span>
+        <span style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em">22</span>
+        <span style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: #334155">
+          <span><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16A34A; margin-right: 5px" aria-hidden="true"></span>18 OK</span>
+          <span><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #EA580C; margin-right: 5px" aria-hidden="true"></span>2 warning</span>
+          <span><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #DC2626; margin-right: 5px" aria-hidden="true"></span>1 error</span>
+          <span><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94A3B8; margin-right: 5px" aria-hidden="true"></span>1 unknown</span>
+        </span>
+      </a>
+      <a href="Domains.dc.html" style="display: flex; flex-direction: column; gap: 10px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; text-decoration: none; color: #0F172A">
+        <span style="font-size: 13px; color: #475569; font-weight: 500">Domains</span>
+        <span style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em">31</span>
+        <span style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: #334155">
+          <span><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16A34A; margin-right: 5px" aria-hidden="true"></span>30 OK</span>
+          <span><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #EA580C; margin-right: 5px" aria-hidden="true"></span>1 warning</span>
+        </span>
+      </a>
+      <a href="Domains.dc.html" style="display: flex; flex-direction: column; gap: 10px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; text-decoration: none; color: #0F172A">
+        <span style="font-size: 13px; color: #475569; font-weight: 500">Sites (subdomains)</span>
+        <span style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em">74</span>
+        <span style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: #334155">
+          <span><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16A34A; margin-right: 5px" aria-hidden="true"></span>70 OK</span>
+          <span><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #EA580C; margin-right: 5px" aria-hidden="true"></span>1 warning</span>
+          <span><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #DC2626; margin-right: 5px" aria-hidden="true"></span>3 error</span>
+        </span>
+      </a>
+      <a href="Servers.dc.html" style="display: flex; flex-direction: column; gap: 10px; background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 12px; padding: 18px 20px; text-decoration: none; color: #0F172A">
+        <span style="font-size: 13px; color: #9A3412; font-weight: 500">Below minimum version</span>
+        <span style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em; color: #9A3412">3 servers</span>
+        <span style="font-size: 12px; color: #9A3412">nginx on web03 · PHP 8.2 on web02 · OpenSSL on db01</span>
+      </a>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+      <div style="flex: 2 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+
+        <section aria-labelledby="issues-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+            <h2 id="issues-h" style="margin: 0; font-size: 16px; font-weight: 600">Current issues</h2>
+            <span style="font-size: 12px; color: #475569">Worst first · 1 pending confirmation</span>
+          </div>
+
+          <div style="padding: 16px 20px; border-bottom: 1px solid #F1F5F9; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap">
+              <span style="font-size: 11px; font-weight: 700; color: #991B1B; background: #FEE2E2; border-radius: 999px; padding: 3px 9px">ERROR</span>
+              <div style="flex: 1 1 260px; min-width: 0">
+                <div style="font-weight: 600"><a href="ServerDetail.dc.html" style="color: #0F172A; text-decoration: none; font-family: 'JetBrains Mono', monospace">web03</a> — TCP port (HTTPS)</div>
+                <div style="color: #475569; margin-top: 2px">Port 443 timed out after 5 s · started 21:17 · 7 min</div>
+              </div>
+              <sc-if value="{{ackWeb03}}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 12px; color: #475569; padding: 8px 0">Acknowledged by Ana Novak</span>
+              </sc-if>
+              <sc-if value="{{notAckWeb03}}" hint-placeholder-val="{{ true }}">
+                <button type="button" onClick="{{ackWeb03Click}}" style="height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-weight: 500; color: #0F172A; cursor: pointer">Acknowledge</button>
+              </sc-if>
+            </div>
+            <div style="margin-left: 20px; padding-left: 16px; border-left: 2px solid #FECACA; display: flex; flex-direction: column; gap: 8px">
+              <div style="font-size: 12px; color: #475569">3 sites behind web03 are failing too:</div>
+              <div style="display: flex; gap: 10px; align-items: center"><span style="width: 8px; height: 8px; border-radius: 50%; background: #DC2626; flex: none" aria-hidden="true"></span><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">reporter.si</span><span style="color: #475569; font-size: 13px">HTTP · connection timed out · Cloudflare → web03</span></div>
+              <div style="display: flex; gap: 10px; align-items: center"><span style="width: 8px; height: 8px; border-radius: 50%; background: #DC2626; flex: none" aria-hidden="true"></span><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">ekipa.svet24.si</span><span style="color: #475569; font-size: 13px">HTTP · 502 Bad Gateway · Varnish → web03</span></div>
+              <div style="display: flex; gap: 10px; align-items: center"><span style="width: 8px; height: 8px; border-radius: 50%; background: #DC2626; flex: none" aria-hidden="true"></span><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">vreme.svet24.si</span><span style="color: #475569; font-size: 13px">HTTP · 502 Bad Gateway · Varnish → web03</span></div>
+            </div>
+          </div>
+
+          <div style="padding: 16px 20px; border-bottom: 1px solid #F1F5F9; display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap">
+            <span style="font-size: 11px; font-weight: 700; color: #9A3412; background: #FFEDD5; border-radius: 999px; padding: 3px 9px">WARNING</span>
+            <div style="flex: 1 1 260px; min-width: 0">
+              <div style="font-weight: 600"><span style="font-family: 'JetBrains Mono', monospace">svet24.si</span> — SSL certificate</div>
+              <div style="color: #475569; margin-top: 2px">Valid until 8 Dec 2026 (19 days) · edge certificate, Varnish</div>
+            </div>
+            <button type="button" style="height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-weight: 500; color: #0F172A; cursor: pointer">Acknowledge</button>
+          </div>
+
+          <div style="padding: 16px 20px; border-bottom: 1px solid #F1F5F9; display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap">
+            <span style="font-size: 11px; font-weight: 700; color: #9A3412; background: #FFEDD5; border-radius: 999px; padding: 3px 9px">WARNING</span>
+            <div style="flex: 1 1 260px; min-width: 0">
+              <div style="font-weight: 600"><a href="ServerDetail.dc.html" style="color: #0F172A; text-decoration: none; font-family: 'JetBrains Mono', monospace">web02</a> — PHP 8.2 below minimum</div>
+              <div style="color: #475569; margin-top: 2px">8.2.20 installed, minimum 8.2.26 · set by Ana Novak after a CVE · 2 days</div>
+            </div>
+            <span style="font-size: 12px; color: #475569; padding: 8px 0">Acknowledged by Marko Kranjc</span>
+          </div>
+
+          <div style="padding: 16px 20px; border-bottom: 1px solid #F1F5F9; display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap">
+            <span style="font-size: 11px; font-weight: 700; color: #9A3412; background: #FFEDD5; border-radius: 999px; padding: 3px 9px">WARNING</span>
+            <div style="flex: 1 1 260px; min-width: 0">
+              <div style="font-weight: 600"><span style="font-family: 'JetBrains Mono', monospace">web03</span> — nginx below minimum</div>
+              <div style="color: #475569; margin-top: 2px">1.24.0 installed, minimum 1.26.2 · last read 2 h ago</div>
+            </div>
+            <button type="button" style="height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-weight: 500; color: #0F172A; cursor: pointer">Acknowledge</button>
+          </div>
+
+          <div style="padding: 16px 20px; display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap">
+            <span style="font-size: 11px; font-weight: 700; color: #9A3412; background: #FFEDD5; border-radius: 999px; padding: 3px 9px">WARNING</span>
+            <div style="flex: 1 1 260px; min-width: 0">
+              <div style="font-weight: 600"><span style="font-family: 'JetBrains Mono', monospace">db01</span> — OpenSSL below minimum</div>
+              <div style="color: #475569; margin-top: 2px">3.0.13 installed, minimum 3.0.15 · 2 days</div>
+            </div>
+            <button type="button" style="height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-weight: 500; color: #0F172A; cursor: pointer">Acknowledge</button>
+          </div>
+        </section>
+
+        <section aria-labelledby="resolved-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+          <div style="padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+            <h2 id="resolved-h" style="margin: 0; font-size: 16px; font-weight: 600">Recently resolved</h2>
+          </div>
+          <div style="padding: 6px 20px 10px">
+            <div style="display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A; flex: none" aria-hidden="true"></span>
+              <span style="flex: 1 1 240px"><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">necenzurirano.si</span> — HTTP</span>
+              <span style="color: #475569; font-size: 13px">down 12 min · resolved 19:41</span>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #F1F5F9; flex-wrap: wrap">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A; flex: none" aria-hidden="true"></span>
+              <span style="flex: 1 1 240px"><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">web01</span> — TCP port (SSH)</span>
+              <span style="color: #475569; font-size: 13px">down 4 min · resolved yesterday 03:12</span>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center; padding: 10px 0; flex-wrap: wrap">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #16A34A; flex: none" aria-hidden="true"></span>
+              <span style="flex: 1 1 240px"><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px">web04</span> — nginx below minimum</span>
+              <span style="color: #475569; font-size: 13px">2 days · cleared after upgrade to 1.26.2</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+
+        <section aria-labelledby="sw-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+            <h2 id="sw-h" style="margin: 0; font-size: 16px; font-weight: 600">Software vs minimum</h2>
+            <a href="#" style="font-size: 13px; text-decoration: none">Manage</a>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px">
+            <thead>
+              <tr style="text-align: left; color: #475569">
+                <th scope="col" style="padding: 10px 20px; font-weight: 500">Software</th>
+                <th scope="col" style="padding: 10px 8px; font-weight: 500">Minimum</th>
+                <th scope="col" style="padding: 10px 20px; font-weight: 500; text-align: right">Below</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">Kernel</td><td style="padding: 10px 8px; color: #475569">not set</td><td style="padding: 10px 20px; text-align: right; color: #475569">—</td></tr>
+              <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">nginx</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace">1.26.2</td><td style="padding: 10px 20px; text-align: right; color: #9A3412; font-weight: 600">1 · web03</td></tr>
+              <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">PHP 8.2</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace">8.2.26</td><td style="padding: 10px 20px; text-align: right; color: #9A3412; font-weight: 600">1 · web02</td></tr>
+              <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">PHP 8.3</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace">8.3.14</td><td style="padding: 10px 20px; text-align: right; color: #166534">0</td></tr>
+              <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">MySQL</td><td style="padding: 10px 8px; color: #475569">not set</td><td style="padding: 10px 20px; text-align: right; color: #475569">—</td></tr>
+              <tr style="border-top: 1px solid #F1F5F9"><td style="padding: 10px 20px">OpenSSL</td><td style="padding: 10px 8px; font-family: 'JetBrains Mono', monospace">3.0.15</td><td style="padding: 10px 20px; text-align: right; color: #9A3412; font-weight: 600">1 · db01</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section aria-labelledby="exp-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+          <div style="padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+            <h2 id="exp-h" style="margin: 0; font-size: 16px; font-weight: 600">Expiring in the next 60 days</h2>
+          </div>
+          <div style="padding: 6px 20px 10px; font-size: 13px">
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F1F5F9"><span><span style="font-family: 'JetBrains Mono', monospace">svet24.si</span> · certificate</span><span style="color: #9A3412; font-weight: 600">19 days</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F1F5F9"><span><span style="font-family: 'JetBrains Mono', monospace">reporter.si</span> · domain</span><span style="color: #334155">41 days</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0"><span><span style="font-family: 'JetBrains Mono', monospace">necenzurirano.si</span> · certificate</span><span style="color: #334155">54 days</span></div>
+          </div>
+        </section>
+
+        <section aria-labelledby="chg-h" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E2E8F0">
+            <h2 id="chg-h" style="margin: 0; font-size: 16px; font-weight: 600">Recent changes</h2>
+            <a href="#" style="font-size: 13px; text-decoration: none">All activity</a>
+          </div>
+          <div style="padding: 6px 20px 12px; font-size: 13px; display: flex; flex-direction: column">
+            <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9"><span style="font-size: 11px; font-weight: 600; color: #1E40AF; background: #DBEAFE; border-radius: 6px; padding: 2px 7px; height: fit-content">Detected</span><span style="flex: 1"><b style="font-weight: 600">web02</b>: nginx 1.24.0 → 1.26.2<br><span style="color: #475569">21:00</span></span></div>
+            <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9"><span style="font-size: 11px; font-weight: 600; color: #991B1B; background: #FEE2E2; border-radius: 6px; padding: 2px 7px; height: fit-content">Status</span><span style="flex: 1"><b style="font-weight: 600">web03</b>: TCP port (HTTPS) incident opened<br><span style="color: #475569">21:17</span></span></div>
+            <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9"><span style="font-size: 11px; font-weight: 600; color: #334155; background: #F1F5F9; border-radius: 6px; padding: 2px 7px; height: fit-content">Edit</span><span style="flex: 1">Marko Kranjc changed <b style="font-weight: 600">necenzurirano.si</b> path to Cloudflare → web02<br><span style="color: #475569">18:05</span></span></div>
+            <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9"><span style="font-size: 11px; font-weight: 600; color: #1E40AF; background: #DBEAFE; border-radius: 6px; padding: 2px 7px; height: fit-content">Detected</span><span style="flex: 1"><b style="font-weight: 600">podjetje.svet24.si</b>: certificate renewed, expires 14 Feb 2027<br><span style="color: #475569">16:40</span></span></div>
+            <div style="display: flex; gap: 10px; padding: 10px 0"><span style="font-size: 11px; font-weight: 600; color: #334155; background: #F1F5F9; border-radius: 6px; padding: 2px 7px; height: fit-content">Edit</span><span style="flex: 1">Ana Novak set minimum PHP 8.2 to 8.2.26<br><span style="color: #475569">17 Nov</span></span></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { q: '', searchOpen: false, ackWeb03: false };
+  }
+  renderVals() {
+    var dots = { ok: '#16A34A', warning: '#EA580C', error: '#DC2626', unknown: '#94A3B8' };
+    var all = [
+      { type: 'Server', name: 'web02', meta: '192.0.2.12 · Ubuntu 24.04 · PHP 8.3.14, 8.2.20 · 24 sites', status: 'warning', href: 'ServerDetail.dc.html' },
+      { type: 'Server', name: 'web03', meta: '192.0.2.13 · Ubuntu 22.04 · nginx 1.24.0 · 9 sites', status: 'error', href: 'Servers.dc.html' },
+      { type: 'Server', name: 'web01', meta: '192.0.2.11 · Ubuntu 24.04 · PHP 8.3.14, 8.2.26 · 18 sites', status: 'ok', href: 'Servers.dc.html' },
+      { type: 'Server', name: 'db01', meta: '192.0.2.31 · Ubuntu 22.04 · MySQL 8.0.40 · OpenSSL 3.0.13', status: 'warning', href: 'Servers.dc.html' },
+      { type: 'Domain', name: 'svet24.si', meta: '5 subdomains · expires 18 Jul 2027 · Register.si', status: 'warning', href: 'Domains.dc.html' },
+      { type: 'Domain', name: 'necenzurirano.si', meta: '2 subdomains · Cloudflare → web02', status: 'ok', href: 'Domains.dc.html' },
+      { type: 'Domain', name: 'reporter.si', meta: '2 subdomains · expires in 41 days', status: 'error', href: 'Domains.dc.html' },
+      { type: 'Subdomain', name: 'podjetje.svet24.si', meta: 'Varnish (external) → web02', status: 'ok', href: 'Domains.dc.html' },
+      { type: 'Subdomain', name: 'njena.svet24.si', meta: 'Varnish (external) → web02', status: 'ok', href: 'Domains.dc.html' },
+      { type: 'Subdomain', name: 'ekipa.svet24.si', meta: 'Varnish (external) → web03', status: 'error', href: 'Domains.dc.html' }
+    ];
+    var q = (this.state.q || '').trim().toLowerCase();
+    var hits = all.filter(function (r) { return !q || (r.name + ' ' + r.meta + ' ' + r.type).toLowerCase().indexOf(q) !== -1; });
+    if (!q) { hits = hits.slice(0, 6); }
+    var results = hits.map(function (r) { return Object.assign({}, r, { dot: dots[r.status] }); });
+    return {
+      q: this.state.q,
+      searchOpen: this.state.searchOpen,
+      results: results,
+      noResults: results.length === 0,
+      resultsLabel: q ? results.length + ' results' : 'Suggestions · try “8.2.20”, “192.0.2.13” or “varnish”',
+      onQuery: (e) => this.setState({ q: e.target.value, searchOpen: true }),
+      openSearch: () => this.setState({ searchOpen: true }),
+      closeSearch: () => this.setState({ searchOpen: false }),
+      ackWeb03: this.state.ackWeb03,
+      notAckWeb03: !this.state.ackWeb03,
+      ackWeb03Click: () => this.setState({ ackWeb03: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

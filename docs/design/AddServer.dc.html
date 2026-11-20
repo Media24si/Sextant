@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add server</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F5F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 100vh; font-family: Inter, system-ui, sans-serif; color: #0F172A; background: #F5F6F8; font-size: 14px">
+
+<nav aria-label="Main" style="flex: 1 1 220px; background: #0B1220; color: #CBD5E1; padding: 20px 14px; display: flex; flex-direction: column; gap: 2px; box-sizing: border-box">
+  <div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px 20px">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg>
+    <span style="font-weight: 700; font-size: 17px; color: #FFFFFF; letter-spacing: -0.01em">Sextant</span>
+  </div>
+  <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Overview</a>
+  <a href="Servers.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #FFFFFF; background: #1E293B; font-weight: 500">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="1.5"></rect><rect x="3" y="13" width="18" height="7" rx="1.5"></rect><path d="M7 7.5h.01M7 16.5h.01"></path></svg>Servers<span style="margin-left: auto; font-size: 12px; color: #94A3B8">22</span></a>
+  <a href="Domains.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"></path></svg>Domains<span style="margin-left: auto; font-size: 12px; color: #94A3B8">31</span></a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 16H3z"></path><path d="M12 10v4M12 17h.01"></path></svg>Incidents<span style="margin-left: auto; font-size: 12px; color: #FCA5A5">5</span></a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"></path></svg>Activity</a>
+  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; padding: 22px 10px 6px">Admin</div>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"></path></svg>Minimum versions</a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"></rect></svg>External services</a>
+  <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 8px; text-decoration: none; color: #CBD5E1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 010 7M18 14.8c2 .7 3.2 2.5 3.6 5.2"></path></svg>Users</a>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+  <header style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 32px; background: #FFFFFF; border-bottom: 1px solid #E2E8F0">
+    <a href="Main.dc.html" style="flex: 1 1 340px; max-width: 580px; display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px 0 14px; box-sizing: border-box; border: 1px solid #CBD5E1; border-radius: 10px; background: #F8FAFC; color: #64748B; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <span>Search servers, domains, IPs, versions…</span>
+      <span style="margin-left: auto; font-size: 12px; color: #475569; border: 1px solid #CBD5E1; border-radius: 6px; padding: 2px 7px; background: #FFFFFF">Ctrl K</span>
+    </a>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="width: 34px; height: 34px; border-radius: 50%; background: #DBEAFE; color: #1E3A8A; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px" aria-hidden="true">AN</span>
+      <div style="display: flex; flex-direction: column; line-height: 1.25">
+        <span style="font-weight: 600; font-size: 13px">Ana Novak</span>
+        <span style="font-size: 12px; color: #475569">Admin</span>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 20px; max-width: 1280px; width: 100%; box-sizing: border-box">
+    <nav aria-label="Breadcrumb" style="font-size: 13px; color: #475569"><a href="Servers.dc.html" style="text-decoration: none">Servers</a> / Add server</nav>
+    <div>
+      <h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Add server</h1>
+      <p style="margin: 6px 0 0; color: #475569">Only our own servers go here. Cloudflare, Varnish and other external services are added under External services.</p>
+    </div>
+
+    <sc-if value="{{saved}}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 14px 18px; color: #166534">
+        <strong style="font-weight: 600">{{name}} added.</strong>
+        <span>Ports 22, 80, 443 and ping detected; 5 monitors created and running.</span>
+        <a href="ServerDetail.dc.html" style="margin-left: auto; font-weight: 500">Open server</a>
+      </div>
+    </sc-if>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <div style="flex: 3 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+
+        <section aria-labelledby="b1" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+          <h2 id="b1" style="margin: 0; font-size: 16px; font-weight: 600"><span style="color: #64748B; margin-right: 8px">1</span>Basics</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="sname" style="font-size: 13px; font-weight: 500">Name</label>
+              <input id="sname" type="text" value="{{name}}" onChange="{{onName}}" style="height: 42px; padding: 0 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #0F172A">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="shost" style="font-size: 13px; font-weight: 500">Hostname</label>
+              <input id="shost" type="text" value="web06.media24.si" style="height: 42px; padding: 0 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #0F172A">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="sprov" style="font-size: 13px; font-weight: 500">Provider</label>
+              <input id="sprov" type="text" value="Hetzner" style="height: 42px; padding: 0 12px; border: 1px solid #CBD5E1; border-radius: 8px; font: inherit; color: #0F172A">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="sos" style="font-size: 13px; font-weight: 500">Operating system</label>
+              <select id="sos" value="{{os}}" onChange="{{onOs}}" style="height: 42px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 8px; font: inherit; background: #FFFFFF; color: #0F172A">
+                <optgroup label="Ubuntu">
+                  <option value="Ubuntu 22.04 LTS">Ubuntu 22.04 LTS</option>
+                  <option value="Ubuntu 24.04 LTS">Ubuntu 24.04 LTS</option>
+                  <option value="Ubuntu 26.04 LTS">Ubuntu 26.04 LTS</option>
+                </optgroup>
+                <optgroup label="Debian">
+                  <option value="Debian 12">Debian 12</option>
+                  <option value="Debian 13">Debian 13</option>
+                </optgroup>
+                <optgroup label="Windows">
+                  <option value="Windows Server 2019">Windows Server 2019</option>
+                  <option value="Windows Server 2022">Windows Server 2022</option>
+                  <option value="Windows Server 2025">Windows Server 2025</option>
+                </optgroup>
+                <option value="Other">Other</option>
+              </select>
+              <span style="font-size: 12px; color: #475569">Also read from the versions endpoint once it's set up.</span>
+            </div>
+          </div>
+          <fieldset style="border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 14px; margin: 0; display: flex; flex-direction: column; gap: 8px">
+            <legend style="font-size: 13px; font-weight: 600; padding: 0 6px">Backups stored on</legend>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 16px; font-size: 13px">
+              <sc-for list="{{backupOpts}}" as="b" hint-placeholder-count="4">
+                <label style="display: flex; gap: 10px; align-items: center; min-height: 36px"><input type="checkbox" checked="{{b.on}}" onChange="{{b.toggle}}" style="width: 18px; height: 18px">{{b.label}}</label>
+              </sc-for>
+            </div>
+            <span style="font-size: 12px; color: {{backupHintC}}">{{backupHint}}</span>
+          </fieldset>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="snotes" style="font-size: 13px; font-weight: 500">Notes</label>
+            <textarea id="snotes" rows="2" placeholder="Anything the team should know" style="padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font: inherit; color: #0F172A; resize: vertical"></textarea>
+          </div>
+        </section>
+
+        <section aria-labelledby="b2" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+            <h2 id="b2" style="margin: 0; font-size: 16px; font-weight: 600"><span style="color: #64748B; margin-right: 8px">2</span>IP addresses</h2>
+            <button type="button" onClick="{{addIp}}" style="height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 500; color: #0F172A; cursor: pointer">+ Add address</button>
+          </div>
+          <p style="margin: 0; font-size: 13px; color: #475569">Every address the server answers on. Sextant uses them to match sites to this server; checks target the primary one.</p>
+          <sc-for list="{{ips}}" as="ip" hint-placeholder-count="2">
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px 12px">
+              <label for="{{ip.inputId}}" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">IP address</label>
+              <input id="{{ip.inputId}}" type="text" value="{{ip.value}}" onChange="{{ip.onChange}}" style="flex: 1 1 220px; height: 40px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #0F172A">
+              <span style="font-size: 12px; color: #475569; width: 40px">{{ip.version}}</span>
+              <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; min-height: 40px"><input type="radio" name="primary-ip" checked="{{ip.primary}}" onChange="{{ip.makePrimary}}" style="width: 18px; height: 18px">Primary</label>
+              <button type="button" onClick="{{ip.remove}}" style="height: 36px; padding: 0 10px; border-radius: 8px; border: 0; background: transparent; color: #B91C1C; font: inherit; font-size: 13px; cursor: pointer">Remove</button>
+            </div>
+          </sc-for>
+        </section>
+
+        <section aria-labelledby="b3" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+          <div>
+            <h2 id="b3" style="margin: 0; font-size: 16px; font-weight: 600"><span style="color: #64748B; margin-right: 8px">3</span>Software versions</h2>
+            <p style="margin: 6px 0 0; font-size: 13px; color: #475569">A root cron script writes the versions to a file; a PHP endpoint serves it only with this token. Sextant reads it daily.</p>
+          </div>
+          <sc-if value="{{isWindows}}" hint-placeholder-val="{{ false }}">
+            <div role="note" style="background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #9A3412">The collector is a bash script, so it can't run on Windows. Skip this step; this server's versions stay empty for now.</div>
+          </sc-if>
+
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="font-size: 13px; font-weight: 600">a. Bearer token</div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap">
+              <sc-if value="{{hasToken}}" hint-placeholder-val="{{ false }}">
+                <code style="flex: 1 1 320px; font-family: 'JetBrains Mono', monospace; font-size: 13px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 12px; word-break: break-all">sxt_4b7e2c9d0a61f38e95d2c47b10ae8f63</code>
+                <button type="button" style="height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 500; color: #0F172A; cursor: pointer">Copy</button>
+              </sc-if>
+              <sc-if value="{{noToken}}" hint-placeholder-val="{{ true }}">
+                <button type="button" onClick="{{genToken}}" style="height: 40px; padding: 0 14px; border-radius: 8px; border: 0; background: #0F172A; color: #FFFFFF; font: inherit; font-weight: 500; cursor: pointer">Generate token</button>
+                <span style="font-size: 12px; color: #475569">or paste your own in Edit later</span>
+              </sc-if>
+            </div>
+            <sc-if value="{{hasToken}}" hint-placeholder-val="{{ false }}">
+              <span style="font-size: 12px; color: #9A3412">Shown once. Sextant stores it encrypted; readers never see it.</span>
+            </sc-if>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="font-size: 13px; font-weight: 600">b. Download the two files</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <a href="#" aria-disabled="{{noTokenStr}}" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: {{dlColor}}; text-decoration: none; font-weight: 500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>sextant-collect.sh</a>
+              <a href="#" aria-disabled="{{noTokenStr}}" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: {{dlColor}}; text-decoration: none; font-weight: 500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>versions.php</a>
+            </div>
+            <span style="font-size: 12px; color: #475569">{{dlHint}}</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="font-size: 13px; font-weight: 600">c. Install on the server</div>
+            <pre style="margin: 0; background: #0B1220; color: #E2E8F0; border-radius: 10px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; white-space: pre">sudo install -m 700 sextant-collect.sh /usr/local/sbin/
+echo '0 * * * * root /usr/local/sbin/sextant-collect.sh' | sudo tee /etc/cron.d/sextant
+sudo install -m 644 versions.php /var/www/sextant/versions.php</pre>
+            <span style="font-size: 12px; color: #475569">Then point an nginx location at /var/www/sextant over HTTPS, e.g. /.sextant/versions.php.</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label for="endpoint" style="font-size: 13px; font-weight: 600">d. Endpoint URL</label>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap">
+              <input id="endpoint" type="url" value="https://web06.media24.si/.sextant/versions.php" style="flex: 1 1 320px; height: 42px; padding: 0 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #0F172A">
+              <button type="button" onClick="{{test}}" style="height: 42px; padding: 0 16px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; font: inherit; font-weight: 500; color: #0F172A; cursor: pointer">Test connection</button>
+            </div>
+            <sc-if value="{{tested}}" hint-placeholder-val="{{ false }}">
+              <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+                <div style="font-size: 13px; color: #166534; font-weight: 600">Connected · data written 4 min ago</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; font-size: 12px">
+                  <div><div style="color: #475569">OS</div><div style="font-family: 'JetBrains Mono', monospace">Ubuntu 24.04.1 LTS</div></div>
+                  <div><div style="color: #475569">Kernel</div><div style="font-family: 'JetBrains Mono', monospace">6.8.0-49-generic</div></div>
+                  <div><div style="color: #475569">nginx</div><div style="font-family: 'JetBrains Mono', monospace">1.26.2</div></div>
+                  <div><div style="color: #475569">PHP</div><div style="font-family: 'JetBrains Mono', monospace">8.3.14</div></div>
+                  <div><div style="color: #475569">MySQL</div><div style="color: #475569">not installed</div></div>
+                  <div><div style="color: #475569">OpenSSL</div><div style="font-family: 'JetBrains Mono', monospace">3.0.15</div></div>
+                </div>
+              </div>
+            </sc-if>
+            <span style="font-size: 12px; color: #475569">Optional now. You can finish this step later from the server page.</span>
+          </div>
+        </section>
+
+        <section aria-labelledby="b4" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <h2 id="b4" style="margin: 0; font-size: 16px; font-weight: 600"><span style="color: #64748B; margin-right: 8px">4</span>Checks</h2>
+          <p style="margin: 0; font-size: 13px; color: #475569">On save, Sextant probes the primary address and attaches only the checks that make sense.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; font-size: 13px">
+            <label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">TCP port 22 (SSH), if open</label>
+            <label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">TCP port 80 (HTTP), if open</label>
+            <label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">TCP port 443 (HTTPS), if open</label>
+            <label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">Ping, if it answers</label>
+            <label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">Software versions, daily</label>
+          </div>
+        </section>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap">
+          <a href="Servers.dc.html" style="display: inline-flex; align-items: center; height: 42px; padding: 0 16px; border-radius: 8px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #0F172A; text-decoration: none; font-weight: 500">Cancel</a>
+          <button type="button" onClick="{{save}}" style="height: 42px; padding: 0 18px; border-radius: 8px; border: 0; background: #1D4ED8; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">Save server</button>
+        </div>
+      </div>
+
+      <aside aria-labelledby="sum-h" style="flex: 1 1 280px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="sum-h" style="margin: 0; font-size: 16px; font-weight: 600">Summary</h2>
+        <div style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: #475569">Name</span><span style="font-family: 'JetBrains Mono', monospace">{{name}}</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: #475569">Addresses</span><span>{{ipCount}}</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: #475569">Primary</span><span style="font-family: 'JetBrains Mono', monospace">{{primaryIp}}</span></div>
+        <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 13px"><span style="color: #475569">OS</span><span style="text-align: right">{{os}}</span></div>
+        <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 13px"><span style="color: #475569">Backups</span><span style="text-align: right; color: {{backupHintC}}">{{backupSummary}}</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: #475569">Versions endpoint</span><span>{{endpointState}}</span></div>
+        <div style="border-top: 1px solid #F1F5F9; padding-top: 12px; font-size: 12px; color: #475569; line-height: 1.5">Sites aren't assigned here. Add a domain or subdomain and pick this server as its backend; the server page then lists every site that reaches it.</div>
+      </aside>
+    </div>
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1480}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: 'web06',
+      os: 'Ubuntu 24.04 LTS',
+      backups: { snap: true, server: true, cloud: false, local: false },
+      token: false,
+      tested: false,
+      saved: false,
+      next: 3,
+      primary: 1,
+      ips: [ { id: 1, value: '198.51.100.23' }, { id: 2, value: '2001:db8:24::23' } ]
+    };
+  }
+  renderVals() {
+    var self = this;
+    var ips = this.state.ips.map(function (ip) {
+      return {
+        inputId: 'ip-' + ip.id,
+        value: ip.value,
+        version: ip.value.indexOf(':') !== -1 ? 'IPv6' : 'IPv4',
+        primary: ip.id === self.state.primary,
+        onChange: function (e) { self.setState({ ips: self.state.ips.map(function (x) { return x.id === ip.id ? { id: x.id, value: e.target.value } : x; }) }); },
+        makePrimary: function () { self.setState({ primary: ip.id }); },
+        remove: function () { self.setState({ ips: self.state.ips.filter(function (x) { return x.id !== ip.id; }) }); }
+      };
+    });
+    var prim = this.state.ips.filter(function (x) { return x.id === self.state.primary; })[0];
+    var bdefs = [ { k: 'snap', label: 'Provider snapshots' }, { k: 'server', label: 'Backup server' }, { k: 'cloud', label: 'Offsite cloud storage' }, { k: 'local', label: 'Local disk on the server' } ];
+    var bs = this.state.backups;
+    var backupOpts = bdefs.map(function (d) {
+      return { label: d.label, on: !!bs[d.k], toggle: function () { var n = Object.assign({}, self.state.backups); n[d.k] = !n[d.k]; self.setState({ backups: n }); } };
+    });
+    var bOn = bdefs.filter(function (d) { return bs[d.k]; }).map(function (d) { return d.label; });
+    var t = this.state.token;
+    return {
+      name: this.state.name,
+      onName: (e) => this.setState({ name: e.target.value }),
+      os: this.state.os,
+      onOs: (e) => this.setState({ os: e.target.value }),
+      isWindows: this.state.os.indexOf('Windows') === 0,
+      backupOpts: backupOpts,
+      backupSummary: bOn.length ? bOn.join(', ') : 'None',
+      backupHint: bOn.length ? 'Admins manage this list of locations.' : 'Nothing ticked: the server will be listed as having no backup location.',
+      backupHintC: bOn.length ? '#475569' : '#C2410C',
+      ips: ips,
+      ipCount: this.state.ips.length,
+      primaryIp: prim ? prim.value : '—',
+      addIp: () => this.setState({ ips: this.state.ips.concat([{ id: this.state.next, value: '' }]), next: this.state.next + 1 }),
+      hasToken: t,
+      noToken: !t,
+      noTokenStr: t ? 'false' : 'true',
+      genToken: () => this.setState({ token: true }),
+      dlColor: t ? '#0F172A' : '#94A3B8',
+      dlHint: t ? 'versions.php comes with a hash of this token built in; the script needs no changes.' : 'Generate the token first; the PHP file is built with it.',
+      test: () => this.setState({ tested: true }),
+      tested: this.state.tested,
+      endpointState: this.state.tested ? 'Connected' : (t ? 'Token ready' : 'Not set up'),
+      save: () => this.setState({ saved: true }),
+      saved: this.state.saved
+    };
+  }
+}
+</script>
+</body>
+</html>
