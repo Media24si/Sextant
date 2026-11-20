@@ -12,6 +12,7 @@ import {
     TriangleAlert,
     Users,
 } from '@lucide/vue';
+import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -47,7 +48,11 @@ const mainNavItems = computed<SidebarNavItem[]>(() => [
 
 const adminNavItems: SidebarNavItem[] = [
     { title: 'Minimum versions', icon: ShieldCheck },
-    { title: 'External services', icon: SquareDashed },
+    {
+        title: 'External services',
+        href: ExternalServiceController.index(),
+        icon: SquareDashed,
+    },
     { title: 'Lists', icon: List },
     { title: 'Users', icon: Users },
 ];

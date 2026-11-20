@@ -17,6 +17,25 @@ export type ChoiceData = {
 id: number,
 label: string,
 };
+export type ExternalServiceFormData = {
+id: number | null,
+name: string,
+kind: App.Enums.ExternalServiceKind,
+ranges: string[],
+ranges_source: App.Enums.RangeSource | null,
+cname_suffixes: string[],
+response_headers: string[],
+notes: string | null,
+};
+export type ExternalServiceRowData = {
+id: number,
+name: string,
+kind: App.Enums.ExternalServiceKind,
+ranges_count: number,
+ranges_source: App.Enums.RangeSource | null,
+sites_count: number,
+deleted: boolean,
+};
 export type ProfileData = {
 name: string,
 email: string,

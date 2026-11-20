@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ExternalService;
 use App\Models\Server;
 use App\Models\User;
 
@@ -15,6 +16,12 @@ dataset('admin routes', [
     'update server' => ['put', 'servers.update', fn () => ['server' => Server::factory()->create()]],
     'delete server' => ['delete', 'servers.destroy', fn () => ['server' => Server::factory()->create()]],
     'restore server' => ['post', 'servers.restore', fn () => ['server' => tap(Server::factory()->create())->delete()]],
+    'add external service form' => ['get', 'external-services.create', null],
+    'store external service' => ['post', 'external-services.store', null],
+    'edit external service form' => ['get', 'external-services.edit', fn () => ['external_service' => ExternalService::factory()->create()]],
+    'update external service' => ['put', 'external-services.update', fn () => ['external_service' => ExternalService::factory()->create()]],
+    'delete external service' => ['delete', 'external-services.destroy', fn () => ['external_service' => ExternalService::factory()->create()]],
+    'restore external service' => ['post', 'external-services.restore', fn () => ['external_service' => tap(ExternalService::factory()->create())->delete()]],
 ]);
 
 test('readers get 403', function (string $method, string $route, ?Closure $parameters) {
