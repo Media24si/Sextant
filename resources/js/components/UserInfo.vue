@@ -21,14 +21,16 @@ const roleLabels: Record<App.Enums.UserRole, string> = {
 </script>
 
 <template>
-    <Avatar class="h-8 w-8 overflow-hidden rounded-lg">
-        <AvatarFallback class="rounded-lg text-black dark:text-white">
+    <Avatar class="size-[34px] overflow-hidden rounded-full">
+        <AvatarFallback
+            class="rounded-full bg-blue-100 text-[13px] font-semibold text-blue-900 dark:bg-blue-950 dark:text-blue-200"
+        >
             {{ getInitials(user.name) }}
         </AvatarFallback>
     </Avatar>
 
     <div class="grid flex-1 text-left text-sm leading-tight">
-        <span class="truncate font-medium">{{ user.name }}</span>
+        <span class="truncate text-[13px] font-semibold">{{ user.name }}</span>
         <span v-if="showRole" class="truncate text-xs text-muted-foreground">{{
             roleLabels[user.role]
         }}</span>

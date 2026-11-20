@@ -1,47 +1,25 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '@/components/PlaceholderPattern.vue';
-import { dashboard } from '@/routes';
-
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Dashboard',
-                href: dashboard(),
-            },
-        ],
-    },
-});
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Overview" />
 
     <div
-        class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+        class="flex w-full max-w-[1280px] flex-col gap-5 px-4 pt-7 pb-12 md:px-8"
     >
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
-            </div>
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
-            </div>
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
-            </div>
+        <div>
+            <h1 class="text-[26px] font-bold tracking-tight">Overview</h1>
+            <p class="mt-1.5 text-muted-foreground">
+                Servers, domains and sites, and anything that needs attention.
+            </p>
         </div>
-        <div
-            class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
+
+        <section
+            class="rounded-xl border bg-card px-6 py-10 text-center text-muted-foreground"
         >
-            <PlaceholderPattern />
-        </div>
+            Nothing to show yet. Totals, current issues and recent changes
+            appear here once servers, domains and sites are added.
+        </section>
     </div>
 </template>

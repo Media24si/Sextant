@@ -12,3 +12,10 @@ export type NavItem = {
     icon?: LucideIcon;
     isActive?: boolean;
 };
+
+/** A sidebar entry. `href` is missing while its page doesn't exist yet: the item shows disabled. */
+export type SidebarNavItem = {
+    title: string;
+    href?: NonNullable<InertiaLinkProps['href']>;
+    icon: LucideIcon;
+};

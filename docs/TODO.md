@@ -37,7 +37,7 @@
 - [x] **P0.6** Sentry with `SENTRY_TRACES_SAMPLE_RATE=0` and one scheduled task using `->sentryMonitor()`. Scheduler documented for `schedule:work` (§14).
 - [x] **P0.7** `config/sextant.php` skeleton exactly as §15.1; `.env.example` with every variable in §15.2.
 - [x] **P0.8** Install and wire `spatie/laravel-data` + TypeScript transformer (types into `resources/js/types/generated.d.ts`, run before `npm run build`), `spatie/laravel-query-builder`, Wayfinder (fall back to Ziggy if unsuitable; note the choice in `docs/spikes/versions.md`).
-- [ ] **P0.9** App shell per the prototype (§13.4): dark sidebar with Overview, Servers, Domains, Incidents, Activity and the admin-only group; header with a global search field placeholder, system health pill and user menu showing the role. Design tokens and fonts (§13.1). Responsive: sidebar stacks on phones.
+- [x] **P0.9** App shell per the prototype (§13.4): dark sidebar with Overview, Servers, Domains, Incidents, Activity and the admin-only group; header with a global search field placeholder, system health pill and user menu showing the role. Design tokens and fonts (§13.1). Responsive: sidebar stacks on phones.
 - [ ] **P0.10** Shared components (§13.4): `DataTable` (§13.5), `StatusBadge`, `StatusDot`, `SeverityBadge`, `ServingPath`, `ConfidenceBadge`, `VersionCell`, `RelativeTime`, `ConfirmDialog`, `PageHeader`, `Breadcrumbs`, `EmptyState`, `RepoLink`, form field wrappers (label, input, error) on shadcn-vue.
 - [ ] **P0.11** A temporary demo page using `DataTable` against a seeded table, proving server-side sort, filter chips, search and pagination via query string.
 - [x] **P0.12** CI: Pint, Larastan, Pest against a **MySQL 9.7** service container, ESLint, `vue-tsc --noEmit`, Vitest.
@@ -255,6 +255,11 @@ Found in Phase 0 (2026-11-20):
 - [x] `APP_TIMEZONE=UTC` (§15.2) had no effect because the kit hard-codes `app.timezone`. Fixed: `config/app.php` reads `APP_TIMEZONE`.
 - [x] P0.6 needs one task with `->sentryMonitor()`, but `monitors:dispatch` doesn't exist until P3.6. `horizon:snapshot` (already in §14) carries it until then; P3.6 adds it to `monitors:dispatch`.
 - [x] `/horizon` must be admin only (§13.2), but Horizon lets anyone in in the `local` environment by default. Decision: admin only everywhere, including local.
+- [x] The sidebar (§13.4) links to pages that arrive in Phases 1–7. Decision: those items show disabled until their route exists; counts are added with the lists in Phase 1.
+- [x] The header health pill (§13.4) has no data until P6.4. Decision: it shows grey "Checks not running yet" until then, and is hidden on phones.
+- [x] The prototype's Admin group has no "Lists" item; §13.4 has one. Decision: follow the spec.
+- [x] "Sidebar stacks on phones" (P0.9): the prototype wraps the nav above the content; the starter kit's sidebar slides in as a sheet. Decision: keep the kit's sheet, opened from the header button.
+- [x] The `Status` enum belongs to P1.2, but the shell and P0.10 components need its TypeScript type. Decision: `App\Enums\Status` (values only) added in P0.9; P1.2 adds `rank()` and `isFailure()`.
 
 Carried over from the previous version of this list (still open in SPEC v0.2):
 

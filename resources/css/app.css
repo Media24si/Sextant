@@ -9,9 +9,25 @@
 
 @theme inline {
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Hostnames, IPs, versions and tokens (SPEC §13.1). */
+    --font-mono:
+        'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Status colours (SPEC §13.1): dots, and badge text on badge backgrounds. */
+    --color-status-ok: var(--status-ok);
+    --color-status-ok-fg: var(--status-ok-fg);
+    --color-status-ok-bg: var(--status-ok-bg);
+    --color-status-warning: var(--status-warning);
+    --color-status-warning-fg: var(--status-warning-fg);
+    --color-status-warning-bg: var(--status-warning-bg);
+    --color-status-error: var(--status-error);
+    --color-status-error-fg: var(--status-error-fg);
+    --color-status-error-bg: var(--status-error-bg);
+    --color-status-unknown: var(--status-unknown);
+    --color-status-unknown-fg: var(--status-unknown-fg);
+    --color-status-unknown-bg: var(--status-unknown-bg);
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -59,77 +75,99 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-muted-foreground: var(--sidebar-muted-foreground);
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.87 0 0);
+    /* Light theme from the admin prototype (docs/design). */
+    --background: #f5f6f8;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
+    --primary: #1d4ed8;
+    --primary-foreground: #ffffff;
+    --secondary: #f1f5f9;
+    --secondary-foreground: #0f172a;
+    --muted: #f8fafc;
+    --muted-foreground: #475569;
+    --accent: #f1f5f9;
+    --accent-foreground: #0f172a;
+    --destructive: #dc2626;
+    --destructive-foreground: #dc2626;
+    --border: #e2e8f0;
+    --input: #cbd5e1;
+    --ring: #93c5fd;
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.87 0 0);
+
+    /* The sidebar is dark in both themes (SPEC §13.1, §13.4). */
+    --sidebar: #0b1220;
+    --sidebar-foreground: #cbd5e1;
+    --sidebar-primary: #60a5fa;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #1e293b;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #1e293b;
+    --sidebar-ring: #60a5fa;
+    --sidebar-muted-foreground: #94a3b8;
+
+    --status-ok: #16a34a;
+    --status-ok-fg: #166534;
+    --status-ok-bg: #dcfce7;
+    --status-warning: #ea580c;
+    --status-warning-fg: #9a3412;
+    --status-warning-bg: #ffedd5;
+    --status-error: #dc2626;
+    --status-error-fg: #991b1b;
+    --status-error-bg: #fee2e2;
+    --status-unknown: #94a3b8;
+    --status-unknown-fg: #334155;
+    --status-unknown-bg: #e2e8f0;
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.145 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.396 0.141 25.723);
-    --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border: oklch(0.269 0 0);
-    --input: oklch(0.269 0 0);
-    --ring: oklch(0.439 0 0);
+    --background: #0b1220;
+    --foreground: #e2e8f0;
+    --card: #111a2e;
+    --card-foreground: #e2e8f0;
+    --popover: #111a2e;
+    --popover-foreground: #e2e8f0;
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+    --secondary: #1e293b;
+    --secondary-foreground: #e2e8f0;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+    --accent: #1e293b;
+    --accent-foreground: #e2e8f0;
+    --destructive: #ef4444;
+    --destructive-foreground: #f87171;
+    --border: #1e293b;
+    --input: #334155;
+    --ring: #1d4ed8;
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.985 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
+
+    --sidebar: #060b16;
+    --sidebar-border: #111a2e;
+
+    --status-ok-fg: #86efac;
+    --status-ok-bg: rgb(22 163 74 / 0.18);
+    --status-warning-fg: #fdba74;
+    --status-warning-bg: rgb(234 88 12 / 0.18);
+    --status-error-fg: #fca5a5;
+    --status-error-bg: rgb(220 38 38 / 0.2);
+    --status-unknown-fg: #cbd5e1;
+    --status-unknown-bg: rgb(148 163 184 / 0.18);
 }
 
 @layer base {

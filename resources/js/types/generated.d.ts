@@ -11,6 +11,7 @@ email: string,
 };
 }
 namespace Enums {
+export type Status = 'ok' | 'warning' | 'error' | 'unknown';
 export type UserRole = 'admin' | 'reader';
 }
 }
