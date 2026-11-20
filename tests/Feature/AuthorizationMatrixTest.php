@@ -29,6 +29,7 @@ $adminRoutes = [
     'restore external service' => ['post', 'external-services.restore', fn () => ['external_service' => tap(ExternalService::factory()->create())->delete()]],
     'add domain form' => ['get', 'domains.create', null],
     'store domain' => ['post', 'domains.store', null],
+    'look up domain' => ['post', 'domains.lookup', null],
     'edit domain form' => ['get', 'domains.edit', fn () => ['domain' => Domain::factory()->create()]],
     'update domain' => ['put', 'domains.update', fn () => ['domain' => Domain::factory()->create()]],
     'delete domain' => ['delete', 'domains.destroy', fn () => ['domain' => Domain::factory()->create()]],

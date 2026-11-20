@@ -24,15 +24,16 @@ class AddSites
     /**
      * @param  string  $domainName  registrable domain, lowercase punycode
      * @param  list<SiteInput>  $sites
+     * @param  string|null  $notes  for a new domain (Add domain)
      * @return list<Site>
      */
-    public function handle(string $domainName, array $sites): array
+    public function handle(string $domainName, array $sites, ?string $notes = null): array
     {
-        return DB::transaction(function () use ($domainName, $sites): array {
+        return DB::transaction(function () use ($domainName, $sites, $notes): array {
             $domain = Domain::query()->where('name', $domainName)->first();
 
             if ($domain === null) {
-                $domain = Domain::query()->create(['name' => $domainName]);
+                $domain = Domain::query()->create(['name' => $domainName, 'notes' => $notes]);
                 DomainAdded::dispatch($domain, $this->monitors->forDomain());
             }
 

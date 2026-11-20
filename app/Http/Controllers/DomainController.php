@@ -2,15 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Sites\AddSites;
 use App\Data\ActivityItemData;
+use App\Data\Detection\DomainLookupData;
 use App\Data\DomainFormData;
 use App\Data\DomainRowData;
+use App\Data\OptionData;
+use App\Detection\SiteDetector;
+use App\Http\Requests\AddDomainRequest;
 use App\Http\Requests\DomainRequest;
+use App\Http\Requests\SiteRequest;
 use App\Models\Activity;
 use App\Models\Domain;
+use App\Models\ExternalService;
+use App\Models\Server;
+use App\Rules\RegistrableDomain;
+use App\Support\Hostname;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -82,16 +93,50 @@ class DomainController extends Controller
         ]);
     }
 
+    /**
+     * Add domain (SPEC §10.5): registry lookup, then the subdomains, saved together.
+     */
     public function create(): Response
     {
-        return Inertia::render('domains/Form', ['form' => DomainFormData::blank()]);
+        return Inertia::render('domains/Add', [
+            'front_services' => array_values(ExternalService::query()->orderBy('name')->get()
+                ->map(fn (ExternalService $service): OptionData => new OptionData($service->id, $service->name))->all()),
+            'servers' => array_values(Server::query()->orderBy('name')->get()
+                ->map(fn (Server $server): OptionData => new OptionData($server->id, $server->name))->all()),
+        ]);
     }
 
-    public function store(DomainRequest $request): RedirectResponse
+    /**
+     * What the registry says about a domain (RDAP, or WHOIS without RDAP). JSON.
+     */
+    public function lookup(Request $request): JsonResponse
     {
-        $domain = Domain::query()->create($request->safe()->only(['name', 'notes']));
+        $request->merge(['name' => Hostname::normalize((string) $request->input('name'))]);
+        $request->validate(
+            ['name' => ['required', 'string', 'max:253', 'regex:'.SiteRequest::HOSTNAME_PATTERN, new RegistrableDomain]],
+            ['name.regex' => 'Enter a domain such as svet24.si.'],
+        );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "Domain {$domain->display_name} added."]);
+        $name = (string) $request->input('name');
+        $existing = Domain::query()->where('name', $name)->first();
+
+        return response()->json(new DomainLookupData(
+            name: $name,
+            display_name: Hostname::display($name),
+            existing_id: $existing?->id,
+            registry: $existing === null ? SiteDetector::registryPreview($name) : null,
+        ));
+    }
+
+    public function store(AddDomainRequest $request, AddSites $addSites): RedirectResponse
+    {
+        /** @var array{name: string, notes?: string|null, sites: list<array{hostname: string, scheme: string, port: int|null, path: string, front_service_id?: int|null, server_id?: int|null, expected_target?: string|null}>} $input */
+        $input = $request->validated();
+        $addSites->handle($input['name'], $input['sites'], $input['notes'] ?? null);
+        $domain = Domain::query()->where('name', $input['name'])->sole();
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => "Domain {$domain->display_name} added"
+            .($input['sites'] === [] ? '.' : ' with '.trans_choice('{1} 1 site|[2,*] :count sites', count($input['sites'])).'.')]);
 
         return to_route('domains.show', $domain);
     }

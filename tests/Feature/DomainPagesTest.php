@@ -90,7 +90,7 @@ test('the domain page lists its sites and the changes to it and them', function 
 
 test('an admin adds and edits a domain; the name is stored as punycode', function () {
     $this->actingAs($this->admin)
-        ->post(route('domains.store'), ['name' => 'ŠOLA.si.', 'notes' => 'School'])
+        ->post(route('domains.store'), ['name' => 'ŠOLA.si.', 'notes' => 'School', 'sites' => []])
         ->assertSessionHasNoErrors();
 
     $domain = Domain::query()->sole();
@@ -108,9 +108,9 @@ test('domain names are validated', function (string $name) {
     Domain::factory()->create(['name' => 'svet24.si']);
 
     $this->actingAs($this->admin)
-        ->post(route('domains.store'), ['name' => $name])
+        ->post(route('domains.store'), ['name' => $name, 'sites' => []])
         ->assertSessionHasErrors('name');
-})->with(['SVET24.si', 'svet24', 'not a domain', 'https://svet24.si']);
+})->with(['SVET24.si', 'svet24', 'not a domain', 'https://svet24.si', 'news.svet24.si', 'co.uk']);
 
 test('a domain with sites is not deleted; an empty one is, and comes back', function () {
     $domain = Domain::factory()->create(['name' => 'svet24.si']);

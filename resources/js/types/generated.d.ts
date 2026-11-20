@@ -229,6 +229,12 @@ value: App.Data.Detection.DetectedDomainData,
 confidence: App.Enums.Confidence,
 explanation: string,
 };
+export type DomainLookupData = {
+name: string,
+display_name: string,
+existing_id: number | null,
+registry: App.Data.Detection.RegistryPreviewData | null,
+};
 export type DuplicateSiteData = {
 site_id: number,
 serving_path: string,

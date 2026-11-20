@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
         Route::post('external-services/{external_service}/restore', [ExternalServiceController::class, 'restore'])->withTrashed()->name('external-services.restore');
 
         Route::get('domains/create', [DomainController::class, 'create'])->name('domains.create');
+        Route::post('domains/lookup', [DomainController::class, 'lookup'])->name('domains.lookup');
         Route::post('domains', [DomainController::class, 'store'])->name('domains.store');
         Route::get('domains/{domain}/edit', [DomainController::class, 'edit'])->name('domains.edit');
         Route::put('domains/{domain}', [DomainController::class, 'update'])->name('domains.update');

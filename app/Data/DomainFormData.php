@@ -17,11 +17,6 @@ class DomainFormData extends Data
         public ?string $notes,
     ) {}
 
-    public static function blank(): self
-    {
-        return new self(null, '', null);
-    }
-
     public static function fromModel(Domain $domain): self
     {
         return new self($domain->id, $domain->display_name, $domain->notes);
