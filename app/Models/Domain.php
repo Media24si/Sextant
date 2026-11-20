@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\Status;
+use App\Observers\DomainObserver;
 use App\Support\Hostname;
 use Database\Factories\DomainFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +30,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $deleted_at
  * @property-read string $display_name
  */
+#[ObservedBy(DomainObserver::class)]
 #[Fillable(['name', 'notes'])]
 class Domain extends Model
 {

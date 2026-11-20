@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Activity\ActivityRecorder;
+use App\Enums\ActivityCategory;
 use App\Enums\Status;
+use App\Observers\ServerObserver;
 use App\Support\Hostname;
 use Database\Factories\ServerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,6 +42,7 @@ use Illuminate\Support\Carbon;
  * @property-read Choice|null $os
  * @property-read ServerAddress|null $primaryAddress
  */
+#[ObservedBy(ServerObserver::class)]
 #[Fillable(['name', 'hostname', 'provider', 'os_choice_id', 'notes', 'versions_url'])]
 #[Hidden(['versions_token'])]
 class Server extends Model
@@ -107,5 +112,34 @@ class Server extends Model
     public function sites(): HasMany
     {
         return $this->hasMany(Site::class);
+    }
+
+    /**
+     * Set where the backups are stored and record the change
+     * (`server.backup_locations_changed`, SPEC §8.4).
+     *
+     * SPEC: §8.2 puts an observer on the pivot; pivot rows don't fire model
+     * events on sync(), so the change is recorded here instead.
+     *
+     * @param  list<int>  $choiceIds
+     */
+    public function syncBackupLocations(array $choiceIds): void
+    {
+        $before = $this->backupLocations()->pluck('label')->all();
+        $changes = $this->backupLocations()->sync($choiceIds);
+
+        if ($changes['attached'] === [] && $changes['detached'] === []) {
+            return;
+        }
+
+        $after = $this->backupLocations()->pluck('label')->all();
+
+        ActivityRecorder::record(
+            ActivityCategory::Inventory,
+            'server.backup_locations_changed',
+            $this,
+            "{$this->name} backups: ".($after === [] ? 'none' : implode(', ', $after)).' (was '.($before === [] ? 'none' : implode(', ', $before)).')',
+            ['old' => $before, 'new' => $after],
+        );
     }
 }

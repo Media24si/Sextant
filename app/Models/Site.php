@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Data\ServingPathData;
 use App\Enums\Status;
+use App\Observers\SiteObserver;
 use App\Support\Hostname;
 use Database\Factories\SiteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,6 +40,7 @@ use Illuminate\Support\Carbon;
  * @property-read ExternalService|null $frontService
  * @property-read Server|null $server
  */
+#[ObservedBy(SiteObserver::class)]
 #[Fillable(['domain_id', 'hostname', 'scheme', 'port', 'front_service_id', 'server_id', 'description', 'github_url', 'notes'])]
 class Site extends Model
 {

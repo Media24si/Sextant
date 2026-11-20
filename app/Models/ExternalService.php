@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Enums\ExternalServiceKind;
 use App\Enums\RangeSource;
+use App\Observers\ExternalServiceObserver;
 use Database\Factories\ExternalServiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,6 +30,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  */
+#[ObservedBy(ExternalServiceObserver::class)]
 #[Fillable(['name', 'kind', 'ranges', 'ranges_source', 'cname_suffixes', 'response_headers', 'notes'])]
 class ExternalService extends Model
 {

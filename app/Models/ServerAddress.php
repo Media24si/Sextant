@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Observers\ServerAddressObserver;
 use Database\Factories\ServerAddressFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property-read Server $server
  */
+#[ObservedBy(ServerAddressObserver::class)]
 #[Fillable(['ip', 'is_primary'])]
 class ServerAddress extends Model
 {

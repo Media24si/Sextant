@@ -63,8 +63,8 @@
 - [x] **P1.3** Migrations + models: `choices` (§3.4) with seeds; `servers` (soft deletes, §3.2, `versions_token` encrypted cast, hidden from serialisation); `server_addresses` (§3.3); `server_backup_location` pivot; `external_services` (soft deletes, §3.5) with the Cloudflare seed; `domains` (§3.6); `sites` (§3.7: `front_service_id`, `server_id`, `description`, `github_url`).
 - [x] **P1.4** Soft-delete uniqueness via stored generated `active_*` columns on `servers.name`, `external_services.name`, `domains.name`, `sites.hostname` (§3.17).
 - [x] **P1.5** Validation: IP belongs to at most one non-deleted server and not inside any external service's ranges (§3.3); domain with live sites can't be deleted; external service used by sites can't be deleted; choice in use can't be deleted; `github_url` format.
-- [ ] **P1.6** `activities` table and `ActivityRecorder::record(...)` (§3.13, §8.1).
-- [ ] **P1.7** Observers on `Server`, `ServerAddress`, `ExternalService`, `Domain`, `Site`, `User` and the backup pivot, including special types `site.path_changed`, `server.address_added/removed`, `server.backup_locations_changed`, `user.role_changed`; exclude secrets and system-maintained columns (§8.2).
+- [x] **P1.6** `activities` table and `ActivityRecorder::record(...)` (§3.13, §8.1).
+- [x] **P1.7** Observers on `Server`, `ServerAddress`, `ExternalService`, `Domain`, `Site`, `User` and the backup pivot, including special types `site.path_changed`, `server.address_added/removed`, `server.backup_locations_changed`, `user.role_changed`; exclude secrets and system-maintained columns (§8.2).
 - [x] **P1.8** Accessors: `$site->url`; Unicode display via `idn_to_utf8()`; `$site->servingPath()` returning front + backend.
 - [ ] **P1.9** laravel-data classes for every page's rows and forms; generated TypeScript types used by pages.
 
@@ -268,6 +268,10 @@ Found in Phase 0 (2026-11-20):
 - [x] P1.1's morph map lists `monitor`, `incident` and `minimum_version`, whose models arrive in Phases 3, 4 and 7. `Relation::enforceMorphMap()` needs real classes, so each joins the map with its model.
 - [x] The choices seeds (§3.4) and the Cloudflare row (§3.5) are reference data that production needs, but deploys run `migrate`, not `db:seed`. Decision: the create-table migrations insert them.
 - [x] P1.5's "IP not inside any external service's ranges" can only check admin-entered `ranges` until `proxies:refresh` caches the published ranges (P2.3/P2.4). `IpAddressIsFree` has a `// SPEC:` note; P2.3 extends it.
+- [x] §8.2 puts an observer on the `server_backup_location` pivot, but `sync()` doesn't fire model events for pivot rows. Decision: `Server::syncBackupLocations()` records `server.backup_locations_changed` itself; forms must use it instead of `sync()`.
+- [x] §8.4 has no type for changing a server's primary address. Decision: recorded as `server.updated` with a `primary_address` property. Changing an address's IP is recorded as removed + added.
+- [x] `site.path_changed` and `site.updated` are separate entries when one save changes both the path and other fields; the path entry carries readable paths ("Varnish → web02 (was direct → web01)").
+- [ ] `activities.user_id` is `nullOnDelete`, so deleting a user (P1.17) turns their past changes into "Sextant" changes, while GOAL says every change shows which admin made it. Options: keep a `user_name` snapshot on activities, or soft-delete users. Default until decided: snapshot the name in `properties`? Needs a decision before P1.17.
 
 Carried over from the previous version of this list (still open in SPEC v0.2):
 
