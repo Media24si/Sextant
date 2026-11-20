@@ -1,15 +1,17 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "media24/sextant",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": [
-        "laravel",
-        "framework"
-    ],
-    "license": "MIT",
+    "description": "Overview and monitoring of Media24 domains, sites and servers.",
+    "keywords": [],
+    "license": "proprietary",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
+        "ext-curl": "*",
+        "ext-intl": "*",
+        "ext-openssl": "*",
+        "ext-pdo_mysql": "*",
+        "ext-redis": "*",
         "inertiajs/inertia-laravel": "^3.0",
         "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
@@ -89,7 +91,6 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
         ],
         "pre-package-uninstall": [

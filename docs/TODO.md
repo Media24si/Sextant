@@ -29,13 +29,13 @@
 
 ## Phase 0 — Foundation (§18)
 
-- [ ] **P0.1** New app from Laravel's **Vue starter kit** (TypeScript). PHP ≥ 8.4 with `intl`, `openssl`, `curl`, `redis`, `pdo_mysql`. `APP_TIMEZONE=UTC`. Remove registration routes, pages and tests.
-- [ ] **P0.2** MySQL 9.7: `.env.example` for socket or TLS; document creating the user with `caching_sha2_password` (§16).
+- [x] **P0.1** New app from Laravel's **Vue starter kit** (TypeScript). PHP ≥ 8.4 with `intl`, `openssl`, `curl`, `redis`, `pdo_mysql`. `APP_TIMEZONE=UTC`. Remove registration routes, pages and tests.
+- [x] **P0.2** MySQL 9.7: `.env.example` for socket or TLS; document creating the user with `caching_sha2_password` (§16).
 - [ ] **P0.3** `users.role` (`admin`/`reader`, default `reader`); `EnsureAdmin` middleware; policy scaffold; `HandleInertiaRequests` shares `auth.user` (id, name, role) and `can.manage` (§13.2).
 - [ ] **P0.4** `php artisan sextant:create-admin` (name, email, password prompt).
 - [ ] **P0.5** Redis + Horizon with supervisors `checks` (5–20), `checks-slow` (2), `notifications` (1), `default` (2); job timeout 60 s, `retry_after` 90 s; `/horizon` admin only (§16).
 - [ ] **P0.6** Sentry with `SENTRY_TRACES_SAMPLE_RATE=0` and one scheduled task using `->sentryMonitor()`. Scheduler documented for `schedule:work` (§14).
-- [ ] **P0.7** `config/sextant.php` skeleton exactly as §15.1; `.env.example` with every variable in §15.2.
+- [x] **P0.7** `config/sextant.php` skeleton exactly as §15.1; `.env.example` with every variable in §15.2.
 - [ ] **P0.8** Install and wire `spatie/laravel-data` + TypeScript transformer (types into `resources/js/types/generated.d.ts`, run before `npm run build`), `spatie/laravel-query-builder`, Wayfinder (fall back to Ziggy if unsuitable; note the choice in `docs/spikes/versions.md`).
 - [ ] **P0.9** App shell per the prototype (§13.4): dark sidebar with Overview, Servers, Domains, Incidents, Activity and the admin-only group; header with a global search field placeholder, system health pill and user menu showing the role. Design tokens and fonts (§13.1). Responsive: sidebar stacks on phones.
 - [ ] **P0.10** Shared components (§13.4): `DataTable` (§13.5), `StatusBadge`, `StatusDot`, `SeverityBadge`, `ServingPath`, `ConfidenceBadge`, `VersionCell`, `RelativeTime`, `ConfirmDialog`, `PageHeader`, `Breadcrumbs`, `EmptyState`, `RepoLink`, form field wrappers (label, input, error) on shadcn-vue.
@@ -245,6 +245,14 @@
 ## Spec issues found
 
 Log anything ambiguous or contradictory here instead of guessing silently.
+
+Found in Phase 0 (2026-11-20):
+
+- [x] SPEC §2 and CLAUDE.md name Inertia 2; the starter kit ships Inertia v3, which keeps `usePoll`, partial reloads and deferred props. Decision: stay on v3.
+- [x] SPEC §2 and §17 name ESLint and Prettier; the starter kit uses vite-plus (`vp check` = oxlint + oxfmt, Vitest via `vp test`). Decision: keep vite-plus. `docs/**` is excluded from the formatter.
+- [x] The starter kit ships Fortify email verification, 2FA and passkeys; SPEC §13.1 names only login, password reset and profile/password, and admins create users. Decision: email verification removed; 2FA and passkeys kept.
+- [x] The starter kit lets any user delete their own account, which conflicts with admins managing users and "never remove the last admin" (§13.6 Users). Decision: self-deletion removed; only admins delete users (P1.17).
+- [x] `APP_TIMEZONE=UTC` (§15.2) had no effect because the kit hard-codes `app.timezone`. Fixed: `config/app.php` reads `APP_TIMEZONE`.
 
 Carried over from the previous version of this list (still open in SPEC v0.2):
 
