@@ -80,9 +80,13 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
-      # Also generates the Wayfinder route files that vue-tsc needs.
+      # Generates the TypeScript types and the Wayfinder route files that vue-tsc needs.
       - name: Build assets
         run: npm run build
+
+      # The build regenerates resources/js/types/generated.d.ts from laravel-data classes.
+      - name: Check generated TypeScript types are committed
+        run: git diff --exit-code -- resources/js/types/generated.d.ts
 
       # Lint and format (vp check), vue-tsc, Vitest, Pint, Larastan, Pest on MySQL 9.7.
       - name: Run CI checks

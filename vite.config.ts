@@ -52,6 +52,7 @@ export default defineConfig({
             'resources/js/actions/**',
             'resources/js/components/ui/*',
             'resources/js/routes/**',
+            'resources/js/types/generated.d.ts',
             'resources/js/wayfinder/**',
         ],
         options: {
@@ -70,6 +71,7 @@ export default defineConfig({
             '.github/**',
             'composer.json',
             'docs/**',
+            'resources/js/types/generated.d.ts',
             'resources/js/components/ui/*',
             'resources/views/mail/*',
         ],

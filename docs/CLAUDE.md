@@ -12,7 +12,7 @@ In-house overview and monitoring for Media24: domains, subdomains (sites), serve
 
 ## Stack
 
-Laravel (latest stable, PHP ≥ 8.4) from the official Vue starter kit · Inertia 3 · Vue 3 `<script setup lang="ts">` · shadcn-vue + Tailwind · MySQL 9.7 LTS · Redis + Horizon · Pest · vite-plus (oxlint, oxfmt, Vitest) · laravel-data + TypeScript transformer · spatie/laravel-query-builder · TanStack Table · Wayfinder (or Ziggy, see `docs/spikes/versions.md`).
+Laravel (latest stable, PHP ≥ 8.4) from the official Vue starter kit · Inertia 3 · Vue 3 `<script setup lang="ts">` · shadcn-vue + Tailwind · MySQL 9.7 LTS · Redis + Horizon · Pest · vite-plus (oxlint, oxfmt, Vitest) · laravel-data + TypeScript transformer · spatie/laravel-query-builder · TanStack Table · Wayfinder (see `docs/spikes/versions.md`).
 
 Not used: Filament, Livewire, websockets, PostgreSQL, SSH to monitored servers.
 
