@@ -13,6 +13,12 @@ export type ServingPathData = {
 front: string | null,
 backend: string | null,
 };
+export type UserRowData = {
+id: number,
+name: string,
+role: App.Enums.UserRole,
+created_at: string | null,
+};
 }
 namespace Enums {
 export type Confidence = 'detected' | 'suggested' | 'not_found';

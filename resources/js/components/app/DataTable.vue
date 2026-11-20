@@ -151,6 +151,11 @@ watch(
 
 /* Sorting */
 
+// Opt-in per column, so columns that render a custom cell (no accessor) can sort too.
+function isSortable(column: ColumnDef<TRow, unknown>): boolean {
+    return column.enableSorting === true;
+}
+
 function sortDirection(columnId: string): 'asc' | 'desc' | null {
     if (props.sort === columnId) {
         return 'asc';
@@ -248,7 +253,7 @@ const lastShown = computed(() =>
                             v-for="header in headerGroup.headers"
                             :key="header.id"
                             :aria-sort="
-                                header.column.getCanSort()
+                                isSortable(header.column.columnDef)
                                     ? ariaSort(header.column.id)
                                     : undefined
                             "
@@ -256,7 +261,7 @@ const lastShown = computed(() =>
                         >
                             <template v-if="!header.isPlaceholder">
                                 <button
-                                    v-if="header.column.getCanSort()"
+                                    v-if="isSortable(header.column.columnDef)"
                                     type="button"
                                     class="-mx-1 inline-flex items-center gap-1 rounded px-1 hover:text-foreground"
                                     :data-test="`sort-${header.column.id}`"

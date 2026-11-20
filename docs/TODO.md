@@ -39,7 +39,7 @@
 - [x] **P0.8** Install and wire `spatie/laravel-data` + TypeScript transformer (types into `resources/js/types/generated.d.ts`, run before `npm run build`), `spatie/laravel-query-builder`, Wayfinder (fall back to Ziggy if unsuitable; note the choice in `docs/spikes/versions.md`).
 - [x] **P0.9** App shell per the prototype (§13.4): dark sidebar with Overview, Servers, Domains, Incidents, Activity and the admin-only group; header with a global search field placeholder, system health pill and user menu showing the role. Design tokens and fonts (§13.1). Responsive: sidebar stacks on phones.
 - [x] **P0.10** Shared components (§13.4): `DataTable` (§13.5), `StatusBadge`, `StatusDot`, `SeverityBadge`, `ServingPath`, `ConfidenceBadge`, `VersionCell`, `RelativeTime`, `ConfirmDialog`, `PageHeader`, `Breadcrumbs`, `EmptyState`, `RepoLink`, form field wrappers (label, input, error) on shadcn-vue.
-- [ ] **P0.11** A temporary demo page using `DataTable` against a seeded table, proving server-side sort, filter chips, search and pagination via query string.
+- [x] **P0.11** A temporary demo page using `DataTable` against a seeded table, proving server-side sort, filter chips, search and pagination via query string.
 - [x] **P0.12** CI: Pint, Larastan, Pest against a **MySQL 9.7** service container, ESLint, `vue-tsc --noEmit`, Vitest.
 - [ ] **P0.13** Spikes, each in `docs/spikes/<name>.md`:
   - [x] MySQL 9.7: stored generated column + unique index for soft-delete uniqueness; `open_monitor_id` unique index; `RESTRICT` FK on its base column (§3.11, §3.17).
@@ -69,7 +69,7 @@
 - [ ] **P1.9** laravel-data classes for every page's rows and forms; generated TypeScript types used by pages.
 
 ### Pages (admin-only actions behind `EnsureAdmin`, §13.3)
-- [ ] **P1.10** Servers list (§13.6): status, name + hostname, primary IP, OS, sites served, backups ("None set" in orange); version columns rendered as "not configured" until Phase 7. Filters: All, Problems, No backup location.
+- [ ] **P1.10** Servers list (§13.6): status, name + hostname, primary IP, OS, sites served, backups ("None set" in orange); version columns rendered as "not configured" until Phase 7. Filters: All, Problems, No backup location. Remove the P0.11 demo when this lands: `DemoTableController`, `pages/demo/Table.vue`, `UserRowData`, `DemoTableSeeder`, `DemoTableTest`, the `demo.table*` routes and their rows in `AuthorizationMatrixTest`.
 - [ ] **P1.11** Server page: header (status, hostname, IPs, provider, OS, backup locations, actions); "How traffic reaches {server}"; sites served with `ServingPath`; activity tab.
 - [ ] **P1.12** Add / edit server: basics with OS select from the `os` list; backup checkboxes from `backup_location`; addresses with a primary radio; versions section as a disabled placeholder until Phase 7. Delete and restore.
 - [ ] **P1.13** External services: list and form (name, kind, ranges, range source, CNAME suffixes, headers).
@@ -261,6 +261,7 @@ Found in Phase 0 (2026-11-20):
 - [x] "Sidebar stacks on phones" (P0.9): the prototype wraps the nav above the content; the starter kit's sidebar slides in as a sheet. Decision: keep the kit's sheet, opened from the header button.
 - [x] The `Status` enum belongs to P1.2, but the shell and P0.10 components need its TypeScript type. Decision: `App\Enums\Status` (values only) added in P0.9; P1.2 adds `rank()` and `isFailure()`.
 - [x] `ConfidenceBadge` and `ServingPath` (P0.10) need types that SPEC defines for Phases 1–2. Decision: `App\Enums\Confidence` (`detected`, `suggested`, `not_found`, §10.1) and `App\Data\ServingPathData` (front and backend names) added now; "Chosen by you" is a UI state (`chosen` prop), not a confidence. P1.8/P1.9 build on them.
+- [x] The P0.11 demo table needs a seeded table without a throwaway migration (migrations are append-only once merged). Decision: it lists `users` (name, role, added; no email, since the users list is admin only), seeded locally with `DemoTableSeeder`. Its admin-only "ping" action is the sample mutation for the Phase 0 exit check.
 
 Carried over from the previous version of this list (still open in SPEC v0.2):
 

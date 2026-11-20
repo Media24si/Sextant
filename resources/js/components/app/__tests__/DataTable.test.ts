@@ -21,7 +21,13 @@ vi.mock('@inertiajs/vue3', async (importOriginal) => ({
 type Row = { id: number; name: string; role: string };
 
 const columns: ColumnDef<Row, unknown>[] = [
-    { id: 'name', accessorKey: 'name', header: 'Name', enableSorting: true },
+    // A custom cell without an accessor, like most real columns.
+    {
+        id: 'name',
+        header: 'Name',
+        enableSorting: true,
+        cell: ({ row }) => row.original.name,
+    },
     { id: 'role', accessorKey: 'role', header: 'Role', enableSorting: false },
 ];
 
