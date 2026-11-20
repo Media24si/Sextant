@@ -17,6 +17,12 @@ export type ChoiceData = {
 id: number,
 label: string,
 };
+export type ChoiceRowData = {
+id: number,
+label: string,
+position: number,
+servers_count: number,
+};
 export type DomainFormData = {
 id: number | null,
 name: string,
@@ -165,6 +171,14 @@ name: string,
 kind: App.Enums.ExternalServiceKind | null,
 sites_count: number,
 first_site: string,
+};
+export type UserRowData = {
+id: number,
+name: string,
+email: string,
+role: App.Enums.UserRole,
+created_at: string | null,
+is_you: boolean,
 };
 }
 namespace Enums {

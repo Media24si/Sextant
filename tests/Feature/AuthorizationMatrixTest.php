@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\ChoiceList;
+use App\Models\Choice;
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
@@ -36,6 +38,14 @@ dataset('admin routes', [
     'update site' => ['put', 'sites.update', fn () => ['site' => Site::factory()->create()]],
     'delete site' => ['delete', 'sites.destroy', fn () => ['site' => Site::factory()->create()]],
     'restore site' => ['post', 'sites.restore', fn () => ['site' => tap(Site::factory()->create())->delete()]],
+    'add list entry' => ['post', 'lists.store', null],
+    'rename list entry' => ['put', 'lists.update', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
+    'move list entry' => ['post', 'lists.move', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
+    'delete list entry' => ['delete', 'lists.destroy', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
+    'users page' => ['get', 'users.index', null],
+    'add user' => ['post', 'users.store', null],
+    'change role' => ['put', 'users.role', fn () => ['user' => User::factory()->create()]],
+    'delete user' => ['delete', 'users.destroy', fn () => ['user' => User::factory()->create()]],
 ]);
 
 test('readers get 403', function (string $method, string $route, ?Closure $parameters) {

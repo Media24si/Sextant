@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\ChoiceController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\ExternalServiceController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
@@ -13,6 +15,7 @@ Route::middleware('auth')->group(function () {
     Route::get('external-services', [ExternalServiceController::class, 'index'])->name('external-services.index');
     Route::get('domains', [DomainController::class, 'index'])->name('domains.index');
     Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
+    Route::get('settings/lists', [ChoiceController::class, 'index'])->name('lists.index');
 
     Route::middleware('admin')->group(function () {
         Route::get('servers/create', [ServerController::class, 'create'])->name('servers.create');
@@ -42,6 +45,16 @@ Route::middleware('auth')->group(function () {
         Route::put('sites/{site}', [SiteController::class, 'update'])->name('sites.update');
         Route::delete('sites/{site}', [SiteController::class, 'destroy'])->name('sites.destroy');
         Route::post('sites/{site}/restore', [SiteController::class, 'restore'])->withTrashed()->name('sites.restore');
+
+        Route::post('settings/lists', [ChoiceController::class, 'store'])->name('lists.store');
+        Route::put('settings/lists/{choice}', [ChoiceController::class, 'update'])->name('lists.update');
+        Route::post('settings/lists/{choice}/move', [ChoiceController::class, 'move'])->name('lists.move');
+        Route::delete('settings/lists/{choice}', [ChoiceController::class, 'destroy'])->name('lists.destroy');
+
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::post('users', [UserController::class, 'store'])->name('users.store');
+        Route::put('users/{user}/role', [UserController::class, 'updateRole'])->name('users.role');
+        Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 
     Route::get('servers/{server}', [ServerController::class, 'show'])->withTrashed()->name('servers.show');

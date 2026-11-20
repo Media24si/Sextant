@@ -12,8 +12,10 @@ import {
     TriangleAlert,
     Users,
 } from '@lucide/vue';
+import ChoiceController from '@/actions/App/Http/Controllers/ChoiceController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
+import UserController from '@/actions/App/Http/Controllers/UserController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -59,8 +61,8 @@ const adminNavItems: SidebarNavItem[] = [
         href: ExternalServiceController.index(),
         icon: SquareDashed,
     },
-    { title: 'Lists', icon: List },
-    { title: 'Users', icon: Users },
+    { title: 'Lists', href: ChoiceController.index(), icon: List },
+    { title: 'Users', href: UserController.index(), icon: Users },
 ];
 </script>
 
