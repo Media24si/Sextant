@@ -40,7 +40,7 @@
 - [ ] **P0.9** App shell per the prototype (§13.4): dark sidebar with Overview, Servers, Domains, Incidents, Activity and the admin-only group; header with a global search field placeholder, system health pill and user menu showing the role. Design tokens and fonts (§13.1). Responsive: sidebar stacks on phones.
 - [ ] **P0.10** Shared components (§13.4): `DataTable` (§13.5), `StatusBadge`, `StatusDot`, `SeverityBadge`, `ServingPath`, `ConfidenceBadge`, `VersionCell`, `RelativeTime`, `ConfirmDialog`, `PageHeader`, `Breadcrumbs`, `EmptyState`, `RepoLink`, form field wrappers (label, input, error) on shadcn-vue.
 - [ ] **P0.11** A temporary demo page using `DataTable` against a seeded table, proving server-side sort, filter chips, search and pagination via query string.
-- [ ] **P0.12** CI: Pint, Larastan, Pest against a **MySQL 9.7** service container, ESLint, `vue-tsc --noEmit`, Vitest.
+- [x] **P0.12** CI: Pint, Larastan, Pest against a **MySQL 9.7** service container, ESLint, `vue-tsc --noEmit`, Vitest.
 - [ ] **P0.13** Spikes, each in `docs/spikes/<name>.md`:
   - [ ] MySQL 9.7: stored generated column + unique index for soft-delete uniqueness; `open_monitor_id` unique index; `RESTRICT` FK on its base column (§3.11, §3.17).
   - [ ] Net_DNS2: custom resolvers, timeouts, CNAME chain, authoritative SOA query.

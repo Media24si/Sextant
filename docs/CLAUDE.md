@@ -12,7 +12,7 @@ In-house overview and monitoring for Media24: domains, subdomains (sites), serve
 
 ## Stack
 
-Laravel (latest stable, PHP ≥ 8.4) from the official Vue starter kit · Inertia 2 · Vue 3 `<script setup lang="ts">` · shadcn-vue + Tailwind · MySQL 9.7 LTS · Redis + Horizon · Pest · laravel-data + TypeScript transformer · spatie/laravel-query-builder · TanStack Table · Wayfinder (or Ziggy, see `docs/spikes/versions.md`).
+Laravel (latest stable, PHP ≥ 8.4) from the official Vue starter kit · Inertia 3 · Vue 3 `<script setup lang="ts">` · shadcn-vue + Tailwind · MySQL 9.7 LTS · Redis + Horizon · Pest · vite-plus (oxlint, oxfmt, Vitest) · laravel-data + TypeScript transformer · spatie/laravel-query-builder · TanStack Table · Wayfinder (or Ziggy, see `docs/spikes/versions.md`).
 
 Not used: Filament, Livewire, websockets, PostgreSQL, SSH to monitored servers.
 
@@ -25,22 +25,25 @@ composer run dev                 # app, queue, vite (starter kit script)
 php artisan horizon              # queues, when testing jobs
 php artisan schedule:work        # scheduler (needed for sub-minute tasks)
 
-php artisan test                 # Pest (needs MySQL 9.7 + Redis)
+php artisan test                 # Pest, against the sextant_testing database (MySQL 9.7)
 vendor/bin/pint                  # code style
 vendor/bin/phpstan analyse       # Larastan
-npm run lint && npm run types && npm run test   # ESLint, vue-tsc, Vitest
+npm run check                    # vite-plus: oxlint + oxfmt (`npm run check:fix` to fix)
+npm run types:check              # vue-tsc --noEmit
+npm run test                     # Vitest via vite-plus
+composer ci:check                # everything CI runs (needs `npm run build` first)
 shellcheck resources/collector/sextant-collect.sh
 php artisan typescript:transform # regenerate TS types after changing data classes
 ```
 
-Adjust these to the real script names once Phase 0 sets them up, and keep this list current.
+Keep this list current when scripts change.
 
 ## Workflow
 
 1. Pick the next unticked task in `TODO.md` (or the one you were given). Don't start a phase before the previous phase's Exit box is ticked.
 2. Read the SPEC sections it references. Plan before coding when a task touches more than a few files.
 3. One task or a small group of related tasks per branch and PR. Branch names: `p{phase}-{task}-{slug}`, e.g. `p1-10-servers-list`.
-4. Write tests with the code. A task is done only when Pint, Larastan, Pest, ESLint, `vue-tsc` and Vitest pass.
+4. Write tests with the code. A task is done only when Pint, Larastan, Pest, `vp check`, `vue-tsc` and Vitest pass (`composer ci:check`).
 5. Tick the task in `TODO.md` in the same PR.
 6. Ambiguity or a contradiction: choose what fits GOAL's principles, leave a `// SPEC:` comment, and add a line under "Spec issues found" in `TODO.md`. Don't invent features.
 7. Tasks marked **[HUMAN]**: prepare everything you can, then stop and say what you need.
