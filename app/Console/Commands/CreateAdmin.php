@@ -38,7 +38,7 @@ class CreateAdmin extends Command
             label: 'Email',
             required: true,
             validate: fn (string $value): ?string => $this->firstError('email', Str::lower($value), [
-                'required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email'),
+                'required', 'string', 'email', 'max:255', Rule::unique(User::class, 'email')->withoutTrashed(),
             ]),
         ));
 

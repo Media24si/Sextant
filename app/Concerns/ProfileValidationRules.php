@@ -44,9 +44,10 @@ trait ProfileValidationRules
             'string',
             'email',
             'max:255',
+            // Deleted users' emails are free again.
             $userId === null
-                ? Rule::unique(User::class)
-                : Rule::unique(User::class)->ignore($userId),
+                ? Rule::unique(User::class)->withoutTrashed()
+                : Rule::unique(User::class)->ignore($userId)->withoutTrashed(),
         ];
     }
 }

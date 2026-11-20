@@ -271,7 +271,7 @@ Found in Phase 0 (2026-11-20):
 - [x] §8.2 puts an observer on the `server_backup_location` pivot, but `sync()` doesn't fire model events for pivot rows. Decision: `Server::syncBackupLocations()` records `server.backup_locations_changed` itself; forms must use it instead of `sync()`.
 - [x] §8.4 has no type for changing a server's primary address. Decision: recorded as `server.updated` with a `primary_address` property. Changing an address's IP is recorded as removed + added.
 - [x] `site.path_changed` and `site.updated` are separate entries when one save changes both the path and other fields; the path entry carries readable paths ("Varnish → web02 (was direct → web01)").
-- [ ] `activities.user_id` is `nullOnDelete`, so deleting a user (P1.17) turns their past changes into "Sextant" changes, while GOAL says every change shows which admin made it. Options: (a) soft-delete users, so names stay; (b) add an `activities.user_name` snapshot. Needs a decision before P1.17 (Users page).
+- [x] `activities.user_id` is `nullOnDelete`, so a hard-deleted user would turn their past changes into "Sextant" changes, while GOAL says every change shows which admin made it. Decided (2026-11-20): users are soft-deleted. Deleted users can't sign in, their email is free again (`active_email` generated unique column, like §3.17), and the feed still shows their name. P1.17 deletes with `delete()`, never `forceDelete()`.
 
 Carried over from the previous version of this list (still open in SPEC v0.2):
 
