@@ -91,3 +91,6 @@ jobs:
       # Lint and format (vp check), vue-tsc, Vitest, Pint, Larastan, Pest on MySQL 9.7.
       - name: Run CI checks
         run: composer ci:check
+        env:
+          # Vitest starts Vite in dev mode, which laravel-vite-plugin refuses to do in CI.
+          LARAVEL_BYPASS_ENV_CHECK: 1
