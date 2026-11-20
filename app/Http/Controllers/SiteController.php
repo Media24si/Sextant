@@ -47,7 +47,7 @@ class SiteController extends Controller
                 AllowedFilter::callback('show', function (Builder $query, mixed $value): void {
                     match ($value) {
                         'problems' => $query->whereIn('status', [Status::Warning, Status::Error]),
-                        // SPEC: until import (P2.9) flags sites, "Needs review" means no backend assigned.
+                        // "Needs review" = no backend assigned, e.g. an import that could only suggest one (§10.6).
                         'needs_review' => $query->whereNull('server_id'),
                         'deleted' => $query->withoutGlobalScope(SoftDeletingScope::class)->whereNotNull('sites.deleted_at'),
                         default => null,

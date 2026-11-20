@@ -288,12 +288,22 @@ offer_www: string | null,
 monitors: App.Data.Detection.ProposedMonitorData[],
 };
 }
+namespace Import {
+export type ImportResultData = {
+input: string,
+hostname: string | null,
+outcome: App.Enums.ImportOutcome,
+message: string,
+site_id: number | null,
+};
+}
 }
 namespace Enums {
 export type ActivityCategory = 'status' | 'inventory' | 'detected';
 export type ChoiceList = 'os' | 'backup_location';
 export type Confidence = 'detected' | 'suggested' | 'not_found';
 export type ExternalServiceKind = 'cdn' | 'proxy' | 'other';
+export type ImportOutcome = 'created' | 'needs_review' | 'skipped';
 export type RangeSource = 'cloudflare' | 'fastly' | 'cloudfront';
 export type SearchResultType = 'server' | 'external_service' | 'domain' | 'site';
 export type Status = 'ok' | 'warning' | 'error' | 'unknown';

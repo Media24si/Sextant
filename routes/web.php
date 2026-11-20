@@ -7,6 +7,7 @@ use App\Http\Controllers\ExternalServiceController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\SiteImportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +46,8 @@ Route::middleware('auth')->group(function () {
         Route::post('domains/{domain}/restore', [DomainController::class, 'restore'])->withTrashed()->name('domains.restore');
 
         Route::get('sites/create', [SiteController::class, 'create'])->name('sites.create');
+        Route::get('sites/import', [SiteImportController::class, 'create'])->name('sites.import');
+        Route::post('sites/import', [SiteImportController::class, 'store'])->name('sites.import.store');
         Route::post('sites/detect', [SiteController::class, 'detect'])->name('sites.detect');
         Route::post('sites', [SiteController::class, 'store'])->name('sites.store');
         Route::get('sites/{site}/edit', [SiteController::class, 'edit'])->name('sites.edit');

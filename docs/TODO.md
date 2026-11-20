@@ -101,7 +101,7 @@
 - [x] **P2.6** `POST /sites/detect` (admin, JSON) and the **Add site** page (§13.6): URL + Detect, findings with `ConfidenceBadge`, backend select ("Chosen by you" on change), serving path preview, first probe, Details (description, GitHub), checks to attach (display only until Phase 3), `www.` offer, duplicate and invalid states, "How detection works" panel, unknown-IP actions (new server / external service, prefilled).
 - [x] **P2.7** `POST /sites` saving in one transaction (§10.4); redirect to the site page. Monitor attachment is stubbed with a clear hook until Phase 3.
 - [x] **P2.8** **Add domain** (§10.5): `POST /domains/lookup` RDAP preview; subdomain rows prefilled by detection; one save.
-- [ ] **P2.9** Import page and `sextant:import urls.txt` (§10.6): created / needs review / skipped summary.
+- [x] **P2.9** Import page and `sextant:import urls.txt` (§10.6): created / needs review / skipped summary.
 - [ ] **P2.10** Re-run detection on a site (§10.7).
 - [ ] **P2.11** "Add site" buttons per the prototype: primary on Overview and Domains, "Add site on {domain}" in expanded domains, link from Add domain.
 
