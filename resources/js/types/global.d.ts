@@ -20,6 +20,7 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             can: Can;
+            nav: { servers: number } | null;
             sidebarOpen: boolean;
             [key: string]: unknown;
         };

@@ -1,31 +1,36 @@
 <?php
 
+use App\Models\Server;
 use App\Models\User;
 
 /*
  * Every route that changes data is admin only (SPEC §13.2, §17): readers get
- * 403, admins succeed. Add each new admin-only route here.
- *
- * @return array<string, array{0: string, 1: string, 2?: array<string, mixed>}>
+ * 403, admins get through. Add each new admin-only route here. The third
+ * value builds the route parameters once the database is ready.
  */
 dataset('admin routes', [
-    'demo table ping' => ['post', 'demo.table.ping'],
+    'add server form' => ['get', 'servers.create', null],
+    'store server' => ['post', 'servers.store', null],
+    'edit server form' => ['get', 'servers.edit', fn () => ['server' => Server::factory()->create()]],
+    'update server' => ['put', 'servers.update', fn () => ['server' => Server::factory()->create()]],
+    'delete server' => ['delete', 'servers.destroy', fn () => ['server' => Server::factory()->create()]],
+    'restore server' => ['post', 'servers.restore', fn () => ['server' => tap(Server::factory()->create())->delete()]],
 ]);
 
-test('readers get 403', function (string $method, string $route, array $parameters = []) {
+test('readers get 403', function (string $method, string $route, ?Closure $parameters) {
     $this->actingAs(User::factory()->reader()->create())
-        ->call(strtoupper($method), route($route, $parameters))
+        ->call(strtoupper($method), route($route, $parameters ? $parameters() : []))
         ->assertForbidden();
 })->with('admin routes');
 
-test('admins are allowed', function (string $method, string $route, array $parameters = []) {
+test('admins are allowed', function (string $method, string $route, ?Closure $parameters) {
     $response = $this->actingAs(User::factory()->admin()->create())
-        ->call(strtoupper($method), route($route, $parameters));
+        ->call(strtoupper($method), route($route, $parameters ? $parameters() : []));
 
     expect($response->status())->toBeLessThan(400);
 })->with('admin routes');
 
-test('guests are sent to the login page', function (string $method, string $route, array $parameters = []) {
-    $this->call(strtoupper($method), route($route, $parameters))
+test('guests are sent to the login page', function (string $method, string $route, ?Closure $parameters) {
+    $this->call(strtoupper($method), route($route, $parameters ? $parameters() : []))
         ->assertRedirect(route('login'));
 })->with('admin routes');

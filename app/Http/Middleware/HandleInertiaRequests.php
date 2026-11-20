@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Data\AuthUserData;
+use App\Models\Server;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -47,6 +48,8 @@ class HandleInertiaRequests extends Middleware
             'can' => [
                 'manage' => $user?->can('manage') ?? false,
             ],
+            // Sidebar counts (SPEC §13.4); more join as their pages arrive.
+            'nav' => fn (): ?array => $user ? ['servers' => Server::query()->count()] : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

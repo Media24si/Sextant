@@ -4,6 +4,7 @@ import {
     SidebarGroup,
     SidebarGroupLabel,
     SidebarMenu,
+    SidebarMenuBadge,
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
@@ -63,6 +64,11 @@ function isActive(item: SidebarNavItem): boolean {
                     <component :is="item.icon" />
                     <span>{{ item.title }}</span>
                 </SidebarMenuButton>
+                <SidebarMenuBadge
+                    v-if="item.href && item.count !== undefined"
+                    class="top-2.5 text-xs font-normal text-sidebar-muted-foreground"
+                    >{{ item.count }}</SidebarMenuBadge
+                >
             </SidebarMenuItem>
         </SidebarMenu>
     </SidebarGroup>

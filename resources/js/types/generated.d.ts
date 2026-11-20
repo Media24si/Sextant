@@ -1,23 +1,84 @@
 declare namespace App {
 namespace Data {
+export type ActivityItemData = {
+id: number,
+category: App.Enums.ActivityCategory,
+type: string,
+summary: string,
+user: string | null,
+created_at: string,
+};
 export type AuthUserData = {
 id: number,
 name: string,
 role: App.Enums.UserRole,
 };
+export type ChoiceData = {
+id: number,
+label: string,
+};
 export type ProfileData = {
 name: string,
 email: string,
+};
+export type ServedSiteData = {
+id: number,
+hostname: string,
+description: string | null,
+status: App.Enums.Status,
+serving_path: App.Data.ServingPathData,
+};
+export type ServerAddressData = {
+id: number,
+ip: string,
+version: number,
+is_primary: boolean,
+};
+export type ServerData = {
+id: number,
+name: string,
+hostname: string | null,
+provider: string | null,
+os: string | null,
+notes: string | null,
+status: App.Enums.Status,
+addresses: App.Data.ServerAddressData[],
+backup_locations: string[],
+deleted: boolean,
+};
+export type ServerFormData = {
+id: number | null,
+name: string,
+hostname: string | null,
+provider: string | null,
+os_choice_id: number | null,
+notes: string | null,
+addresses: {
+ip: string,
+is_primary: boolean,
+}[],
+backup_location_ids: number[],
+};
+export type ServerRowData = {
+id: number,
+name: string,
+hostname: string | null,
+status: App.Enums.Status,
+primary_ip: string | null,
+os: string | null,
+sites_count: number,
+backup_locations: string[],
+deleted: boolean,
 };
 export type ServingPathData = {
 front: string | null,
 backend: string | null,
 };
-export type UserRowData = {
-id: number,
+export type TrafficGroupData = {
 name: string,
-role: App.Enums.UserRole,
-created_at: string | null,
+kind: App.Enums.ExternalServiceKind | null,
+sites_count: number,
+first_site: string,
 };
 }
 namespace Enums {

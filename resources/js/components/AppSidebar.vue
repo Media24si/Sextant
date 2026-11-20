@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import {
     Activity,
     Globe,
@@ -11,6 +12,7 @@ import {
     TriangleAlert,
     Users,
 } from '@lucide/vue';
+import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import {
@@ -28,15 +30,20 @@ const page = usePage();
 
 /*
  * SPEC §13.4. Items without an href are pages from later phases; they show
- * disabled until their route exists. Counts arrive with the lists in Phase 1.
+ * disabled until their route exists.
  */
-const mainNavItems: SidebarNavItem[] = [
+const mainNavItems = computed<SidebarNavItem[]>(() => [
     { title: 'Overview', href: dashboard(), icon: LayoutGrid },
-    { title: 'Servers', icon: Server },
+    {
+        title: 'Servers',
+        href: ServerController.index(),
+        icon: Server,
+        count: page.props.nav?.servers,
+    },
     { title: 'Domains', icon: Globe },
     { title: 'Incidents', icon: TriangleAlert },
     { title: 'Activity', icon: Activity },
-];
+]);
 
 const adminNavItems: SidebarNavItem[] = [
     { title: 'Minimum versions', icon: ShieldCheck },

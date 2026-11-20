@@ -18,4 +18,5 @@ export type SidebarNavItem = {
     title: string;
     href?: NonNullable<InertiaLinkProps['href']>;
     icon: LucideIcon;
+    count?: number;
 };

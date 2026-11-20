@@ -69,9 +69,9 @@
 - [ ] **P1.9** laravel-data classes for every page's rows and forms; generated TypeScript types used by pages.
 
 ### Pages (admin-only actions behind `EnsureAdmin`, §13.3)
-- [ ] **P1.10** Servers list (§13.6): status, name + hostname, primary IP, OS, sites served, backups ("None set" in orange); version columns rendered as "not configured" until Phase 7. Filters: All, Problems, No backup location. Remove the P0.11 demo when this lands: `DemoTableController`, `pages/demo/Table.vue`, `UserRowData`, `DemoTableSeeder`, `DemoTableTest`, the `demo.table*` routes and their rows in `AuthorizationMatrixTest`.
-- [ ] **P1.11** Server page: header (status, hostname, IPs, provider, OS, backup locations, actions); "How traffic reaches {server}"; sites served with `ServingPath`; activity tab.
-- [ ] **P1.12** Add / edit server: basics with OS select from the `os` list; backup checkboxes from `backup_location`; addresses with a primary radio; versions section as a disabled placeholder until Phase 7. Delete and restore.
+- [x] **P1.10** Servers list (§13.6): status, name + hostname, primary IP, OS, sites served, backups ("None set" in orange); version columns rendered as "not configured" until Phase 7. Filters: All, Problems, No backup location. Remove the P0.11 demo when this lands: `DemoTableController`, `pages/demo/Table.vue`, `UserRowData`, `DemoTableSeeder`, `DemoTableTest`, the `demo.table*` routes and their rows in `AuthorizationMatrixTest`.
+- [x] **P1.11** Server page: header (status, hostname, IPs, provider, OS, backup locations, actions); "How traffic reaches {server}"; sites served with `ServingPath`; activity tab.
+- [x] **P1.12** Add / edit server: basics with OS select from the `os` list; backup checkboxes from `backup_location`; addresses with a primary radio; versions section as a disabled placeholder until Phase 7. Delete and restore.
 - [ ] **P1.13** External services: list and form (name, kind, ranges, range source, CNAME suffixes, headers).
 - [ ] **P1.14** Domains list with expandable subdomains (§13.6): counts, expiry, registrar, status; expanded rows show description, repo link, `ServingPath`, status; Expand/Collapse all; filter. Domain page.
 - [ ] **P1.15** Sites list (filters: status, front service, backend, Needs review); site page; edit site (front service select, backend select, description, GitHub link, scheme, port, notes). Add site is Phase 2: until then a simple manual form.
@@ -275,7 +275,7 @@ Found in Phase 0 (2026-11-20):
 
 Carried over from the previous version of this list (still open in SPEC v0.2):
 
-- [ ] Deleting a server that is still the backend of live sites isn't defined. Domains and external services block deletion when in use (§3.5, §3.6); confirm whether servers should do the same or set `sites.server_id` to null (sites then show "Backend not assigned").
+- [ ] Deleting a server that is still the backend of live sites isn't defined. Domains and external services block deletion when in use (§3.5, §3.6); confirm whether servers should do the same or set `sites.server_id` to null (sites then show "Backend not assigned"). Default until decided (P1.12): refused with "web02 is the backend of N sites. Move them to another server first.", like domains and external services.
 - [ ] A server where no port 22/80/443 is open, ping fails and no versions endpoint is set gets no default monitors, so its status stays `unknown`. Confirm whether that's intended or whether the server page should prompt an admin to add a monitor.
 
 ## Out of scope for v1 (don't build)
