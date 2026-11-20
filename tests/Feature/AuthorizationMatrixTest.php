@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
 use App\Models\User;
@@ -22,6 +23,12 @@ dataset('admin routes', [
     'update external service' => ['put', 'external-services.update', fn () => ['external_service' => ExternalService::factory()->create()]],
     'delete external service' => ['delete', 'external-services.destroy', fn () => ['external_service' => ExternalService::factory()->create()]],
     'restore external service' => ['post', 'external-services.restore', fn () => ['external_service' => tap(ExternalService::factory()->create())->delete()]],
+    'add domain form' => ['get', 'domains.create', null],
+    'store domain' => ['post', 'domains.store', null],
+    'edit domain form' => ['get', 'domains.edit', fn () => ['domain' => Domain::factory()->create()]],
+    'update domain' => ['put', 'domains.update', fn () => ['domain' => Domain::factory()->create()]],
+    'delete domain' => ['delete', 'domains.destroy', fn () => ['domain' => Domain::factory()->create()]],
+    'restore domain' => ['post', 'domains.restore', fn () => ['domain' => tap(Domain::factory()->create())->delete()]],
 ]);
 
 test('readers get 403', function (string $method, string $route, ?Closure $parameters) {

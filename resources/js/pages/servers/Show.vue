@@ -3,10 +3,10 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ArrowRight } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
+import ActivityList from '@/components/app/ActivityList.vue';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import EmptyState from '@/components/app/EmptyState.vue';
-import RelativeTime from '@/components/app/RelativeTime.vue';
 import ServingPath from '@/components/app/ServingPath.vue';
 import StatusBadge from '@/components/app/StatusBadge.vue';
 import StatusDot from '@/components/app/StatusDot.vue';
@@ -32,12 +32,6 @@ const kindLabels: Record<App.Enums.ExternalServiceKind, string> = {
     cdn: 'External CDN',
     proxy: 'External proxy',
     other: 'External service',
-};
-
-const categoryDots: Record<App.Enums.ActivityCategory, string> = {
-    status: 'bg-status-warning',
-    inventory: 'bg-status-unknown',
-    detected: 'bg-primary',
 };
 
 const confirmingDelete = ref(false);
@@ -301,27 +295,9 @@ function restore(): void {
                 <h2 id="changes" class="px-6 pt-5 pb-4 text-lg font-semibold">
                     Changes
                 </h2>
-                <ul v-if="activity.length > 0" class="divide-y border-t px-6">
-                    <li
-                        v-for="item in activity"
-                        :key="item.id"
-                        class="flex gap-3 py-3 text-sm"
-                    >
-                        <span
-                            class="mt-1.5 size-2 shrink-0 rounded-full"
-                            :class="categoryDots[item.category]"
-                            aria-hidden="true"
-                        />
-                        <div>
-                            <p>{{ item.summary }}</p>
-                            <p class="text-xs text-muted-foreground">
-                                {{ item.user ?? 'Sextant' }} ·
-                                <RelativeTime :datetime="item.created_at" />
-                            </p>
-                        </div>
-                    </li>
-                </ul>
-                <EmptyState v-else title="No changes yet" />
+                <div class="border-t px-6">
+                    <ActivityList :items="activity" />
+                </div>
             </section>
         </div>
 

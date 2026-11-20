@@ -41,3 +41,15 @@ export function formatRelative(iso: string, now: number): string {
 
     return 'just now';
 }
+
+const dateFormat = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+});
+
+/** "18 Jul 2027" for a date-only value such as `2027-07-18` (no time zone shift). */
+export function formatDate(date: string): string {
+    return dateFormat.format(new Date(`${date}T00:00:00Z`));
+}

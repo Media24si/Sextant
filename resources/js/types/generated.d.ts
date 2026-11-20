@@ -17,6 +17,32 @@ export type ChoiceData = {
 id: number,
 label: string,
 };
+export type DomainFormData = {
+id: number | null,
+name: string,
+notes: string | null,
+};
+export type DomainRowData = {
+id: number,
+name: string,
+status: App.Enums.Status,
+expires_at: string | null,
+expires_in_days: number | null,
+registrar: string | null,
+failing_count: number,
+warning_count: number,
+sites: App.Data.DomainSiteData[],
+deleted: boolean,
+};
+export type DomainSiteData = {
+id: number,
+hostname: string,
+description: string | null,
+github_url: string | null,
+status: App.Enums.Status,
+serving_path: App.Data.ServingPathData,
+server_id: number | null,
+};
 export type ExternalServiceFormData = {
 id: number | null,
 name: string,

@@ -12,6 +12,7 @@ import {
     TriangleAlert,
     Users,
 } from '@lucide/vue';
+import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import AppLogo from '@/components/AppLogo.vue';
@@ -41,7 +42,12 @@ const mainNavItems = computed<SidebarNavItem[]>(() => [
         icon: Server,
         count: page.props.nav?.servers,
     },
-    { title: 'Domains', icon: Globe },
+    {
+        title: 'Domains',
+        href: DomainController.index(),
+        icon: Globe,
+        count: page.props.nav?.domains,
+    },
     { title: 'Incidents', icon: TriangleAlert },
     { title: 'Activity', icon: Activity },
 ]);
