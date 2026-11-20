@@ -7,6 +7,7 @@ import SiteController from '@/actions/App/Http/Controllers/SiteController';
 import ActivityList from '@/components/app/ActivityList.vue';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
+import RedetectSiteDialog from '@/components/app/RedetectSiteDialog.vue';
 import RepoLink from '@/components/app/RepoLink.vue';
 import ServingPath from '@/components/app/ServingPath.vue';
 import StatusBadge from '@/components/app/StatusBadge.vue';
@@ -14,12 +15,16 @@ import { Button } from '@/components/ui/button';
 
 /*
  * Site page (SPEC §13.6). Latest results, monitors and incidents join in
- * Phases 3 and 4; re-run detection in Phase 2.
+ * Phases 3 and 4.
  */
 const props = defineProps<{
     site: App.Data.SiteData;
     activity: App.Data.ActivityItemData[];
+    front_services: App.Data.OptionData[];
+    servers: App.Data.OptionData[];
 }>();
+
+const redetecting = ref(false);
 
 const page = usePage();
 
@@ -113,6 +118,9 @@ function destroy(): void {
                 <Button variant="outline" @click="confirmingDelete = true"
                     >Delete</Button
                 >
+                <Button variant="outline" @click="redetecting = true"
+                    >Re-run detection</Button
+                >
                 <Button as-child>
                     <Link :href="SiteController.edit(site.id)">Edit site</Link>
                 </Button>
@@ -163,6 +171,14 @@ function destroy(): void {
                 </div>
             </section>
         </div>
+
+        <RedetectSiteDialog
+            v-if="page.props.can.manage && !site.deleted"
+            v-model:open="redetecting"
+            :site="site"
+            :front-services="front_services"
+            :servers="servers"
+        />
 
         <ConfirmDialog
             v-model:open="confirmingDelete"

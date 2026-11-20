@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import DomainController from '@/actions/App/Http/Controllers/DomainController';
+import ServerController from '@/actions/App/Http/Controllers/ServerController';
+import SiteController from '@/actions/App/Http/Controllers/SiteController';
+import PageHeader from '@/components/app/PageHeader.vue';
+import { Button } from '@/components/ui/button';
+
+/* Overview (SPEC §13.6). Totals, issues and changes arrive in Phase 6. */
+const page = usePage();
 </script>
 
 <template>
@@ -8,12 +16,22 @@ import { Head } from '@inertiajs/vue3';
     <div
         class="flex w-full max-w-[1280px] flex-col gap-5 px-4 pt-7 pb-12 md:px-8"
     >
-        <div>
-            <h1 class="text-[26px] font-bold tracking-tight">Overview</h1>
-            <p class="mt-1.5 text-muted-foreground">
-                Servers, domains and sites, and anything that needs attention.
-            </p>
-        </div>
+        <PageHeader
+            title="Overview"
+            description="Servers, domains and sites, and anything that needs attention."
+        >
+            <template v-if="page.props.can.manage" #actions>
+                <Button variant="outline" as-child>
+                    <Link :href="ServerController.create()">+ Add server</Link>
+                </Button>
+                <Button variant="outline" as-child>
+                    <Link :href="DomainController.create()">+ Add domain</Link>
+                </Button>
+                <Button as-child>
+                    <Link :href="SiteController.create()">+ Add site</Link>
+                </Button>
+            </template>
+        </PageHeader>
 
         <section
             class="rounded-xl border bg-card px-6 py-10 text-center text-muted-foreground"

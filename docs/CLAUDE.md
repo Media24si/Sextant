@@ -34,6 +34,9 @@ npm run test                     # Vitest via vite-plus
 composer ci:check                # everything CI runs (needs `npm run build` first)
 shellcheck resources/collector/sextant-collect.sh
 php artisan typescript:transform # regenerate TS types after changing data classes
+php artisan test --group=live    # the few tests that use the real network (DNS, TLS, RDAP)
+php artisan proxies:refresh      # download CDN IP ranges (daily in the scheduler)
+php artisan sextant:import urls.txt  # bulk-add sites, one URL per line
 ```
 
 Keep this list current when scripts change.

@@ -5,6 +5,7 @@ import { computed, h } from 'vue';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
+import SiteImportController from '@/actions/App/Http/Controllers/SiteImportController';
 import DataTable from '@/components/app/DataTable.vue';
 import PageHeader from '@/components/app/PageHeader.vue';
 import ServingPath from '@/components/app/ServingPath.vue';
@@ -131,9 +132,16 @@ const selected = (event: Event) => {
                 <Button variant="outline" as-child>
                     <Link :href="DomainController.index()">By domain</Link>
                 </Button>
-                <Button v-if="page.props.can.manage" as-child>
-                    <Link :href="SiteController.create()">+ Add site</Link>
-                </Button>
+                <template v-if="page.props.can.manage">
+                    <Button variant="outline" as-child>
+                        <Link :href="SiteImportController.create()"
+                            >Import</Link
+                        >
+                    </Button>
+                    <Button as-child>
+                        <Link :href="SiteController.create()">+ Add site</Link>
+                    </Button>
+                </template>
             </template>
         </PageHeader>
 

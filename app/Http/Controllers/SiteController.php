@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -98,6 +99,8 @@ class SiteController extends Controller
                 ->limit(self::ACTIVITY_SHOWN)
                 ->get()
                 ->map(ActivityItemData::fromModel(...)),
+            'front_services' => $this->frontServiceOptions(),
+            'servers' => $this->serverOptions(),
         ]);
     }
 
@@ -130,6 +133,35 @@ class SiteController extends Controller
         } catch (InvalidUrl $exception) {
             throw ValidationException::withMessages(['url' => $exception->getMessage()]);
         }
+    }
+
+    /**
+     * Detection again for an existing site, which doesn't count as its own
+     * duplicate (SPEC §10.7). JSON; writes nothing.
+     */
+    public function detectAgain(Site $site, SiteDetector $detector): JsonResponse
+    {
+        return response()->json($detector->detect($site->url, ignore: $site));
+    }
+
+    /**
+     * Applies the serving path the admin confirmed after re-running detection (SPEC §10.7).
+     *
+     * SPEC: §13.3 lists only `detect-again`; applying needs a route of its own
+     * because `PUT /sites/{site}` wants the whole form.
+     */
+    public function updatePath(Request $request, Site $site): RedirectResponse
+    {
+        $validated = $request->validate([
+            'front_service_id' => ['nullable', 'integer', Rule::exists('external_services', 'id')->whereNull('deleted_at')],
+            'server_id' => ['nullable', 'integer', Rule::exists('servers', 'id')->whereNull('deleted_at')],
+        ]);
+
+        $site->update($validated);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => "Serving path of {$site->display_hostname} saved."]);
+
+        return to_route('sites.show', $site);
     }
 
     /**

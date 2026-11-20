@@ -102,11 +102,11 @@
 - [x] **P2.7** `POST /sites` saving in one transaction (§10.4); redirect to the site page. Monitor attachment is stubbed with a clear hook until Phase 3.
 - [x] **P2.8** **Add domain** (§10.5): `POST /domains/lookup` RDAP preview; subdomain rows prefilled by detection; one save.
 - [x] **P2.9** Import page and `sextant:import urls.txt` (§10.6): created / needs review / skipped summary.
-- [ ] **P2.10** Re-run detection on a site (§10.7).
-- [ ] **P2.11** "Add site" buttons per the prototype: primary on Overview and Domains, "Add site on {domain}" in expanded domains, link from Add domain.
+- [x] **P2.10** Re-run detection on a site (§10.7).
+- [x] **P2.11** "Add site" buttons per the prototype: primary on Overview and Domains, "Add site on {domain}" in expanded domains, link from Add domain.
 
 ### Tests
-- [ ] **P2.12** `UrlNormalizer` (case, trailing dot, `šola.si`, ports, paths, IP literals); matchers (v4/v6 ranges, CNAME, headers); backend suggestion (one sibling, tie, none, mixed fronts, header on/off); detection feature tests (direct, Cloudflare, Varnish, new domain, unknown IP, duplicate/restore, redirect → `expected_target` + `www.` offer); import outcomes; RDAP fixtures; WHOIS fixtures (§17).
+- [x] **P2.12** `UrlNormalizer` (case, trailing dot, `šola.si`, ports, paths, IP literals); matchers (v4/v6 ranges, CNAME, headers); backend suggestion (one sibling, tie, none, mixed fronts, header on/off); detection feature tests (direct, Cloudflare, Varnish, new domain, unknown IP, duplicate/restore, redirect → `expected_target` + `www.` offer); import outcomes; RDAP fixtures; WHOIS fixtures (§17).
 
 - [ ] **Exit P2** **[HUMAN]**: all ~80 sites imported; every site has a domain and a backend or is in "Needs review"; a Varnish site and a Cloudflare site produce the right findings and suggestions.
 
@@ -290,6 +290,8 @@ Carried over from the previous version of this list (still open in SPEC v0.2):
 - [x] §10.1 doesn't say how probes run "in parallel". Decision: `Concurrency::run()` (process driver, `sync` in tests), falling back to one after another if worker processes can't start.
 - [x] §10.3 sibling suggestion counts "sites behind the front" including ones without a backend (`3 of the 5`). A tie for most common is Not found with the tied servers as candidates.
 - [x] `return_to` (Add server / external service from Add site's unknown IP) only accepts paths on this app. Add site re-runs detection from `?url=` when you come back.
+- [x] §10.7 re-run detection needs a way to apply the result; §13.3 lists only `POST /sites/{site}/detect-again`. Added `PUT /sites/{site}/path` (front service and backend only). Findings Sextant isn't sure of keep the site's current values.
+- [x] §10.6 doesn't say how the Import page handles ~80 URLs within a request's time. Decision: the page sends one URL per request (`POST /sites/import`) and shows progress; `sextant:import` runs them in one process.
 
 ## Out of scope for v1 (don't build)
 

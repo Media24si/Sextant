@@ -41,6 +41,8 @@ $adminRoutes = [
     'delete site' => ['delete', 'sites.destroy', fn () => ['site' => Site::factory()->create()]],
     'restore site' => ['post', 'sites.restore', fn () => ['site' => tap(Site::factory()->create())->delete()]],
     'detect site' => ['post', 'sites.detect', null],
+    'detect site again' => ['post', 'sites.detect-again', fn () => ['site' => Site::factory()->create()]],
+    'apply serving path' => ['put', 'sites.path', fn () => ['site' => Site::factory()->create()]],
     'import page' => ['get', 'sites.import', null],
     'import a URL' => ['post', 'sites.import.store', null],
     'add list entry' => ['post', 'lists.store', null],

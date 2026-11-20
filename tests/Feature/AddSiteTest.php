@@ -186,3 +186,38 @@ test('return_to only goes to paths on this app', function (string $returnTo) {
         ->get(route('servers.create', ['return_to' => $returnTo]))
         ->assertInertia(fn (Assert $page) => $page->where('return_to', null));
 })->with(['https://evil.example/', '//evil.example/', '/\\evil.example']);
+
+test('detection runs again on a site without calling it a duplicate', function () {
+    $site = Site::factory()->for($this->domain)->create(['hostname' => 'podjetje.svet24.si', 'server_id' => $this->web02->id]);
+    app(DnsResolver::class)->answer('podjetje.svet24.si', ['203.0.113.80']);
+
+    $this->actingAs($this->admin)
+        ->postJson(route('sites.detect-again', $site))
+        ->assertOk()
+        ->assertJsonPath('duplicate', null)
+        ->assertJsonPath('front.value.name', 'Varnish')
+        ->assertJsonPath('front.confidence', 'detected');
+
+    expect($site->fresh()->front_service_id)->toBeNull();
+});
+
+test('the confirmed serving path is applied and reaches the change feed', function () {
+    $site = Site::factory()->for($this->domain)->create(['hostname' => 'podjetje.svet24.si', 'server_id' => $this->web02->id]);
+
+    $this->actingAs($this->admin)
+        ->put(route('sites.path', $site), ['front_service_id' => $this->varnish->id, 'server_id' => $this->web02->id])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('sites.show', $site));
+
+    expect($site->fresh()->servingPath()->toArray())->toBe(['front' => 'Varnish', 'backend' => 'web02'])
+        ->and(Activity::query()->where('type', 'site.path_changed')->sole()->summary)
+        ->toBe('podjetje.svet24.si serving path: Varnish → web02 (was direct → web02)');
+});
+
+test('the serving path only takes live services and servers', function () {
+    $site = Site::factory()->for($this->domain)->create();
+
+    $this->actingAs($this->admin)
+        ->put(route('sites.path', $site), ['front_service_id' => 999, 'server_id' => tap(Server::factory()->create())->delete()->id])
+        ->assertSessionHasErrors(['front_service_id', 'server_id']);
+});

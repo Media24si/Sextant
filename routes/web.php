@@ -54,6 +54,8 @@ Route::middleware('auth')->group(function () {
         Route::put('sites/{site}', [SiteController::class, 'update'])->name('sites.update');
         Route::delete('sites/{site}', [SiteController::class, 'destroy'])->name('sites.destroy');
         Route::post('sites/{site}/restore', [SiteController::class, 'restore'])->withTrashed()->name('sites.restore');
+        Route::post('sites/{site}/detect-again', [SiteController::class, 'detectAgain'])->name('sites.detect-again');
+        Route::put('sites/{site}/path', [SiteController::class, 'updatePath'])->name('sites.path');
 
         Route::post('settings/lists', [ChoiceController::class, 'store'])->name('lists.store');
         Route::put('settings/lists/{choice}', [ChoiceController::class, 'update'])->name('lists.update');
