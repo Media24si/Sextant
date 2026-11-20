@@ -13,12 +13,15 @@ import { externalServiceKindLabels, rangeSourceLabels } from '@/lib/labels';
 /* Add / edit external service (SPEC §3.5, P1.13). */
 const props = defineProps<{
     form: App.Data.ExternalServiceFormData;
+    /** Set when opened from Add site's unknown address (SPEC §10.4). */
+    return_to: string | null;
 }>();
 
 const id = props.form.id;
 
 // Lists are edited one per line and sent as arrays.
 const form = useForm({
+    return_to: props.return_to,
     name: props.form.name,
     kind: props.form.kind,
     ranges: props.form.ranges.join('\n'),
@@ -247,7 +250,11 @@ const sources = computed(
                 <span v-else />
                 <div class="flex gap-3">
                     <Button variant="outline" as-child>
-                        <Link :href="ExternalServiceController.index()"
+                        <Link
+                            :href="
+                                props.return_to ??
+                                ExternalServiceController.index()
+                            "
                             >Cancel</Link
                         >
                     </Button>

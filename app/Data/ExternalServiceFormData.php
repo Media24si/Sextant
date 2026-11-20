@@ -26,9 +26,12 @@ class ExternalServiceFormData extends Data
         public ?string $notes,
     ) {}
 
-    public static function blank(): self
+    /**
+     * @param  list<string>  $ranges  prefilled from Add site's unknown address (SPEC §10.4)
+     */
+    public static function blank(array $ranges = []): self
     {
-        return new self(null, '', ExternalServiceKind::Proxy, [], null, [], [], null);
+        return new self(null, '', ExternalServiceKind::Proxy, $ranges, null, [], [], null);
     }
 
     public static function fromModel(ExternalService $service): self

@@ -18,6 +18,7 @@ use App\Models\Choice;
 use App\Models\Server;
 use App\Models\ServerAddress;
 use App\Models\Site;
+use App\Support\ReturnTo;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -89,9 +90,11 @@ class ServerController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        return $this->form(ServerFormData::blank());
+        $ip = $request->query('ip');
+
+        return $this->form(ServerFormData::blank(is_string($ip) && filter_var($ip, FILTER_VALIDATE_IP) !== false ? $ip : ''), ReturnTo::from($request));
     }
 
     public function store(ServerRequest $request, SaveServer $saveServer): RedirectResponse
@@ -101,8 +104,9 @@ class ServerController extends Controller
         $server = $saveServer->handle(new Server, $input);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "Server {$server->name} added."]);
+        $returnTo = ReturnTo::from($request);
 
-        return to_route('servers.show', $server);
+        return $returnTo !== null ? redirect($returnTo) : to_route('servers.show', $server);
     }
 
     public function edit(Server $server): Response
@@ -166,10 +170,11 @@ class ServerController extends Controller
         return to_route('servers.show', $server);
     }
 
-    private function form(ServerFormData $form): Response
+    private function form(ServerFormData $form, ?string $returnTo = null): Response
     {
         return Inertia::render('servers/Form', [
             'form' => $form,
+            'return_to' => $returnTo,
             'os_choices' => Choice::ofList(ChoiceList::Os)->get()->map(ChoiceData::fromModel(...)),
             'backup_choices' => Choice::ofList(ChoiceList::BackupLocation)->get()->map(ChoiceData::fromModel(...)),
         ]);

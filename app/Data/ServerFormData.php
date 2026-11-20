@@ -27,9 +27,12 @@ class ServerFormData extends Data
         public array $backup_location_ids,
     ) {}
 
-    public static function blank(): self
+    /**
+     * @param  string  $ip  prefilled from Add site's unknown address (SPEC §10.4)
+     */
+    public static function blank(string $ip = ''): self
     {
-        return new self(null, '', null, null, null, null, [['ip' => '', 'is_primary' => true]], []);
+        return new self(null, '', null, null, null, null, [['ip' => $ip, 'is_primary' => true]], []);
     }
 
     public static function fromModel(Server $server): self

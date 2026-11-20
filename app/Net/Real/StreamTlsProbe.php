@@ -41,8 +41,11 @@ class StreamTlsProbe implements TlsProbe
             restore_error_handler();
         }
 
-        if ($socket === false && $code !== 0) {
-            throw new CheckCouldNotRun("Couldn't connect to {$host}:{$port}: {$message}");
+        $warning = implode(' ', $warnings);
+
+        // Code 0 also covers DNS failures; only a failed handshake is the certificate's fault.
+        if ($socket === false && ($code !== 0 || ! str_contains($warning, 'Failed to enable crypto'))) {
+            throw new CheckCouldNotRun("Couldn't connect to {$host}:{$port}: ".($message !== '' ? $message : $warning));
         }
 
         if ($socket !== false) {
@@ -53,11 +56,13 @@ class StreamTlsProbe implements TlsProbe
             return new TlsResult(true, null, $this->certificate($certificate), $this->ip($peer));
         }
 
-        return $this->unverified($host, $port, $ip, $timeout, implode(' ', $warnings));
+        return $this->unverified($host, $port, $ip, $timeout, $warning);
     }
 
     private function unverified(string $host, int $port, ?string $ip, float $timeout, string $warning): TlsResult
     {
+        set_error_handler(fn (): bool => true);
+
         try {
             $download = SslCertificate::download()
                 ->withVerifyPeer(false)
@@ -72,6 +77,8 @@ class StreamTlsProbe implements TlsProbe
             $certificate = $download->forHost($host);
         } catch (Throwable) {
             $certificate = false;
+        } finally {
+            restore_error_handler();
         }
 
         if (! $certificate instanceof SslCertificate) {

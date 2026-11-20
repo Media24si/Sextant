@@ -16,11 +16,14 @@ const props = defineProps<{
     form: App.Data.ServerFormData;
     os_choices: App.Data.ChoiceData[];
     backup_choices: App.Data.ChoiceData[];
+    /** Set when opened from Add site's unknown address (SPEC §10.4). */
+    return_to: string | null;
 }>();
 
 const editing = computed(() => props.form.id !== null);
 
 const form = useForm({
+    return_to: props.return_to,
     name: props.form.name,
     hostname: props.form.hostname ?? '',
     provider: props.form.provider ?? '',
@@ -47,11 +50,13 @@ const breadcrumbs = computed(() => [
         : []),
 ]);
 
-const cancelHref = computed(() =>
-    props.form.id !== null
-        ? ServerController.show(props.form.id)
-        : ServerController.index(),
-);
+const cancelHref = computed(() => {
+    if (props.form.id !== null) {
+        return ServerController.show(props.form.id);
+    }
+
+    return props.return_to ?? ServerController.index();
+});
 
 const fieldClasses =
     'border-input w-full rounded-md border bg-card px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive dark:bg-input/30';

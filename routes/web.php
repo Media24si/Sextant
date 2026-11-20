@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
         Route::post('domains/{domain}/restore', [DomainController::class, 'restore'])->withTrashed()->name('domains.restore');
 
         Route::get('sites/create', [SiteController::class, 'create'])->name('sites.create');
+        Route::post('sites/detect', [SiteController::class, 'detect'])->name('sites.detect');
         Route::post('sites', [SiteController::class, 'store'])->name('sites.store');
         Route::get('sites/{site}/edit', [SiteController::class, 'edit'])->name('sites.edit');
         Route::put('sites/{site}', [SiteController::class, 'update'])->name('sites.update');

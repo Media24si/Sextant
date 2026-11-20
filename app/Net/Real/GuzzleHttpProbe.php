@@ -21,6 +21,7 @@ class GuzzleHttpProbe implements HttpProbe
     {
         $chain = [];
         $timings = [];
+        $totalMs = 0;
         $ip = null;
         $current = $url;
 
@@ -33,7 +34,6 @@ class GuzzleHttpProbe implements HttpProbe
                     ->timeout((int) ceil($timeout))
                     ->withOptions([
                         'verify' => $verifyTls,
-                        'stream' => $maxBytes === 0,
                         'on_stats' => function (TransferStats $transfer) use (&$stats): void {
                             $stats = $transfer->getHandlerStats();
                         },
@@ -48,6 +48,9 @@ class GuzzleHttpProbe implements HttpProbe
             if (is_array($stats)) {
                 $ip = is_string($stats['primary_ip'] ?? null) && $stats['primary_ip'] !== '' ? $stats['primary_ip'] : $ip;
                 $timings = $this->timings($stats);
+                $totalMs += $timings['total'];
+                // The whole visit, redirects included; the other timings are the final hop's.
+                $timings['total'] = $totalMs;
             }
 
             $chain[] = ['url' => $current, 'status' => $response->status()];

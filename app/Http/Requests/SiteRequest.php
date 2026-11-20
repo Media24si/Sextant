@@ -17,6 +17,9 @@ use Illuminate\Validation\Validator;
  */
 class SiteRequest extends FormRequest
 {
+    /** Lowercase punycode with at least one dot. */
+    public const HOSTNAME_PATTERN = '/^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+(xn--[a-z0-9-]{1,59}|[a-z]{2,63})$/';
+
     public function authorize(): bool
     {
         return $this->user()?->can('manage') === true;
@@ -45,7 +48,7 @@ class SiteRequest extends FormRequest
             'domain_id' => ['required', 'integer', Rule::exists('domains', 'id')->whereNull('deleted_at')],
             'hostname' => [
                 'required', 'string', 'max:253',
-                'regex:/^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+(xn--[a-z0-9-]{1,59}|[a-z]{2,63})$/',
+                'regex:'.self::HOSTNAME_PATTERN,
                 Rule::unique('sites', 'hostname')->withoutTrashed()->ignore($site instanceof Site ? $site : null),
             ],
             'scheme' => ['required', Rule::in(['https', 'http'])],

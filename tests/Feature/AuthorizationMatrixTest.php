@@ -39,6 +39,7 @@ $adminRoutes = [
     'update site' => ['put', 'sites.update', fn () => ['site' => Site::factory()->create()]],
     'delete site' => ['delete', 'sites.destroy', fn () => ['site' => Site::factory()->create()]],
     'restore site' => ['post', 'sites.restore', fn () => ['site' => tap(Site::factory()->create())->delete()]],
+    'detect site' => ['post', 'sites.detect', null],
     'add list entry' => ['post', 'lists.store', null],
     'rename list entry' => ['put', 'lists.update', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'move list entry' => ['post', 'lists.move', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],

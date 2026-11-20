@@ -74,26 +74,13 @@ test('the sites list filters by status, front service, backend and text', functi
     'search' => [['search' => 'quiz'], ['kviz.svet24.si']],
 ]);
 
-test('an admin adds a site by hand', function () {
-    $this->actingAs($this->admin)
-        ->post(route('sites.store'), sitePayload(['hostname' => 'Podjetje.Svet24.si.']))
-        ->assertSessionHasNoErrors();
-
-    $site = Site::query()->sole();
-
-    expect($site->hostname)->toBe('podjetje.svet24.si')
-        ->and($site->port)->toBeNull()
-        ->and($site->servingPath()->toArray())->toBe(['front' => 'Varnish', 'backend' => 'web02'])
-        ->and($site->github_url)->toBe('https://github.com/media24/podjetje')
-        ->and(Activity::query()->where('type', 'site.created')->exists())->toBeTrue();
-});
-
-test('site input is validated', function (array $overrides, string $error) {
+test('site edits are validated', function (array $overrides, string $error) {
     Site::factory()->for($this->domain)->create(['hostname' => 'svet24.si']);
-    $other = Domain::factory()->create(['name' => 'media24.si']);
+    $site = Site::factory()->for($this->domain)->create(['hostname' => 'podjetje.svet24.si']);
+    Domain::factory()->create(['name' => 'media24.si']);
 
     $this->actingAs($this->admin)
-        ->post(route('sites.store'), sitePayload($overrides))
+        ->put(route('sites.update', $site), sitePayload($overrides))
         ->assertSessionHasErrors($error);
 })->with([
     'hostname taken' => [['hostname' => 'svet24.si'], 'hostname'],
@@ -122,15 +109,6 @@ test('an admin edits the serving path and it reaches the change feed', function 
     expect($site->fresh()->port)->toBe(8443)
         ->and(Activity::query()->where('type', 'site.path_changed')->sole()->summary)
         ->toBe('svet24.si serving path: Varnish → web02 (was direct → web02)');
-});
-
-test('the add form can start from a domain', function () {
-    $this->actingAs($this->admin)
-        ->get(route('sites.create', ['domain' => $this->domain->id]))
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('form.domain_id', $this->domain->id)
-            ->where('form.hostname', 'svet24.si')
-            ->has('domains', 1));
 });
 
 test('the site page shows its path and changes; delete and restore', function () {

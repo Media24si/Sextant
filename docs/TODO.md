@@ -97,9 +97,9 @@
 - [x] **P2.4** `proxies:refresh` (daily) and `rdap:refresh-bootstrap` (weekly, also refreshes the PSL) (§14).
 
 ### Detection and saving
-- [ ] **P2.5** `SiteDetector` producing `SiteDetectionData` exactly as §10.1, with confidence rules (§10.2) and backend detection behind a front service: optional header, siblings, not found (§10.3). Probes in parallel; ≤ 15 s.
-- [ ] **P2.6** `POST /sites/detect` (admin, JSON) and the **Add site** page (§13.6): URL + Detect, findings with `ConfidenceBadge`, backend select ("Chosen by you" on change), serving path preview, first probe, Details (description, GitHub), checks to attach (display only until Phase 3), `www.` offer, duplicate and invalid states, "How detection works" panel, unknown-IP actions (new server / external service, prefilled).
-- [ ] **P2.7** `POST /sites` saving in one transaction (§10.4); redirect to the site page. Monitor attachment is stubbed with a clear hook until Phase 3.
+- [x] **P2.5** `SiteDetector` producing `SiteDetectionData` exactly as §10.1, with confidence rules (§10.2) and backend detection behind a front service: optional header, siblings, not found (§10.3). Probes in parallel; ≤ 15 s.
+- [x] **P2.6** `POST /sites/detect` (admin, JSON) and the **Add site** page (§13.6): URL + Detect, findings with `ConfidenceBadge`, backend select ("Chosen by you" on change), serving path preview, first probe, Details (description, GitHub), checks to attach (display only until Phase 3), `www.` offer, duplicate and invalid states, "How detection works" panel, unknown-IP actions (new server / external service, prefilled).
+- [x] **P2.7** `POST /sites` saving in one transaction (§10.4); redirect to the site page. Monitor attachment is stubbed with a clear hook until Phase 3.
 - [ ] **P2.8** **Add domain** (§10.5): `POST /domains/lookup` RDAP preview; subdomain rows prefilled by detection; one save.
 - [ ] **P2.9** Import page and `sextant:import urls.txt` (§10.6): created / needs review / skipped summary.
 - [ ] **P2.10** Re-run detection on a site (§10.7).
@@ -285,6 +285,11 @@ Carried over from the previous version of this list (still open in SPEC v0.2):
 
 - [ ] Deleting a server that is still the backend of live sites isn't defined. Domains and external services block deletion when in use (§3.5, §3.6); confirm whether servers should do the same or set `sites.server_id` to null (sites then show "Backend not assigned"). Default until decided (P1.12): refused with "web02 is the backend of N sites. Move them to another server first.", like domains and external services.
 - [ ] A server where no port 22/80/443 is open, ping fails and no versions endpoint is set gets no default monitors, so its status stays `unknown`. Confirm whether that's intended or whether the server page should prompt an admin to add a monitor.
+- [x] §10.1 `SiteDetectionData` gains `display_hostname`, `scheme` and `port` (saving needs them) and `probe.*_status` (the prototype's coloured dots). Findings are null when `duplicate` is set. Decided in P2.5.
+- [x] §10.4 says "attach default monitors with the detected arguments", but monitors don't exist until P3.1. Decision: saving fires `SiteAdded` / `DomainAdded` after commit, carrying the proposed monitors (with `path` and `expected_target`); P3's listener attaches them. Sites added before P3 lands lose a non-root `path` and `expected_target`: P3 should re-run detection for sites without monitors.
+- [x] §10.1 doesn't say how probes run "in parallel". Decision: `Concurrency::run()` (process driver, `sync` in tests), falling back to one after another if worker processes can't start.
+- [x] §10.3 sibling suggestion counts "sites behind the front" including ones without a backend (`3 of the 5`). A tie for most common is Not found with the tied servers as candidates.
+- [x] `return_to` (Add server / external service from Add site's unknown IP) only accepts paths on this app. Add site re-runs detection from `?url=` when you come back.
 
 ## Out of scope for v1 (don't build)
 

@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Sites\AddSites;
 use App\Data\ActivityItemData;
 use App\Data\OptionData;
 use App\Data\SiteData;
 use App\Data\SiteFormData;
 use App\Data\SiteRowData;
+use App\Detection\InvalidUrl;
+use App\Detection\SiteDetector;
 use App\Enums\Status;
+use App\Http\Requests\AddSiteRequest;
 use App\Http\Requests\SiteRequest;
 use App\Models\Activity;
 use App\Models\Domain;
@@ -17,16 +21,18 @@ use App\Models\Site;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
- * Sites (SPEC §13.6). Phase 1 adds them by hand; Phase 2's Add site detects
- * the domain and serving path from a URL (§10).
+ * Sites (SPEC §13.6). Add site detects the domain and serving path from a
+ * URL (§10); the edit form changes them by hand.
  */
 class SiteController extends Controller
 {
@@ -95,18 +101,68 @@ class SiteController extends Controller
         ]);
     }
 
+    /**
+     * Add site (SPEC §10.1, §13.6). `?url=` runs detection on load, e.g. back
+     * from Add server; `?domain=` starts the URL with that domain.
+     */
     public function create(Request $request): Response
     {
         $domain = Domain::query()->find($request->integer('domain'));
+        $url = $request->query('url');
 
-        return $this->form(SiteFormData::blank($domain?->id, $domain === null ? '' : $domain->display_name));
+        return Inertia::render('sites/Add', [
+            'url' => is_string($url) ? $url : null,
+            'domain' => $domain?->display_name,
+            'front_services' => $this->frontServiceOptions(),
+            'servers' => $this->serverOptions(),
+        ]);
     }
 
-    public function store(SiteRequest $request): RedirectResponse
+    /**
+     * Runs detection and returns what it found; writes nothing (SPEC §10.1).
+     */
+    public function detect(Request $request, SiteDetector $detector): JsonResponse
     {
-        $site = Site::query()->create($request->validated());
+        $request->validate(['url' => ['required', 'string', 'max:2048']]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => "Site {$site->display_hostname} added."]);
+        try {
+            return response()->json($detector->detect((string) $request->input('url')));
+        } catch (InvalidUrl $exception) {
+            throw ValidationException::withMessages(['url' => $exception->getMessage()]);
+        }
+    }
+
+    /**
+     * Saves the reviewed site, its domain if new, and the `www.` sibling if asked (SPEC §10.4).
+     */
+    public function store(AddSiteRequest $request, AddSites $addSites): RedirectResponse
+    {
+        /** @var array{hostname: string, scheme: string, port: int|null, path: string, front_service_id?: int|null, server_id?: int|null, description?: string|null, github_url?: string|null, expected_target?: string|null, add_www?: bool} $input */
+        $input = $request->validated();
+        $site = [
+            'hostname' => $input['hostname'],
+            'scheme' => $input['scheme'],
+            'port' => $input['port'],
+            'path' => $input['path'],
+            'front_service_id' => $input['front_service_id'] ?? null,
+            'server_id' => $input['server_id'] ?? null,
+        ];
+        $sites = [[
+            ...$site,
+            'description' => $input['description'] ?? null,
+            'github_url' => $input['github_url'] ?? null,
+            'expected_target' => $input['expected_target'] ?? null,
+        ]];
+
+        if ($request->boolean('add_www')) {
+            $sites[] = [...$site, 'hostname' => 'www.'.$input['hostname']];
+        }
+
+        $site = $addSites->handle((string) $request->registrableDomain(), $sites)[0];
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => count($sites) === 1
+            ? "Site {$site->display_hostname} added."
+            : "Sites {$site->display_hostname} and www.{$site->display_hostname} added."]);
 
         return to_route('sites.show', $site);
     }

@@ -6,6 +6,7 @@ use App\Data\ExternalServiceFormData;
 use App\Data\ExternalServiceRowData;
 use App\Http\Requests\ExternalServiceRequest;
 use App\Models\ExternalService;
+use App\Support\ReturnTo;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -43,9 +44,14 @@ class ExternalServiceController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        return Inertia::render('external-services/Form', ['form' => ExternalServiceFormData::blank()]);
+        $ip = $request->query('ip');
+
+        return Inertia::render('external-services/Form', [
+            'form' => ExternalServiceFormData::blank(is_string($ip) && filter_var($ip, FILTER_VALIDATE_IP) !== false ? [$ip] : []),
+            'return_to' => ReturnTo::from($request),
+        ]);
     }
 
     public function store(ExternalServiceRequest $request): RedirectResponse
@@ -53,13 +59,14 @@ class ExternalServiceController extends Controller
         $service = ExternalService::query()->create($this->attributes($request));
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "External service {$service->name} added."]);
+        $returnTo = ReturnTo::from($request);
 
-        return to_route('external-services.index');
+        return $returnTo !== null ? redirect($returnTo) : to_route('external-services.index');
     }
 
     public function edit(ExternalService $externalService): Response
     {
-        return Inertia::render('external-services/Form', ['form' => ExternalServiceFormData::fromModel($externalService)]);
+        return Inertia::render('external-services/Form', ['form' => ExternalServiceFormData::fromModel($externalService), 'return_to' => null]);
     }
 
     public function update(ExternalServiceRequest $request, ExternalService $externalService): RedirectResponse

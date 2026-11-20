@@ -189,6 +189,99 @@ role: App.Enums.UserRole,
 created_at: string | null,
 is_you: boolean,
 };
+namespace Detection {
+export type BackendCandidateData = {
+server_id: number,
+name: string,
+sibling_count: number,
+};
+export type BackendFindingData = {
+value: App.Data.Detection.DetectedServerData | null,
+confidence: App.Enums.Confidence,
+explanation: string,
+};
+export type DetectedDomainData = {
+name: string,
+display_name: string,
+existing_id: number | null,
+site_count: number,
+registry: App.Data.Detection.RegistryPreviewData | null,
+};
+export type DetectedServerData = {
+server_id: number,
+name: string,
+};
+export type DetectedServiceData = {
+service_id: number,
+name: string,
+};
+export type DnsFindingData = {
+value: App.Data.Detection.DnsRecordsData,
+confidence: App.Enums.Confidence,
+explanation: string,
+};
+export type DnsRecordsData = {
+ips: string[],
+cname_chain: string[],
+};
+export type DomainFindingData = {
+value: App.Data.Detection.DetectedDomainData,
+confidence: App.Enums.Confidence,
+explanation: string,
+};
+export type DuplicateSiteData = {
+site_id: number,
+serving_path: string,
+trashed: boolean,
+};
+export type FrontFindingData = {
+value: App.Data.Detection.DetectedServiceData | null,
+confidence: App.Enums.Confidence,
+explanation: string,
+};
+export type ProbeSummaryData = {
+http: string,
+http_status: App.Enums.Status,
+tls: string | null,
+tls_status: App.Enums.Status | null,
+redirect: string,
+redirect_status: App.Enums.Status,
+final_url: string | null,
+};
+export type ProposedMonitorData = {
+checker: string,
+label: string | null,
+arguments: Record<string, any>,
+};
+export type RegistryPreviewData = {
+source: string,
+server: string | null,
+found: boolean,
+registrar: string | null,
+expires_at: string | null,
+nameservers: string[],
+statuses: string[],
+error: string | null,
+};
+export type SiteDetectionData = {
+input: string,
+hostname: string,
+display_hostname: string,
+scheme: string,
+port: number | null,
+path: string,
+duplicate: App.Data.Detection.DuplicateSiteData | null,
+domain: App.Data.Detection.DomainFindingData | null,
+dns: App.Data.Detection.DnsFindingData | null,
+front: App.Data.Detection.FrontFindingData | null,
+backend: App.Data.Detection.BackendFindingData | null,
+backend_candidates: App.Data.Detection.BackendCandidateData[],
+unknown_ip: string | null,
+probe: App.Data.Detection.ProbeSummaryData | null,
+offer_www: string | null,
+monitors: App.Data.Detection.ProposedMonitorData[],
+};
+}
 }
 namespace Enums {
 export type ActivityCategory = 'status' | 'inventory' | 'detected';

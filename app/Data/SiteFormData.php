@@ -22,11 +22,6 @@ class SiteFormData extends Data
         public ?string $notes,
     ) {}
 
-    public static function blank(?int $domainId = null, string $hostname = ''): self
-    {
-        return new self(null, $domainId, $hostname, 'https', null, null, null, null, null, null);
-    }
-
     public static function fromModel(Site $site): self
     {
         return new self(
