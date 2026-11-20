@@ -42,7 +42,7 @@
 - [ ] **P0.11** A temporary demo page using `DataTable` against a seeded table, proving server-side sort, filter chips, search and pagination via query string.
 - [x] **P0.12** CI: Pint, Larastan, Pest against a **MySQL 9.7** service container, ESLint, `vue-tsc --noEmit`, Vitest.
 - [ ] **P0.13** Spikes, each in `docs/spikes/<name>.md`:
-  - [ ] MySQL 9.7: stored generated column + unique index for soft-delete uniqueness; `open_monitor_id` unique index; `RESTRICT` FK on its base column (§3.11, §3.17).
+  - [x] MySQL 9.7: stored generated column + unique index for soft-delete uniqueness; `open_monitor_id` unique index; `RESTRICT` FK on its base column (§3.11, §3.17).
   - [ ] Net_DNS2: custom resolvers, timeouts, CNAME chain, authoritative SOA query.
   - [ ] TLS: verifying connection plus `spatie/ssl-certificate` fields.
   - [ ] RDAP via IANA bootstrap; record the `svet24.si` response as a fixture (date-only events).
