@@ -7,6 +7,7 @@ type: string,
 summary: string,
 user: string | null,
 created_at: string,
+url: string | null,
 };
 export type AuthUserData = {
 id: number,
@@ -75,6 +76,14 @@ label: string,
 export type ProfileData = {
 name: string,
 email: string,
+};
+export type SearchResultData = {
+type: App.Enums.SearchResultType,
+id: number,
+label: string,
+context: string,
+status: App.Enums.Status | null,
+url: string,
 };
 export type ServedSiteData = {
 id: number,
@@ -187,6 +196,7 @@ export type ChoiceList = 'os' | 'backup_location';
 export type Confidence = 'detected' | 'suggested' | 'not_found';
 export type ExternalServiceKind = 'cdn' | 'proxy' | 'other';
 export type RangeSource = 'cloudflare' | 'fastly' | 'cloudfront';
+export type SearchResultType = 'server' | 'external_service' | 'domain' | 'site';
 export type Status = 'ok' | 'warning' | 'error' | 'unknown';
 export type UserRole = 'admin' | 'reader';
 }

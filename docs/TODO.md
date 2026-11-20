@@ -66,7 +66,7 @@
 - [x] **P1.6** `activities` table and `ActivityRecorder::record(...)` (§3.13, §8.1).
 - [x] **P1.7** Observers on `Server`, `ServerAddress`, `ExternalService`, `Domain`, `Site`, `User` and the backup pivot, including special types `site.path_changed`, `server.address_added/removed`, `server.backup_locations_changed`, `user.role_changed`; exclude secrets and system-maintained columns (§8.2).
 - [x] **P1.8** Accessors: `$site->url`; Unicode display via `idn_to_utf8()`; `$site->servingPath()` returning front + backend.
-- [ ] **P1.9** laravel-data classes for every page's rows and forms; generated TypeScript types used by pages.
+- [x] **P1.9** laravel-data classes for every page's rows and forms; generated TypeScript types used by pages.
 
 ### Pages (admin-only actions behind `EnsureAdmin`, §13.3)
 - [x] **P1.10** Servers list (§13.6): status, name + hostname, primary IP, OS, sites served, backups ("None set" in orange); version columns rendered as "not configured" until Phase 7. Filters: All, Problems, No backup location. Remove the P0.11 demo when this lands: `DemoTableController`, `pages/demo/Table.vue`, `UserRowData`, `DemoTableSeeder`, `DemoTableTest`, the `demo.table*` routes and their rows in `AuthorizationMatrixTest`.
@@ -77,12 +77,12 @@
 - [x] **P1.15** Sites list (filters: status, front service, backend, Needs review); site page; edit site (front service select, backend select, description, GitHub link, scheme, port, notes). Add site is Phase 2: until then a simple manual form.
 - [x] **P1.16** Lists page (OS and backup locations: add, rename, reorder, delete when unused).
 - [x] **P1.17** Users page (admin only): list, create, change role, delete; never remove the last admin.
-- [ ] **P1.18** Activity page with filters (category, type, resource, server, user).
-- [ ] **P1.19** Global search: `GET /search` (§13.8) and the `GlobalSearch` Command dialog with Ctrl/⌘ + K; versions matching is added in Phase 7.
+- [x] **P1.18** Activity page with filters (category, type, resource, server, user).
+- [x] **P1.19** Global search: `GET /search` (§13.8) and the `GlobalSearch` Command dialog with Ctrl/⌘ + K; versions matching is added in Phase 7.
 
 ### Tests
-- [ ] **P1.20** Authorization matrix test covering every admin-only route so far (403 for reader, success for admin); grow it in every later phase (§17).
-- [ ] **P1.21** Observers (admin edits recorded; quiet writes not; secrets never stored); validation rules; `assertInertia` for each page; Vitest for `DataTable`, `ServingPath`, `StatusBadge`, `GlobalSearch`.
+- [x] **P1.20** Authorization matrix test covering every admin-only route so far (403 for reader, success for admin); grow it in every later phase (§17).
+- [x] **P1.21** Observers (admin edits recorded; quiet writes not; secrets never stored); validation rules; `assertInertia` for each page; Vitest for `DataTable`, `ServingPath`, `StatusBadge`, `GlobalSearch`.
 
 - [ ] **Exit P1** **[HUMAN]**: all ~20 servers, Cloudflare and Varnish entered; a sample of domains and sites entered by hand with paths; search finds servers by IP and sites by description; a reader can browse everything and change nothing.
 
@@ -268,6 +268,8 @@ Found in Phase 0 (2026-11-20):
 - [x] The sidebar (§13.4) has no Sites item. The flat Sites list is reached from the Domains page ("All sites"), and back ("By domain").
 - [x] §13.6 Users says "invite/create", but no mail is set up. Decision: the admin sets a first password and passes it on; the user changes it under Settings. Admins may delete themselves unless they're the last admin, and are then signed out.
 - [x] The Lists page (`/settings/lists`) is readable by everyone and only admins can change it, like other lists; its sidebar link sits in the Admin group (§13.4). Choice changes aren't in §8.4, so they don't reach the change feed.
+- [x] GlobalSearch (§13.4) is a "Command dialog", but shadcn-vue's Command filters on the client while §13.8 searches on the server. Decision: a Dialog with a combobox and grouped listbox (arrow keys, Enter opens the highlighted result, first by default); same behaviour, server results.
+- [x] External services have no page of their own, so their search results and change-feed links go to the External services list.
 - [x] `.eu` has no RDAP service and EURid's WHOIS publishes no expiry date (`docs/spikes/rdap.md`). Resolved: Media24 uses `.si`, `.com`, `.me`, `.work` and `.dev`, no `.eu` (`docs/spikes/tlds.md`).
 - [ ] The Sextant server has no IPv6 (`docs/spikes/icmp.md`: "Address family not supported by protocol"). SPEC assumes Sextant can reach IPv6 addresses (`server.tcp`/`server.ping` with `-6`, §9.1, §9.2, §9.0). Until the server gets IPv6, any check that has to connect over IPv6 must throw CheckCouldNotRun ("Sextant has no IPv6 connectivity") and stay Unknown, and default monitors should target the server's IPv4 address. Confirm, or enable IPv6 on the Sextant server.
 - [x] SPEC §4.2 puts `Status` in `App\Checks`; it lives in `App\Enums\Status` with the other enums. `CheckResult` and the checkers (P3.2) import it from there.

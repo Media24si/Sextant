@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ChoiceController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\ExternalServiceController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\UserController;
@@ -16,6 +18,8 @@ Route::middleware('auth')->group(function () {
     Route::get('domains', [DomainController::class, 'index'])->name('domains.index');
     Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
     Route::get('settings/lists', [ChoiceController::class, 'index'])->name('lists.index');
+    Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
+    Route::get('search', SearchController::class)->name('search');
 
     Route::middleware('admin')->group(function () {
         Route::get('servers/create', [ServerController::class, 'create'])->name('servers.create');

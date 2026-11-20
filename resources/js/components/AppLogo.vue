@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
-
-const name = usePage().props.name;
+import AppWordmark from '@/components/AppWordmark.vue';
 </script>
 
 <template>
-    <div class="flex aspect-square size-8 items-center justify-center">
-        <AppLogoIcon class="size-6 text-sidebar-primary" />
-    </div>
-    <span
-        class="truncate text-[17px] leading-tight font-bold tracking-tight text-sidebar-primary-foreground"
-        >{{ name }}</span
-    >
+    <!--
+        Wordmark in the open sidebar, just the sign when it's collapsed to icons.
+        The sizes are !important: the sidebar button forces child SVGs to size-4.
+    -->
+    <AppWordmark
+        class="h-7! w-[131px]! text-sidebar-primary-foreground group-data-[collapsible=icon]:hidden"
+    />
+    <AppLogoIcon
+        class="hidden size-8! text-sidebar-primary-foreground group-data-[collapsible=icon]:block"
+    />
 </template>

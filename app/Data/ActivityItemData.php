@@ -4,6 +4,7 @@ namespace App\Data;
 
 use App\Enums\ActivityCategory;
 use App\Models\Activity;
+use App\Support\ResourceUrl;
 use Spatie\LaravelData\Data;
 
 /**
@@ -18,6 +19,7 @@ class ActivityItemData extends Data
         public string $summary,
         public ?string $user,
         public string $created_at,
+        public ?string $url,
     ) {}
 
     public static function fromModel(Activity $activity): self
@@ -29,6 +31,7 @@ class ActivityItemData extends Data
             summary: $activity->summary,
             user: $activity->user?->name,
             created_at: $activity->created_at->toAtomString(),
+            url: ResourceUrl::for($activity->subject_type, $activity->subject_id),
         );
     }
 }

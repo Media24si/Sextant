@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
-import GlobalSearchField from '@/components/app/GlobalSearchField.vue';
+import GlobalSearch from '@/components/app/GlobalSearch.vue';
 import SystemHealthPill from '@/components/app/SystemHealthPill.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
@@ -19,7 +19,7 @@ const page = usePage();
         class="flex shrink-0 items-center gap-3 border-b bg-card px-4 py-3.5 md:px-8"
     >
         <SidebarTrigger class="-ml-1" />
-        <GlobalSearchField class="min-w-0 flex-1" />
+        <GlobalSearch class="flex-1" />
         <div class="ml-auto flex shrink-0 items-center gap-3.5">
             <div class="hidden md:block">
                 <SystemHealthPill />

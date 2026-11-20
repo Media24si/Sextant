@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
 import EmptyState from '@/components/app/EmptyState.vue';
 import RelativeTime from '@/components/app/RelativeTime.vue';
 
@@ -27,7 +28,15 @@ const categoryDots: Record<App.Enums.ActivityCategory, string> = {
                 aria-hidden="true"
             />
             <div>
-                <p>{{ item.summary }}</p>
+                <p>
+                    <Link
+                        v-if="item.url"
+                        :href="item.url"
+                        class="hover:underline"
+                        >{{ item.summary }}</Link
+                    >
+                    <template v-else>{{ item.summary }}</template>
+                </p>
                 <p class="text-xs text-muted-foreground">
                     {{ item.user ?? 'Sextant' }} ·
                     <RelativeTime :datetime="item.created_at" />
