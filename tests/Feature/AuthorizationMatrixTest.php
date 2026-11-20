@@ -3,6 +3,7 @@
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
+use App\Models\Site;
 use App\Models\User;
 
 /*
@@ -29,6 +30,12 @@ dataset('admin routes', [
     'update domain' => ['put', 'domains.update', fn () => ['domain' => Domain::factory()->create()]],
     'delete domain' => ['delete', 'domains.destroy', fn () => ['domain' => Domain::factory()->create()]],
     'restore domain' => ['post', 'domains.restore', fn () => ['domain' => tap(Domain::factory()->create())->delete()]],
+    'add site form' => ['get', 'sites.create', null],
+    'store site' => ['post', 'sites.store', null],
+    'edit site form' => ['get', 'sites.edit', fn () => ['site' => Site::factory()->create()]],
+    'update site' => ['put', 'sites.update', fn () => ['site' => Site::factory()->create()]],
+    'delete site' => ['delete', 'sites.destroy', fn () => ['site' => Site::factory()->create()]],
+    'restore site' => ['post', 'sites.restore', fn () => ['site' => tap(Site::factory()->create())->delete()]],
 ]);
 
 test('readers get 403', function (string $method, string $route, ?Closure $parameters) {

@@ -5,6 +5,7 @@ import { useDebounceFn } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
+import SiteController from '@/actions/App/Http/Controllers/SiteController';
 import EmptyState from '@/components/app/EmptyState.vue';
 import ExpiryDate from '@/components/app/ExpiryDate.vue';
 import PageHeader from '@/components/app/PageHeader.vue';
@@ -130,10 +131,20 @@ function problems(row: Row): string {
             title="Domains"
             :description="`${counts.all} ${counts.all === 1 ? 'domain' : 'domains'} · ${counts.sites} ${counts.sites === 1 ? 'subdomain' : 'subdomains'} · open a domain to see how each subdomain is served`"
         >
-            <template v-if="page.props.can.manage" #actions>
-                <Button as-child>
-                    <Link :href="DomainController.create()">+ Add domain</Link>
+            <template #actions>
+                <Button variant="outline" as-child>
+                    <Link :href="SiteController.index()">All sites</Link>
                 </Button>
+                <template v-if="page.props.can.manage">
+                    <Button variant="outline" as-child>
+                        <Link :href="DomainController.create()"
+                            >+ Add domain</Link
+                        >
+                    </Button>
+                    <Button as-child>
+                        <Link :href="SiteController.create()">+ Add site</Link>
+                    </Button>
+                </template>
             </template>
         </PageHeader>
 
@@ -321,6 +332,16 @@ function problems(row: Row): string {
                             <p v-else class="py-3 text-muted-foreground">
                                 No subdomains yet.
                             </p>
+                            <Link
+                                v-if="page.props.can.manage && !row.deleted"
+                                :href="
+                                    SiteController.create({
+                                        query: { domain: row.id },
+                                    })
+                                "
+                                class="mt-2 inline-flex h-9 items-center rounded-lg border border-dashed border-status-unknown px-3 text-sm text-primary hover:bg-card"
+                                >+ Add site on {{ row.name }}</Link
+                            >
                         </td>
                     </tr>
                 </tbody>

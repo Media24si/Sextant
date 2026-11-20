@@ -113,6 +113,16 @@ function visit(changes: Changes): void {
     });
 }
 
+/**
+ * Set one filter from the page's own controls (the `filters` slot), e.g. a
+ * select of backend servers. null clears it.
+ */
+function setFilter(key: string, value: string | null): void {
+    if ((props.filters[key] ?? null) !== value) {
+        visit({ filter: { [key]: value } });
+    }
+}
+
 /* Chips */
 
 function isChipActive(chip: TableFilterChip): boolean {
@@ -196,7 +206,7 @@ const lastShown = computed(() =>
 <template>
     <div class="flex flex-col gap-4">
         <div
-            v-if="chips.length > 0 || searchPlaceholder"
+            v-if="chips.length > 0 || searchPlaceholder || $slots.filters"
             class="flex flex-wrap items-center justify-between gap-3"
         >
             <div
@@ -226,19 +236,22 @@ const lastShown = computed(() =>
                     >
                 </button>
             </div>
-            <div v-if="searchPlaceholder" class="relative w-full sm:w-72">
-                <Search
-                    class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                    aria-hidden="true"
-                />
-                <Input
-                    v-model="search"
-                    type="search"
-                    :placeholder="searchPlaceholder"
-                    :aria-label="searchPlaceholder"
-                    class="bg-card pl-9"
-                    data-test="data-table-search"
-                />
+            <div class="flex flex-wrap items-center gap-2">
+                <slot name="filters" :set-filter="setFilter" />
+                <div v-if="searchPlaceholder" class="relative w-full sm:w-72">
+                    <Search
+                        class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                        aria-hidden="true"
+                    />
+                    <Input
+                        v-model="search"
+                        type="search"
+                        :placeholder="searchPlaceholder"
+                        :aria-label="searchPlaceholder"
+                        class="bg-card pl-9"
+                        data-test="data-table-search"
+                    />
+                </div>
             </div>
         </div>
 

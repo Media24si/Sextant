@@ -74,7 +74,7 @@
 - [x] **P1.12** Add / edit server: basics with OS select from the `os` list; backup checkboxes from `backup_location`; addresses with a primary radio; versions section as a disabled placeholder until Phase 7. Delete and restore.
 - [x] **P1.13** External services: list and form (name, kind, ranges, range source, CNAME suffixes, headers).
 - [x] **P1.14** Domains list with expandable subdomains (§13.6): counts, expiry, registrar, status; expanded rows show description, repo link, `ServingPath`, status; Expand/Collapse all; filter. Domain page.
-- [ ] **P1.15** Sites list (filters: status, front service, backend, Needs review); site page; edit site (front service select, backend select, description, GitHub link, scheme, port, notes). Add site is Phase 2: until then a simple manual form.
+- [x] **P1.15** Sites list (filters: status, front service, backend, Needs review); site page; edit site (front service select, backend select, description, GitHub link, scheme, port, notes). Add site is Phase 2: until then a simple manual form.
 - [ ] **P1.16** Lists page (OS and backup locations: add, rename, reorder, delete when unused).
 - [ ] **P1.17** Users page (admin only): list, create, change role, delete; never remove the last admin.
 - [ ] **P1.18** Activity page with filters (category, type, resource, server, user).
@@ -264,6 +264,8 @@ Found in Phase 0 (2026-11-20):
 - [x] The P0.11 demo table needs a seeded table without a throwaway migration (migrations are append-only once merged). Decision: it lists `users` (name, role, added; no email, since the users list is admin only), seeded locally with `DemoTableSeeder`. Its admin-only "ping" action is the sample mutation for the Phase 0 exit check.
 - [x] Phase 1 needs domains entered by hand (Exit P1), but Add domain with the registry lookup is Phase 2 (§10.5). Decision: P1.14 adds a simple Add / edit domain form (name, notes); P2.8 replaces it. "Add site on {domain}" links come with the site form (P1.15).
 - [x] The Domains list (§13.6) has expandable rows, which `DataTable` doesn't do. It uses the same server-side query (`TableQuery`, filter and paging in the query string) with its own rendering. Its filter also matches subdomains, descriptions, backend servers and front services ("e.g. web03 or cloudflare", as in the prototype).
+- [x] The Sites list's "Needs review" filter (§13.6) isn't defined before import (§10.6) flags sites. Decision: until P2.9, it means "no backend server assigned".
+- [x] The sidebar (§13.4) has no Sites item. The flat Sites list is reached from the Domains page ("All sites"), and back ("By domain").
 - [x] `.eu` has no RDAP service and EURid's WHOIS publishes no expiry date (`docs/spikes/rdap.md`). Resolved: Media24 uses `.si`, `.com`, `.me`, `.work` and `.dev`, no `.eu` (`docs/spikes/tlds.md`).
 - [ ] The Sextant server has no IPv6 (`docs/spikes/icmp.md`: "Address family not supported by protocol"). SPEC assumes Sextant can reach IPv6 addresses (`server.tcp`/`server.ping` with `-6`, §9.1, §9.2, §9.0). Until the server gets IPv6, any check that has to connect over IPv6 must throw CheckCouldNotRun ("Sextant has no IPv6 connectivity") and stay Unknown, and default monitors should target the server's IPv4 address. Confirm, or enable IPv6 on the Sextant server.
 - [x] SPEC §4.2 puts `Status` in `App\Checks`; it lives in `App\Enums\Status` with the other enums. `CheckResult` and the checkers (P3.2) import it from there.

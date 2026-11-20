@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
+import SiteController from '@/actions/App/Http/Controllers/SiteController';
 import ActivityList from '@/components/app/ActivityList.vue';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
@@ -109,6 +110,16 @@ function destroy(): void {
                 <Button variant="outline" @click="confirmingDelete = true"
                     >Delete</Button
                 >
+                <Button variant="outline" as-child>
+                    <Link
+                        :href="
+                            SiteController.create({
+                                query: { domain: domain.id },
+                            })
+                        "
+                        >+ Add site</Link
+                    >
+                </Button>
                 <Button as-child>
                     <Link :href="DomainController.edit(domain.id)"
                         >Edit domain</Link

@@ -3,6 +3,7 @@
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\ExternalServiceController;
 use App\Http\Controllers\ServerController;
+use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
@@ -11,6 +12,7 @@ Route::middleware('auth')->group(function () {
     Route::get('servers', [ServerController::class, 'index'])->name('servers.index');
     Route::get('external-services', [ExternalServiceController::class, 'index'])->name('external-services.index');
     Route::get('domains', [DomainController::class, 'index'])->name('domains.index');
+    Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
 
     Route::middleware('admin')->group(function () {
         Route::get('servers/create', [ServerController::class, 'create'])->name('servers.create');
@@ -33,10 +35,18 @@ Route::middleware('auth')->group(function () {
         Route::put('domains/{domain}', [DomainController::class, 'update'])->name('domains.update');
         Route::delete('domains/{domain}', [DomainController::class, 'destroy'])->name('domains.destroy');
         Route::post('domains/{domain}/restore', [DomainController::class, 'restore'])->withTrashed()->name('domains.restore');
+
+        Route::get('sites/create', [SiteController::class, 'create'])->name('sites.create');
+        Route::post('sites', [SiteController::class, 'store'])->name('sites.store');
+        Route::get('sites/{site}/edit', [SiteController::class, 'edit'])->name('sites.edit');
+        Route::put('sites/{site}', [SiteController::class, 'update'])->name('sites.update');
+        Route::delete('sites/{site}', [SiteController::class, 'destroy'])->name('sites.destroy');
+        Route::post('sites/{site}/restore', [SiteController::class, 'restore'])->withTrashed()->name('sites.restore');
     });
 
     Route::get('servers/{server}', [ServerController::class, 'show'])->withTrashed()->name('servers.show');
     Route::get('domains/{domain}', [DomainController::class, 'show'])->withTrashed()->name('domains.show');
+    Route::get('sites/{site}', [SiteController::class, 'show'])->withTrashed()->name('sites.show');
 });
 
 require __DIR__.'/settings.php';

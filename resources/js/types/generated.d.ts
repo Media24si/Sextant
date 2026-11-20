@@ -62,6 +62,10 @@ ranges_source: App.Enums.RangeSource | null,
 sites_count: number,
 deleted: boolean,
 };
+export type OptionData = {
+id: number,
+label: string,
+};
 export type ProfileData = {
 name: string,
 email: string,
@@ -118,6 +122,43 @@ deleted: boolean,
 export type ServingPathData = {
 front: string | null,
 backend: string | null,
+};
+export type SiteData = {
+id: number,
+hostname: string,
+url: string,
+description: string | null,
+github_url: string | null,
+notes: string | null,
+domain_id: number,
+domain: string,
+serving_path: App.Data.ServingPathData,
+server_id: number | null,
+status: App.Enums.Status,
+deleted: boolean,
+};
+export type SiteFormData = {
+id: number | null,
+domain_id: number | null,
+hostname: string,
+scheme: string,
+port: number | null,
+front_service_id: number | null,
+server_id: number | null,
+description: string | null,
+github_url: string | null,
+notes: string | null,
+};
+export type SiteRowData = {
+id: number,
+hostname: string,
+description: string | null,
+domain_id: number,
+domain: string,
+serving_path: App.Data.ServingPathData,
+server_id: number | null,
+status: App.Enums.Status,
+deleted: boolean,
 };
 export type TrafficGroupData = {
 name: string,

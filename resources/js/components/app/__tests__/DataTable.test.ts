@@ -205,6 +205,43 @@ describe('DataTable', () => {
         );
     });
 
+    it('lets the page set other filters through the filters slot', async () => {
+        const wrapper = mount(DataTable, {
+            props: {
+                url: '/demo/table',
+                columns: columns as ColumnDef<unknown, unknown>[],
+                rows: rows([]),
+                filters: { role: 'admin', backend: '3' },
+                sort: 'name',
+            },
+            slots: {
+                filters: `<template #filters="{ setFilter }">
+                    <button data-test="pick" @click="setFilter('backend', '7')">7</button>
+                    <button data-test="clear" @click="setFilter('backend', null)">clear</button>
+                    <button data-test="same" @click="setFilter('backend', '3')">same</button>
+                </template>`,
+            },
+        });
+
+        await wrapper.find('[data-test="pick"]').trigger('click');
+        expect(routerGet).toHaveBeenLastCalledWith(
+            '/demo/table',
+            { filter: { role: 'admin', backend: '7' }, sort: 'name' },
+            visitOptions,
+        );
+
+        await wrapper.find('[data-test="clear"]').trigger('click');
+        expect(routerGet).toHaveBeenLastCalledWith(
+            '/demo/table',
+            { filter: { role: 'admin' }, sort: 'name' },
+            visitOptions,
+        );
+
+        routerGet.mockClear();
+        await wrapper.find('[data-test="same"]').trigger('click');
+        expect(routerGet).not.toHaveBeenCalled();
+    });
+
     it('shows the empty state when there are no rows', () => {
         const wrapper = mountTable({
             rows: rows([]),
