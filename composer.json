@@ -16,8 +16,10 @@
         "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.17",
+        "laravel/horizon": "^5.52",
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14",
+        "sentry/sentry-laravel": "^4.31",
         "spatie/laravel-data": "^4.23",
         "spatie/laravel-query-builder": "^7.3",
         "spatie/laravel-typescript-transformer": "^3.3"

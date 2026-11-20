@@ -28,6 +28,8 @@ The full pinning pass (P0.13, last bullet) happens at the end of Phase 0. Until 
 | `spatie/laravel-data` | 4.23.1 | Data classes for every page's props (SPEC §2) |
 | `spatie/laravel-typescript-transformer` | 3.3.0 | TypeScript types from data classes (SPEC §2) |
 | `spatie/laravel-query-builder` | 7.3.9 | Server-side filters and sorts for `DataTable` (SPEC §13.5) |
+| `laravel/horizon` | 5.52.0 | Queue supervisors and dashboard (SPEC §16) |
+| `sentry/sentry-laravel` | 4.31.0 | Sextant's own errors and Sentry Crons (SPEC §12.2) |
 
 Dev: `larastan/larastan` 3.15.0, `laravel/boost` 2.10.4, `laravel/pail` 1.3.0, `laravel/pao` 1.1.6, `laravel/pint` 1.32.3, `laravel/sail` 1.71.0, `pestphp/pest` 5.3.7, `pestphp/pest-plugin-laravel` 5.0.1, `mockery/mockery` 1.6.15, `nunomaduro/collision` 8.9.6, `fakerphp/faker` 1.24.1. All from the starter kit.
 
