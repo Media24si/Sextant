@@ -2,21 +2,17 @@
 
 namespace App\Rules;
 
-use App\Models\ExternalService;
+use App\Detection\ExternalServiceMatcher;
 use App\Models\Server;
 use App\Models\ServerAddress;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
-use Symfony\Component\HttpFoundation\IpUtils;
 
 /**
  * An IP may belong to at most one non-deleted server and must not fall inside
- * an external service's ranges (SPEC §3.3). Sextant never creates a server
- * from an external service's address (GOAL §3).
- *
- * SPEC: only the admin-entered `ranges` are checked here; the published
- * ranges of `ranges_source` services join when `proxies:refresh` caches them (P2.3/P2.4).
+ * an external service's ranges, its own or the published ones (SPEC §3.3).
+ * Sextant never creates a server from an external service's address (GOAL §3).
  */
 class IpAddressIsFree implements ValidationRule
 {
@@ -46,12 +42,10 @@ class IpAddressIsFree implements ValidationRule
             return;
         }
 
-        foreach (ExternalService::query()->get(['name', 'ranges']) as $service) {
-            if (IpUtils::checkIp($ip, $service->ranges)) {
-                $fail("{$ip} is in the ranges of the external service {$service->name}, so it can't be one of our servers.");
+        $service = app(ExternalServiceMatcher::class)->forIp($ip);
 
-                return;
-            }
+        if ($service !== null) {
+            $fail("{$ip} is in the ranges of the external service {$service->name}, so it can't be one of our servers.");
         }
     }
 }

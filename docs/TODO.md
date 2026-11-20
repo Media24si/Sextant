@@ -91,10 +91,10 @@
 ## Phase 2 — Add site, Add domain and import (§18)
 
 ### Network and matching
-- [ ] **P2.1** `app/Net` interfaces, real implementations and fakes: `DnsResolver`, `TcpProbe`, `TlsProbe`, `HttpProbe`, `PingProbe`, `RdapClient` (IANA bootstrap cached, weekly refresh, 12 h cache unless `fresh`), `WhoisClient` (§9.0). User agent from config.
-- [ ] **P2.2** `UrlNormalizer` (§10.1 step 1); registrable domain via PSL.
-- [ ] **P2.3** `ServerMatcher` and `ExternalServiceMatcher` (manual ranges + cached source ranges, CNAME suffixes, response headers) using `IpUtils` (§9.0).
-- [ ] **P2.4** `proxies:refresh` (daily) and `rdap:refresh-bootstrap` (weekly, also refreshes the PSL) (§14).
+- [x] **P2.1** `app/Net` interfaces, real implementations and fakes: `DnsResolver`, `TcpProbe`, `TlsProbe`, `HttpProbe`, `PingProbe`, `RdapClient` (IANA bootstrap cached, weekly refresh, 12 h cache unless `fresh`), `WhoisClient` (§9.0). User agent from config.
+- [x] **P2.2** `UrlNormalizer` (§10.1 step 1); registrable domain via PSL.
+- [x] **P2.3** `ServerMatcher` and `ExternalServiceMatcher` (manual ranges + cached source ranges, CNAME suffixes, response headers) using `IpUtils` (§9.0).
+- [x] **P2.4** `proxies:refresh` (daily) and `rdap:refresh-bootstrap` (weekly, also refreshes the PSL) (§14).
 
 ### Detection and saving
 - [ ] **P2.5** `SiteDetector` producing `SiteDetectionData` exactly as §10.1, with confidence rules (§10.2) and backend detection behind a front service: optional header, siblings, not found (§10.3). Probes in parallel; ≤ 15 s.

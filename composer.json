@@ -13,6 +13,7 @@
         "ext-pdo_mysql": "*",
         "ext-redis": "*",
         "inertiajs/inertia-laravel": "^3.0",
+        "jeremykendall/php-domain-parser": "^6.4",
         "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.17",

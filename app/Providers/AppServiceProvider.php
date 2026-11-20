@@ -7,6 +7,20 @@ use App\Models\ExternalService;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\User;
+use App\Net\DnsResolver;
+use App\Net\HttpProbe;
+use App\Net\PingProbe;
+use App\Net\RdapClient;
+use App\Net\Real\GuzzleHttpProbe;
+use App\Net\Real\IanaRdapClient;
+use App\Net\Real\NetDnsResolver;
+use App\Net\Real\SocketTcpProbe;
+use App\Net\Real\SocketWhoisClient;
+use App\Net\Real\StreamTlsProbe;
+use App\Net\Real\SystemPingProbe;
+use App\Net\TcpProbe;
+use App\Net\TlsProbe;
+use App\Net\WhoisClient;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
@@ -22,7 +36,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // All network I/O goes through these wrappers so tests can fake it (SPEC §9.0).
+        $this->app->singleton(DnsResolver::class, NetDnsResolver::class);
+        $this->app->singleton(TcpProbe::class, SocketTcpProbe::class);
+        $this->app->singleton(TlsProbe::class, StreamTlsProbe::class);
+        $this->app->singleton(HttpProbe::class, GuzzleHttpProbe::class);
+        $this->app->singleton(PingProbe::class, SystemPingProbe::class);
+        $this->app->singleton(RdapClient::class, IanaRdapClient::class);
+        $this->app->singleton(WhoisClient::class, SocketWhoisClient::class);
     }
 
     /**

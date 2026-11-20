@@ -2,7 +2,7 @@
 
 Every package Sextant depends on, why it's there, and the version installed. `composer.lock` and `package-lock.json` pin the exact versions; `composer.json` and `package.json` use caret constraints. Add a row whenever a package is added (docs/CLAUDE.md, "Dependencies").
 
-Versions are as installed at the end of Phase 0 (2026-11-20). Not yet installed, named by SPEC for later phases: `jeremykendall/php-domain-parser` (P2.2).
+Versions are as installed at the end of Phase 0 (2026-11-20).
 
 ## Decisions
 
@@ -36,6 +36,7 @@ Versions are as installed at the end of Phase 0 (2026-11-20). Not yet installed,
 | `sentry/sentry-laravel` | 4.31.0 | Sextant's own errors and Sentry Crons (SPEC §12.2) |
 | `pear/net_dns2` | 2.0.7 | DNS with our own resolvers, timeouts and direct authoritative queries (SPEC §2, §9.0; `net-dns2.md`) |
 | `spatie/ssl-certificate` | 2.7.0 | Certificate fields for `site.ssl` (SPEC §2, §9.6; `tls.md`) |
+| `jeremykendall/php-domain-parser` | 6.4.1 | Registrable domain via the Public Suffix List (SPEC §10.1, P2.2). Snapshot in `resources/data/public_suffix_list.dat`; `rdap:refresh-bootstrap` keeps a fresher copy in storage |
 
 Dev: `larastan/larastan` 3.15.0, `laravel/boost` 2.10.4, `laravel/pail` 1.3.0, `laravel/pao` 1.1.6, `laravel/pint` 1.32.3, `laravel/sail` 1.71.0, `pestphp/pest` 5.3.7, `pestphp/pest-plugin-laravel` 5.0.1, `mockery/mockery` 1.6.15, `nunomaduro/collision` 8.9.6, `fakerphp/faker` 1.24.1. All from the starter kit.
 

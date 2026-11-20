@@ -9,3 +9,6 @@ use Illuminate\Support\Facades\Schedule;
  */
 
 Schedule::command('horizon:snapshot')->everyFiveMinutes()->sentryMonitor();
+
+Schedule::command('proxies:refresh')->daily()->withoutOverlapping();
+Schedule::command('rdap:refresh-bootstrap')->weekly()->withoutOverlapping();
