@@ -9,8 +9,13 @@ export type ProfileData = {
 name: string,
 email: string,
 };
+export type ServingPathData = {
+front: string | null,
+backend: string | null,
+};
 }
 namespace Enums {
+export type Confidence = 'detected' | 'suggested' | 'not_found';
 export type Status = 'ok' | 'warning' | 'error' | 'unknown';
 export type UserRole = 'admin' | 'reader';
 }

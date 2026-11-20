@@ -38,7 +38,7 @@
 - [x] **P0.7** `config/sextant.php` skeleton exactly as §15.1; `.env.example` with every variable in §15.2.
 - [x] **P0.8** Install and wire `spatie/laravel-data` + TypeScript transformer (types into `resources/js/types/generated.d.ts`, run before `npm run build`), `spatie/laravel-query-builder`, Wayfinder (fall back to Ziggy if unsuitable; note the choice in `docs/spikes/versions.md`).
 - [x] **P0.9** App shell per the prototype (§13.4): dark sidebar with Overview, Servers, Domains, Incidents, Activity and the admin-only group; header with a global search field placeholder, system health pill and user menu showing the role. Design tokens and fonts (§13.1). Responsive: sidebar stacks on phones.
-- [ ] **P0.10** Shared components (§13.4): `DataTable` (§13.5), `StatusBadge`, `StatusDot`, `SeverityBadge`, `ServingPath`, `ConfidenceBadge`, `VersionCell`, `RelativeTime`, `ConfirmDialog`, `PageHeader`, `Breadcrumbs`, `EmptyState`, `RepoLink`, form field wrappers (label, input, error) on shadcn-vue.
+- [x] **P0.10** Shared components (§13.4): `DataTable` (§13.5), `StatusBadge`, `StatusDot`, `SeverityBadge`, `ServingPath`, `ConfidenceBadge`, `VersionCell`, `RelativeTime`, `ConfirmDialog`, `PageHeader`, `Breadcrumbs`, `EmptyState`, `RepoLink`, form field wrappers (label, input, error) on shadcn-vue.
 - [ ] **P0.11** A temporary demo page using `DataTable` against a seeded table, proving server-side sort, filter chips, search and pagination via query string.
 - [x] **P0.12** CI: Pint, Larastan, Pest against a **MySQL 9.7** service container, ESLint, `vue-tsc --noEmit`, Vitest.
 - [ ] **P0.13** Spikes, each in `docs/spikes/<name>.md`:
@@ -260,6 +260,7 @@ Found in Phase 0 (2026-11-20):
 - [x] The prototype's Admin group has no "Lists" item; §13.4 has one. Decision: follow the spec.
 - [x] "Sidebar stacks on phones" (P0.9): the prototype wraps the nav above the content; the starter kit's sidebar slides in as a sheet. Decision: keep the kit's sheet, opened from the header button.
 - [x] The `Status` enum belongs to P1.2, but the shell and P0.10 components need its TypeScript type. Decision: `App\Enums\Status` (values only) added in P0.9; P1.2 adds `rank()` and `isFailure()`.
+- [x] `ConfidenceBadge` and `ServingPath` (P0.10) need types that SPEC defines for Phases 1–2. Decision: `App\Enums\Confidence` (`detected`, `suggested`, `not_found`, §10.1) and `App\Data\ServingPathData` (front and backend names) added now; "Chosen by you" is a UI state (`chosen` prop), not a confidence. P1.8/P1.9 build on them.
 
 Carried over from the previous version of this list (still open in SPEC v0.2):
 

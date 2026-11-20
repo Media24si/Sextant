@@ -15,6 +15,10 @@ The full pinning pass (P0.13, last bullet) happens at the end of Phase 0. Until 
   - The file isn't formatted (no Prettier) and is excluded from `vp check`.
   - `CarbonInterface` properties become `string`; laravel-data serialises dates as ISO 8601 (`DATE_ATOM`), matching SPEC §13.1.
 
+- **TanStack Table v8, not v9.** v9 (released this year) replaces `useVueTable` with a new feature-based API; shadcn-vue's data-table pattern and its docs are written for v8. Revisit when shadcn-vue moves to v9.
+- **shadcn-vue CLI quirk.** `npx shadcn-vue add` wrote `import { cn } from "cn"` and added the unrelated npm package `cn`. Both were corrected (`@/lib/utils`, package removed). Check imports and `package.json` after every `add`. Answer "no" when it offers to overwrite existing components.
+- **`npm audit`:** 5 moderate advisories in `glob`/`minimatch`, reached only through `@vue/test-utils` → `js-beautify` (dev dependency, not shipped).
+
 ## Composer
 
 | Package | Version | Why |
@@ -48,6 +52,9 @@ Dev: `larastan/larastan` 3.15.0, `laravel/boost` 2.10.4, `laravel/pail` 1.3.0, `
 | `vue-sonner` | 2.0.9 | Toasts |
 | `vite-plus` | 1.4.0 | Build, lint, format, Vitest |
 | `vue-tsc` | 3.3.14 | Type checking |
+| `@tanstack/vue-table` | 8.21.3 | Headless table for `DataTable` (SPEC §2, §13.5) |
+| `@vue/test-utils` (dev) | 2.6.0 | Mounting components in Vitest |
+| `happy-dom` (dev) | 21.0.4 | DOM for Vitest (`test.environment` in `vite.config.ts`) |
 | `typescript` | 5.9.3 | |
 
 Others from the starter kit: `class-variance-authority` 0.7.1, `clsx` 2.1.1, `tailwind-merge` 3.7.1, `tw-animate-css` 1.4.0, `vue-input-otp` 0.3.2, `laravel-vite-plugin` 3.2.1, `@vitejs/plugin-vue` 6.0.11, `concurrently` 10.0.7, `@types/node` 22.20.5, `@laravel/multiplex` 0.4.5 (optional).
