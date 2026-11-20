@@ -1,0 +1,256 @@
+# Sextant v1 — Agent TODO
+
+> Derived from GOAL.md v0.3 and SPEC.md v0.2 (2026-11-20). Section refs like **§10.3** point to SPEC.md; **GOAL §5** points to GOAL.md. Stack: Laravel + Inertia + Vue 3 + TypeScript + shadcn-vue, MySQL 9.7 LTS, Redis + Horizon.
+
+## How to work through this list
+
+1. Read GOAL.md and SPEC.md in full before starting, and the screenshots in `docs/design/`. **If they conflict, GOAL.md wins**: log the conflict under "Spec issues found" and follow GOAL.
+2. Work phase by phase. Don't start a phase until the previous phase's **Exit** box is ticked.
+3. One task (or a small group of related tasks) per branch and pull request. Tick a task only when its code and tests are in, and Pint, Larastan, Pest, ESLint, `vue-tsc` and Vitest all pass.
+4. Tasks marked **[HUMAN]** need access or decisions you don't have (servers, Sentry, Discord, real data). Prepare everything you can, then stop and ask.
+5. No live network in the default test suite. All network I/O goes through `app/Net` wrappers with fakes (§9.0). Live tests go in `--group=live`.
+6. Never invent behaviour the spec doesn't define. If something is ambiguous, pick the option closest to GOAL's principles, leave a `// SPEC:` comment, and log it below.
+7. UI: match the prototype's structure, navigation and components (§13). Don't add screens or features the prototype and spec don't have.
+
+### Non-negotiable rules (from GOAL "Principles")
+
+- Overview first: the inventory, serving paths and versions must be right before monitoring is polished.
+- Unknown is not Error: a check that couldn't run never counts towards an incident.
+- A single failed check never notifies. Incidents open after N failures and resolve after M passes.
+- Every non-OK effective status is backed by an incident (§6.1). No manual "resolve".
+- System writes use `saveQuietly()` and never appear as inventory activity.
+- Checker = code, monitor = config. A new check is a class + config entry + test, no migration.
+- Detection proposes, the admin confirms. Never create a server from an external service's address.
+- Sextant never holds SSH or other credentials to our servers. Version tokens are encrypted and never sent to the browser after generation.
+- Readers change nothing: every mutating route is admin-only and tested (§13.2, §17).
+- Store UTC, display Europe/Ljubljana. Hostnames lowercase punycode, no trailing dot.
+
+---
+
+## Phase 0 — Foundation (§18)
+
+- [ ] **P0.1** New app from Laravel's **Vue starter kit** (TypeScript). PHP ≥ 8.4 with `intl`, `openssl`, `curl`, `redis`, `pdo_mysql`. `APP_TIMEZONE=UTC`. Remove registration routes, pages and tests.
+- [ ] **P0.2** MySQL 9.7: `.env.example` for socket or TLS; document creating the user with `caching_sha2_password` (§16).
+- [ ] **P0.3** `users.role` (`admin`/`reader`, default `reader`); `EnsureAdmin` middleware; policy scaffold; `HandleInertiaRequests` shares `auth.user` (id, name, role) and `can.manage` (§13.2).
+- [ ] **P0.4** `php artisan sextant:create-admin` (name, email, password prompt).
+- [ ] **P0.5** Redis + Horizon with supervisors `checks` (5–20), `checks-slow` (2), `notifications` (1), `default` (2); job timeout 60 s, `retry_after` 90 s; `/horizon` admin only (§16).
+- [ ] **P0.6** Sentry with `SENTRY_TRACES_SAMPLE_RATE=0` and one scheduled task using `->sentryMonitor()`. Scheduler documented for `schedule:work` (§14).
+- [ ] **P0.7** `config/sextant.php` skeleton exactly as §15.1; `.env.example` with every variable in §15.2.
+- [ ] **P0.8** Install and wire `spatie/laravel-data` + TypeScript transformer (types into `resources/js/types/generated.d.ts`, run before `npm run build`), `spatie/laravel-query-builder`, Wayfinder (fall back to Ziggy if unsuitable; note the choice in `docs/spikes/versions.md`).
+- [ ] **P0.9** App shell per the prototype (§13.4): dark sidebar with Overview, Servers, Domains, Incidents, Activity and the admin-only group; header with a global search field placeholder, system health pill and user menu showing the role. Design tokens and fonts (§13.1). Responsive: sidebar stacks on phones.
+- [ ] **P0.10** Shared components (§13.4): `DataTable` (§13.5), `StatusBadge`, `StatusDot`, `SeverityBadge`, `ServingPath`, `ConfidenceBadge`, `VersionCell`, `RelativeTime`, `ConfirmDialog`, `PageHeader`, `Breadcrumbs`, `EmptyState`, `RepoLink`, form field wrappers (label, input, error) on shadcn-vue.
+- [ ] **P0.11** A temporary demo page using `DataTable` against a seeded table, proving server-side sort, filter chips, search and pagination via query string.
+- [ ] **P0.12** CI: Pint, Larastan, Pest against a **MySQL 9.7** service container, ESLint, `vue-tsc --noEmit`, Vitest.
+- [ ] **P0.13** Spikes, each in `docs/spikes/<name>.md`:
+  - [ ] MySQL 9.7: stored generated column + unique index for soft-delete uniqueness; `open_monitor_id` unique index; `RESTRICT` FK on its base column (§3.11, §3.17).
+  - [ ] Net_DNS2: custom resolvers, timeouts, CNAME chain, authoritative SOA query.
+  - [ ] TLS: verifying connection plus `spatie/ssl-certificate` fields.
+  - [ ] RDAP via IANA bootstrap; record the `svet24.si` response as a fixture (date-only events).
+  - [ ] **[HUMAN]** List every TLD Media24 uses; confirm RDAP or WHOIS parsing for each.
+  - [ ] **[HUMAN]** Confirm ICMP `ping` works for the php-fpm and Horizon users on the Sextant server.
+  - [ ] Pin package versions in `composer.json` / `package.json`; list them in `docs/spikes/versions.md`.
+- [ ] **P0.14** **[HUMAN]** Deploy to the dedicated Sextant server (§16): nginx + php-fpm, MySQL 9.7, Redis, Horizon and `schedule:work` under supervisor/systemd; outbound firewall per §16.
+- [ ] **P0.15** **[HUMAN]** Export the prototype's artboards as PNG into `docs/design/` (Overview, Servers, Server detail, Domains, Add domain, Add server, Add site).
+- [ ] **Exit P0**: deployed; an admin and a reader can log in; the reader sees no edit controls and gets 403 on a sample mutation; the demo `DataTable` works server-side; a Sentry cron check-in is visible; spike notes written.
+
+---
+
+## Phase 1 — Inventory and overview (§18)
+
+### Data
+- [ ] **P1.1** Enforced morph map (§3).
+- [ ] **P1.2** `Status` enum with `rank()` and `isFailure()` (§4.2).
+- [ ] **P1.3** Migrations + models: `choices` (§3.4) with seeds; `servers` (soft deletes, §3.2, `versions_token` encrypted cast, hidden from serialisation); `server_addresses` (§3.3); `server_backup_location` pivot; `external_services` (soft deletes, §3.5) with the Cloudflare seed; `domains` (§3.6); `sites` (§3.7: `front_service_id`, `server_id`, `description`, `github_url`).
+- [ ] **P1.4** Soft-delete uniqueness via stored generated `active_*` columns on `servers.name`, `external_services.name`, `domains.name`, `sites.hostname` (§3.17).
+- [ ] **P1.5** Validation: IP belongs to at most one non-deleted server and not inside any external service's ranges (§3.3); domain with live sites can't be deleted; external service used by sites can't be deleted; choice in use can't be deleted; `github_url` format.
+- [ ] **P1.6** `activities` table and `ActivityRecorder::record(...)` (§3.13, §8.1).
+- [ ] **P1.7** Observers on `Server`, `ServerAddress`, `ExternalService`, `Domain`, `Site`, `User` and the backup pivot, including special types `site.path_changed`, `server.address_added/removed`, `server.backup_locations_changed`, `user.role_changed`; exclude secrets and system-maintained columns (§8.2).
+- [ ] **P1.8** Accessors: `$site->url`; Unicode display via `idn_to_utf8()`; `$site->servingPath()` returning front + backend.
+- [ ] **P1.9** laravel-data classes for every page's rows and forms; generated TypeScript types used by pages.
+
+### Pages (admin-only actions behind `EnsureAdmin`, §13.3)
+- [ ] **P1.10** Servers list (§13.6): status, name + hostname, primary IP, OS, sites served, backups ("None set" in orange); version columns rendered as "not configured" until Phase 7. Filters: All, Problems, No backup location.
+- [ ] **P1.11** Server page: header (status, hostname, IPs, provider, OS, backup locations, actions); "How traffic reaches {server}"; sites served with `ServingPath`; activity tab.
+- [ ] **P1.12** Add / edit server: basics with OS select from the `os` list; backup checkboxes from `backup_location`; addresses with a primary radio; versions section as a disabled placeholder until Phase 7. Delete and restore.
+- [ ] **P1.13** External services: list and form (name, kind, ranges, range source, CNAME suffixes, headers).
+- [ ] **P1.14** Domains list with expandable subdomains (§13.6): counts, expiry, registrar, status; expanded rows show description, repo link, `ServingPath`, status; Expand/Collapse all; filter. Domain page.
+- [ ] **P1.15** Sites list (filters: status, front service, backend, Needs review); site page; edit site (front service select, backend select, description, GitHub link, scheme, port, notes). Add site is Phase 2: until then a simple manual form.
+- [ ] **P1.16** Lists page (OS and backup locations: add, rename, reorder, delete when unused).
+- [ ] **P1.17** Users page (admin only): list, create, change role, delete; never remove the last admin.
+- [ ] **P1.18** Activity page with filters (category, type, resource, server, user).
+- [ ] **P1.19** Global search: `GET /search` (§13.8) and the `GlobalSearch` Command dialog with Ctrl/⌘ + K; versions matching is added in Phase 7.
+
+### Tests
+- [ ] **P1.20** Authorization matrix test covering every admin-only route so far (403 for reader, success for admin); grow it in every later phase (§17).
+- [ ] **P1.21** Observers (admin edits recorded; quiet writes not; secrets never stored); validation rules; `assertInertia` for each page; Vitest for `DataTable`, `ServingPath`, `StatusBadge`, `GlobalSearch`.
+
+- [ ] **Exit P1** **[HUMAN]**: all ~20 servers, Cloudflare and Varnish entered; a sample of domains and sites entered by hand with paths; search finds servers by IP and sites by description; a reader can browse everything and change nothing.
+
+---
+
+## Phase 2 — Add site, Add domain and import (§18)
+
+### Network and matching
+- [ ] **P2.1** `app/Net` interfaces, real implementations and fakes: `DnsResolver`, `TcpProbe`, `TlsProbe`, `HttpProbe`, `PingProbe`, `RdapClient` (IANA bootstrap cached, weekly refresh, 12 h cache unless `fresh`), `WhoisClient` (§9.0). User agent from config.
+- [ ] **P2.2** `UrlNormalizer` (§10.1 step 1); registrable domain via PSL.
+- [ ] **P2.3** `ServerMatcher` and `ExternalServiceMatcher` (manual ranges + cached source ranges, CNAME suffixes, response headers) using `IpUtils` (§9.0).
+- [ ] **P2.4** `proxies:refresh` (daily) and `rdap:refresh-bootstrap` (weekly, also refreshes the PSL) (§14).
+
+### Detection and saving
+- [ ] **P2.5** `SiteDetector` producing `SiteDetectionData` exactly as §10.1, with confidence rules (§10.2) and backend detection behind a front service: optional header, siblings, not found (§10.3). Probes in parallel; ≤ 15 s.
+- [ ] **P2.6** `POST /sites/detect` (admin, JSON) and the **Add site** page (§13.6): URL + Detect, findings with `ConfidenceBadge`, backend select ("Chosen by you" on change), serving path preview, first probe, Details (description, GitHub), checks to attach (display only until Phase 3), `www.` offer, duplicate and invalid states, "How detection works" panel, unknown-IP actions (new server / external service, prefilled).
+- [ ] **P2.7** `POST /sites` saving in one transaction (§10.4); redirect to the site page. Monitor attachment is stubbed with a clear hook until Phase 3.
+- [ ] **P2.8** **Add domain** (§10.5): `POST /domains/lookup` RDAP preview; subdomain rows prefilled by detection; one save.
+- [ ] **P2.9** Import page and `sextant:import urls.txt` (§10.6): created / needs review / skipped summary.
+- [ ] **P2.10** Re-run detection on a site (§10.7).
+- [ ] **P2.11** "Add site" buttons per the prototype: primary on Overview and Domains, "Add site on {domain}" in expanded domains, link from Add domain.
+
+### Tests
+- [ ] **P2.12** `UrlNormalizer` (case, trailing dot, `šola.si`, ports, paths, IP literals); matchers (v4/v6 ranges, CNAME, headers); backend suggestion (one sibling, tie, none, mixed fronts, header on/off); detection feature tests (direct, Cloudflare, Varnish, new domain, unknown IP, duplicate/restore, redirect → `expected_target` + `www.` offer); import outcomes; RDAP fixtures; WHOIS fixtures (§17).
+
+- [ ] **Exit P2** **[HUMAN]**: all ~80 sites imported; every site has a domain and a backend or is in "Needs review"; a Varnish site and a Cloudflare site produce the right findings and suggestions.
+
+---
+
+## Phase 3 — Monitoring engine and core checkers (§18)
+
+### Data
+- [ ] **P3.1** `monitors` (§3.8), `monitor_states` (§3.9), `monitor_runs` (§3.10, no FK, `MassPrunable` at 90 days).
+
+### Registry and contracts (§4)
+- [ ] **P3.2** `Checker`, `CheckResult`, `CheckCouldNotRun`, base classes `ServerChecker`, `DomainChecker`, `SiteChecker`.
+- [ ] **P3.3** `config/checkers.php` exactly as §4.3 and a `CheckerRegistry` service.
+- [ ] **P3.4** `Argument` schema builder and `Arguments` value object with typed getters that throw on unknown keys; settings resolution (§4.5); schema serialised to JSON for the UI (§4.6).
+- [ ] **P3.5** `sextant:checkers` validation command.
+
+### Running (§5)
+- [ ] **P3.6** `monitors:dispatch` (compare-and-set claim, batches of 200, 50 s cap, Sentry cron) and a shared `MonitorClaimer`.
+- [ ] **P3.7** `RunMonitor` job (§5.2) and the pipeline exactly as §5.3.
+- [ ] **P3.8** `NetworkHealth::isHealthy()` (§5.4).
+- [ ] **P3.9** State machine **without incidents** (failures show as pending), stale handling, confirmation re-check (§5.1, §6.1, §6.2).
+- [ ] **P3.10** `ResourceStatus::refresh()` (§7); `ChangeDetector` + `detected` activities (§8.3).
+- [ ] **P3.11** `sextant:sweep` (statuses, stale states), pruning schedule, `monitors:run`, `monitors:sync-defaults --checker` (required) (§14).
+
+### Checkers (§9)
+- [ ] **P3.12** `server.tcp` (§9.1).
+- [ ] **P3.13** `site.http` (§9.5).
+- [ ] **P3.14** `site.ssl` (§9.6), with "(edge certificate, {service})" behind a front service.
+- [ ] **P3.15** `site.path` (§9.7) with every situation in its table.
+- [ ] **P3.16** `domain.expiration` (§9.3), RDAP then WHOIS, side effects written quietly.
+
+### Defaults and UI
+- [ ] **P3.17** Default monitors on create with `only_if` conditions (`PortIsOpen`, `UsesHttps`); wire Phase 2's hook; spread first runs on import; backfill command for existing resources (§4.4).
+- [ ] **P3.18** Monitors UI: tab on server, domain and site pages; global Monitors list (filters: checker, status, enabled, muted, pending); drawer with effective settings, state and last 100 runs; form with `MonitorArgumentsForm` (empty = inherit, inherited value as placeholder); Run now; §6.4 effects.
+- [ ] **P3.19** Tests: StateMachine table tests (no incidents yet), settings resolution, registry validation, `RunMonitor` end to end with `FakeChecker`, dispatch double-claim prevention, canary, `ChangeDetector`, `site.path` situations.
+- [ ] **P3.20** **[HUMAN]** Before go-live: Sextant's IP in fail2ban `ignoreip` on monitored servers and allowlisted in Cloudflare/WAF (§16).
+
+- [ ] **Exit P3** **[HUMAN]**: all default monitors run for 48 h with no stuck or duplicate jobs in Horizon; 10 results spot-checked by hand.
+
+---
+
+## Phase 4 — Incidents (§18)
+
+- [ ] **P4.1** `incidents` (§3.11: `RESTRICT` FK, `server_id` snapshot of the backend, generated unique `open_monitor_id`, scopes) and `incident_events` (§3.12).
+- [ ] **P4.2** `IncidentManager`: open (duplicate-safe), escalate, de-escalate, acknowledge, reminder, resolve; events with `notify` flags (§6.3); `status` activities.
+- [ ] **P4.3** Complete the state machine (§6.2); pending and recovering flags.
+- [ ] **P4.4** Resolution on monitor disable/delete and resource delete. No manual resolve.
+- [ ] **P4.5** Acknowledge (admins only) from incident pages.
+- [ ] **P4.6** Muting (§6.6): monitor, resource, and server plus every site whose backend it is.
+- [ ] **P4.7** Dependency checks, adoption and grouping by backend server (§6.5).
+- [ ] **P4.8** Sweep additions: reminders, mute-ended, detached-child (§6.3, §6.5, §6.6).
+- [ ] **P4.9** Incidents list and page (§13.6); incident tabs on resource pages including the server roll-up via `server_id`.
+- [ ] **P4.10** Tests: full StateMachine tables, unique open incident under two concurrent runs, adoption by backend, detached-child reminders, authorization for acknowledge.
+- [ ] **Exit P4** **[HUMAN]**: firewalling a test server's port 443 from Sextant opens exactly one server incident with its sites as children; lifting the block resolves them all.
+
+---
+
+## Phase 5 — Notifications and self-monitoring (§18)
+
+- [ ] **P5.1** Discord sender job on `notifications` (single worker), `RateLimited('discord')`, `?wait=true`, 429 handling, Sentry after 5 failures (§12.1).
+- [ ] **P5.2** `notifications:flush` every 30 s exactly as §12.1 steps 1–6.
+- [ ] **P5.3** Embed builder per §12.1, including serving paths in server groups and CVE links for `server.versions`.
+- [ ] **P5.4** `sextant:heartbeat` and Sentry Crons (§12.2); only Sextant's own errors go to Sentry.
+- [ ] **P5.5** Tests with `Http::fake`: `@here` rules, 10-embed split, muted suppression, grouped child suppression and folding, resolution summary, 429.
+- [ ] **P5.6** **[HUMAN]** Create the Discord webhook; Sentry alert rule for missed check-ins routed to the same channel.
+- [ ] **Exit P5** **[HUMAN]**: the Phase 4 outage produces one Discord message for the outage and one for the recovery; stopping Horizon produces a Sentry alert in Discord within 10 minutes.
+
+---
+
+## Phase 6 — Live dashboard (§18)
+
+- [ ] **P6.1** `DashboardData` building `DashboardProps` (§13.7) with a handful of queries; types generated from laravel-data.
+- [ ] **P6.2** Dashboard page per the prototype: totals; Current issues (grouped, Acknowledge for admins, recovering/acknowledged markers, serving paths on children); Recently resolved; Expiring in 60 days; Recent changes; footer with system health and pending count. Add domain / Add server / Add site buttons for admins.
+- [ ] **P6.3** `usePoll(10_000, { only: [...] })` on the dashboard; polling on server, site and incident pages (§13.7).
+- [ ] **P6.4** Header health pill wired to `system`.
+- [ ] **P6.5** Feature test that props match the contract and ordering/grouping rules hold.
+- [ ] **Exit P6**: during a scripted outage the issue appears within 10 s of opening, without a reload.
+
+---
+
+## Phase 7 — Software versions (§18)
+
+- [ ] **P7.1** Migrations `server_software` (§3.14) and `minimum_versions` (§3.15); `servers.os_reported`, `versions_url`, `versions_token`, `versions_token_last4` if not already present.
+- [ ] **P7.2** Collector `resources/collector/sextant-collect.sh` exactly as §11.3 (no `jq`, atomic write, missing software = `null`, package versions via `dpkg-query`); `shellcheck` in CI.
+- [ ] **P7.3** `versions.php.stub` exactly as §11.4 (PHP ≥ 7.4, GET only, HTTPS only, `hash_equals` on SHA-256, 401/405/403/503 rules, `Cache-Control: no-store`).
+- [ ] **P7.4** Token generation and rotation (shown once, encrypted, last4), download routes for both files, install instructions with the nginx snippet, Test connection (§11.2, §11.4, §13.3).
+- [ ] **P7.5** `VersionsClient` and `VersionsFile` validation (schema 1, 256 KB cap, 10 s timeout).
+- [ ] **P7.6** `VersionsRecorder` (§11.5): upserts, removals, `os_reported`, `software.*` and `server.os_changed` activities; nothing on the first reading.
+- [ ] **P7.7** Version normalisation and comparison (§11.6), including kernel strings.
+- [ ] **P7.8** `server.versions` checker (§9.9) and its attachment when an endpoint is configured (§4.4); Refresh claims a run.
+- [ ] **P7.9** Minimum versions page (§13.6); set/change/remove claims runs of all versions monitors (§6.4); `minimum_version.*` activities.
+- [ ] **P7.10** UI: version columns and "Below minimum" filter on Servers; versions panel on the server page (installed, package, minimum, read time, endpoint, masked token, downloads, Test connection, Refresh, OS reported vs set); Software vs minimum on the dashboard; servers below minimum in totals; search by version; Windows note on Add server.
+- [ ] **P7.11** Tests: validation fixtures, comparison, recorder changes, checker outcomes (OK, Warning, 401/timeout/stale → Unknown with versions kept), rendered `versions.php` via `php -S` (401/405/200), the downloaded file contains the hash and never the token; live-group collector run in Ubuntu 24.04 and Debian 12 containers.
+- [ ] **P7.12** **[HUMAN]** Install the collector and endpoint on two real servers, one with two PHP versions.
+- [ ] **Exit P7** **[HUMAN]**: setting a minimum above a server's version turns it orange within a minute and posts a Discord warning without `@here`; upgrading clears it; stopping the cron shows the reading's age with no alert.
+
+---
+
+## Phase 8 — Remaining checkers (§18)
+
+- [ ] **P8.1** `domain.nameservers` (§9.4).
+- [ ] **P8.2** `site.redirect` (§9.8); detection already sets `expected_target`.
+- [ ] **P8.3** `server.ping` (§9.2) with `RespondsToPing`.
+- [ ] **P8.4** Unit tests for each with fakes.
+- [ ] **P8.5** `monitors:sync-defaults --checker=…` for each (dry run first).
+- [ ] **Exit P8**: every checker in GOAL's table runs on existing resources.
+
+---
+
+## Phase 9 — Hardening and launch (§18)
+
+- [ ] **P9.1** **[HUMAN]** One week of real data; review every incident; tune thresholds and intervals.
+- [ ] **P9.2** Verify each GOAL success criterion and record evidence in `docs/launch-checklist.md`:
+  - [ ] Add a site from its URL in under a minute with the right domain, serving path and monitors.
+  - [ ] Find how a site is served and which sites depend on a server within seconds.
+  - [ ] Set a minimum after a CVE and see every affected server within a minute.
+  - [ ] A real outage reaches Discord within interval × failure threshold + 1 min.
+  - [ ] A single failed check never notifies; losing Sextant's own connectivity never opens incidents.
+  - [ ] Sextant stopping is reported via Sentry within 10 min.
+  - [ ] Certificate and domain expiries show at least 30 days ahead.
+  - [ ] The dashboard answers "is anything broken?" within seconds, without refresh.
+  - [ ] Readers can browse everything and change nothing.
+- [ ] **P9.3** README runbook: deploying, adding a checker (class + config + test), installing the collector, rotating a token, handling a false positive.
+- [ ] **P9.4** **[HUMAN]** Daily MySQL dump configured and a restore verified.
+- [ ] **Exit P9**: the team uses Sextant as its source of truth and all GOAL success criteria are met.
+
+---
+
+## Open questions (from GOAL; use the default until decided)
+
+- Readers acknowledging incidents → default: admins only.
+- Distribution backports → default: compare upstream, show package versions, admins acknowledge.
+- Backend header behind Cloudflare/Varnish (`SEXTANT_BACKEND_HEADER`) → default: off, suggest from siblings.
+- Real backup location list → default: seeded placeholders, editable on the Lists page.
+
+## Spec issues found
+
+Log anything ambiguous or contradictory here instead of guessing silently.
+
+Carried over from the previous version of this list (still open in SPEC v0.2):
+
+- [ ] Deleting a server that is still the backend of live sites isn't defined. Domains and external services block deletion when in use (§3.5, §3.6); confirm whether servers should do the same or set `sites.server_id` to null (sites then show "Backend not assigned").
+- [ ] A server where no port 22/80/443 is open, ping fails and no versions endpoint is set gets no default monitors, so its status stays `unknown`. Confirm whether that's intended or whether the server page should prompt an admin to add a monitor.
+
+## Out of scope for v1 (don't build)
+
+Server metrics or agents, checking that backups run, automatic CVE matching, multiple probe locations, public status page, teams or per-resource permissions, applications (web or mobile), CDN-bypass origin checks, checks of external services, serving paths longer than front + backend, on-call/escalation policies, maintenance windows beyond "mute until", uptime/SLA reports, software versions on Windows (GOAL "Not in v1").
