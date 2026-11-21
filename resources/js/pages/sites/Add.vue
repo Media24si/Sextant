@@ -47,6 +47,7 @@ const form = useForm({
     github_url: '',
     expected_target: null as string | null,
     add_www: false,
+    skip_checkers: [] as string[],
 });
 
 const frontChosen = ref(false);
@@ -73,6 +74,7 @@ async function detect(): Promise<void> {
                 (monitor) => monitor.checker === 'site.redirect',
             )?.arguments.expected_target as string | undefined) ?? null;
         form.add_www = false;
+        form.skip_checkers = [];
     } catch {
         // 422: the message shows under the URL field.
     }
@@ -123,6 +125,17 @@ const domainMonitors = computed(
             monitor.checker.startsWith('domain.'),
         ) ?? [],
 );
+
+/** Checks start ticked; unticking one leaves it off the new site or domain. */
+function isAttached(checker: string): boolean {
+    return !form.skip_checkers.includes(checker);
+}
+
+function toggleCheck(checker: string, attached: boolean): void {
+    form.skip_checkers = attached
+        ? form.skip_checkers.filter((skipped) => skipped !== checker)
+        : [...form.skip_checkers, checker];
+}
 
 const breadcrumbs = [
     { title: 'Domains', href: DomainController.index() },
@@ -642,6 +655,7 @@ const fieldClasses =
                         </h2>
                         <p class="text-sm text-muted-foreground">
                             Attached with the site once monitoring is running.
+                            Untick any you don't want.
                         </p>
                     </div>
                     <div class="grid gap-6 sm:grid-cols-2">
@@ -651,17 +665,25 @@ const fieldClasses =
                                 :key="monitor.checker"
                                 class="flex flex-col"
                             >
-                                <span class="flex items-center gap-2">
-                                    <span
-                                        class="text-status-ok"
-                                        aria-hidden="true"
-                                        >✓</span
-                                    >
+                                <label class="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        class="size-4 accent-primary"
+                                        :checked="isAttached(monitor.checker)"
+                                        @change="
+                                            toggleCheck(
+                                                monitor.checker,
+                                                (
+                                                    $event.target as HTMLInputElement
+                                                ).checked,
+                                            )
+                                        "
+                                    />
                                     {{
                                         checkerLabels[monitor.checker] ??
                                         monitor.checker
                                     }}
-                                </span>
+                                </label>
                                 <span
                                     v-if="monitorArgumentsNote(monitor)"
                                     class="pl-6 font-mono text-xs break-all text-muted-foreground"
@@ -681,21 +703,33 @@ const fieldClasses =
                                 <li
                                     v-for="monitor in domainMonitors"
                                     :key="monitor.checker"
-                                    class="flex items-center gap-2"
                                 >
-                                    <span
-                                        class="text-status-ok"
-                                        aria-hidden="true"
-                                        >✓</span
-                                    >
-                                    {{
-                                        checkerLabels[monitor.checker] ??
-                                        monitor.checker
-                                    }}
+                                    <label class="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            class="size-4 accent-primary"
+                                            :checked="
+                                                isAttached(monitor.checker)
+                                            "
+                                            @change="
+                                                toggleCheck(
+                                                    monitor.checker,
+                                                    (
+                                                        $event.target as HTMLInputElement
+                                                    ).checked,
+                                                )
+                                            "
+                                        />
+                                        {{
+                                            checkerLabels[monitor.checker] ??
+                                            monitor.checker
+                                        }}
+                                    </label>
                                 </li>
                             </ul>
                         </div>
                     </div>
+                    <InputError :message="form.errors.skip_checkers" />
                 </section>
 
                 <div class="flex justify-end gap-3">

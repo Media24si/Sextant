@@ -17,11 +17,13 @@ class DomainAdded implements ShouldDispatchAfterCommit
 
     /**
      * @param  list<ProposedMonitorData>  $monitors
+     * @param  list<string>  $skipCheckers  checkers unticked on Add site
      */
     public function __construct(
         public Domain $domain,
         public array $monitors,
         /** Bulk import: spread first runs over the first interval (§5.1). */
         public bool $spread = false,
+        public array $skipCheckers = [],
     ) {}
 }

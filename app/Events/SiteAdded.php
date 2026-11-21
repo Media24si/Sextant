@@ -19,11 +19,13 @@ class SiteAdded implements ShouldDispatchAfterCommit
 
     /**
      * @param  list<ProposedMonitorData>  $monitors
+     * @param  list<string>  $skipCheckers  checkers unticked on Add site
      */
     public function __construct(
         public Site $site,
         public array $monitors,
         /** Bulk import: spread first runs over the first interval (§5.1). */
         public bool $spread = false,
+        public array $skipCheckers = [],
     ) {}
 }

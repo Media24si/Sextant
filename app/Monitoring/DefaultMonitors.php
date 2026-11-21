@@ -31,9 +31,10 @@ class DefaultMonitors
     /**
      * @param  list<ProposedMonitorData>  $proposed  detection's arguments, merged per checker and label
      * @param  string|null  $onlyChecker  `monitors:sync-defaults --checker`
+     * @param  list<string>  $skipCheckers  checkers unticked on Add site
      * @return list<Monitor> the monitors created (or that would be, with $dryRun)
      */
-    public function attach(Model&Monitorable $resource, array $proposed = [], bool $spread = false, ?string $onlyChecker = null, bool $dryRun = false): array
+    public function attach(Model&Monitorable $resource, array $proposed = [], bool $spread = false, ?string $onlyChecker = null, bool $dryRun = false, array $skipCheckers = []): array
     {
         $type = $resource->getMorphClass();
 
@@ -46,7 +47,7 @@ class DefaultMonitors
             $checker = $default['checker'];
             $label = $default['label'] ?? null;
 
-            if ($onlyChecker !== null && $checker !== $onlyChecker) {
+            if (($onlyChecker !== null && $checker !== $onlyChecker) || in_array($checker, $skipCheckers, true)) {
                 continue;
             }
 

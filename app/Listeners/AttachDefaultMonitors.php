@@ -17,11 +17,11 @@ class AttachDefaultMonitors
 
     public function handleSiteAdded(SiteAdded $event): void
     {
-        $this->defaults->attach($event->site, $event->monitors, $event->spread);
+        $this->defaults->attach($event->site, $event->monitors, $event->spread, skipCheckers: $event->skipCheckers);
     }
 
     public function handleDomainAdded(DomainAdded $event): void
     {
-        $this->defaults->attach($event->domain, $event->monitors, $event->spread);
+        $this->defaults->attach($event->domain, $event->monitors, $event->spread, skipCheckers: $event->skipCheckers);
     }
 }

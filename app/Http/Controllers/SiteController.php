@@ -173,7 +173,7 @@ class SiteController extends Controller
      */
     public function store(AddSiteRequest $request, AddSites $addSites): RedirectResponse
     {
-        /** @var array{hostname: string, scheme: string, port: int|null, path: string, front_service_id?: int|null, server_id?: int|null, description?: string|null, github_url?: string|null, expected_target?: string|null, add_www?: bool} $input */
+        /** @var array{hostname: string, scheme: string, port: int|null, path: string, front_service_id?: int|null, server_id?: int|null, description?: string|null, github_url?: string|null, expected_target?: string|null, add_www?: bool, skip_checkers?: list<string>} $input */
         $input = $request->validated();
         $site = [
             'hostname' => $input['hostname'],
@@ -194,7 +194,7 @@ class SiteController extends Controller
             $sites[] = [...$site, 'hostname' => 'www.'.$input['hostname']];
         }
 
-        $site = $addSites->handle((string) $request->registrableDomain(), $sites)[0];
+        $site = $addSites->handle((string) $request->registrableDomain(), $sites, skipCheckers: $input['skip_checkers'] ?? [])[0];
 
         Inertia::flash('toast', ['type' => 'success', 'message' => count($sites) === 1
             ? "Site {$site->display_hostname} added."

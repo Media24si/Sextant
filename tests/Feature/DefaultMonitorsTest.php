@@ -49,6 +49,19 @@ test('an http site gets no certificate check', function () {
     expect(monitorsOf(Site::query()->sole()))->toBe(['site.http', 'site.path', 'site.redirect']);
 });
 
+test('checks unticked on Add site are left off the site and its new domain', function () {
+    Queue::fake();
+
+    $this->actingAs($this->admin)->post(route('sites.store'), [
+        'hostname' => 'svet24.si', 'scheme' => 'https', 'path' => '/', 'add_www' => true,
+        'skip_checkers' => ['site.redirect', 'domain.nameservers'],
+    ])->assertSessionHasNoErrors();
+
+    expect(monitorsOf(Site::query()->where('hostname', 'svet24.si')->sole()))->toBe(['site.http', 'site.ssl', 'site.path'])
+        ->and(monitorsOf(Site::query()->where('hostname', 'www.svet24.si')->sole()))->toBe(['site.http', 'site.ssl', 'site.path'])
+        ->and(monitorsOf(Domain::query()->sole()))->toBe(['domain.expiration']);
+});
+
 test('default monitors do not reach the change feed', function () {
     Queue::fake();
 

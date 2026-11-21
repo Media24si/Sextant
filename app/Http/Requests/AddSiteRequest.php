@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Checks\CheckerRegistry;
 use App\Detection\PublicSuffixList;
 use App\Models\Site;
 use App\Rules\GithubRepositoryUrl;
@@ -54,6 +55,8 @@ class AddSiteRequest extends FormRequest
             'github_url' => ['nullable', 'string', 'max:255', new GithubRepositoryUrl],
             'expected_target' => ['nullable', 'string', 'max:2048', 'url:http,https'],
             'add_www' => ['boolean'],
+            'skip_checkers' => ['array'],
+            'skip_checkers.*' => ['string', Rule::in($this->defaultCheckers())],
         ];
     }
 
@@ -79,6 +82,18 @@ class AddSiteRequest extends FormRequest
                 }
             },
         ];
+    }
+
+    /**
+     * The site and domain default checkers Add site can leave off (SPEC §4.4).
+     *
+     * @return list<string>
+     */
+    private function defaultCheckers(): array
+    {
+        $registry = app(CheckerRegistry::class);
+
+        return array_column([...$registry->defaults('site'), ...$registry->defaults('domain')], 'checker');
     }
 
     public function registrableDomain(): ?string

@@ -157,6 +157,7 @@ test('added sites are validated', function (array $overrides, string $error) {
     'path without slash' => [['path' => 'novice'], 'path'],
     'bad redirect target' => [['expected_target' => 'javascript:alert(1)'], 'expected_target'],
     'deleted backend' => [['server_id' => fn () => tap(Server::factory()->create())->delete()->id], 'server_id'],
+    'skipping a check that is not a default' => [['skip_checkers' => ['server.ping']], 'skip_checkers.0'],
 ]);
 
 test('Add server from an unknown address comes back to Add site', function () {

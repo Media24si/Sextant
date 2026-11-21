@@ -2,6 +2,7 @@
 
 namespace App\Actions\Sites;
 
+use App\Data\Detection\ProposedMonitorData;
 use App\Detection\NormalizedUrl;
 use App\Detection\ProposedMonitors;
 use App\Events\DomainAdded;
@@ -26,26 +27,28 @@ class AddSites
      * @param  list<SiteInput>  $sites
      * @param  string|null  $notes  for a new domain (Add domain)
      * @param  bool  $spread  bulk import: spread the first runs (§5.1)
+     * @param  list<string>  $skipCheckers  default checkers not to attach (unticked on Add site)
      * @return list<Site>
      */
-    public function handle(string $domainName, array $sites, ?string $notes = null, bool $spread = false): array
+    public function handle(string $domainName, array $sites, ?string $notes = null, bool $spread = false, array $skipCheckers = []): array
     {
-        return DB::transaction(function () use ($domainName, $sites, $notes, $spread): array {
+        return DB::transaction(function () use ($domainName, $sites, $notes, $spread, $skipCheckers): array {
             $domain = Domain::query()->where('name', $domainName)->first();
 
             if ($domain === null) {
                 $domain = Domain::query()->create(['name' => $domainName, 'notes' => $notes]);
-                DomainAdded::dispatch($domain, $this->monitors->forDomain(), $spread);
+                DomainAdded::dispatch($domain, $this->skip($this->monitors->forDomain(), $skipCheckers), $spread, $skipCheckers);
             }
 
-            return array_map(fn (array $input): Site => $this->addSite($domain, $input, $spread), $sites);
+            return array_map(fn (array $input): Site => $this->addSite($domain, $input, $spread, $skipCheckers), $sites);
         });
     }
 
     /**
      * @param  SiteInput  $input
+     * @param  list<string>  $skipCheckers
      */
-    private function addSite(Domain $domain, array $input, bool $spread): Site
+    private function addSite(Domain $domain, array $input, bool $spread, array $skipCheckers): Site
     {
         $site = $domain->sites()->create([
             'hostname' => $input['hostname'],
@@ -58,8 +61,18 @@ class AddSites
         ]);
 
         $url = new NormalizedUrl($site->scheme, $site->hostname, $site->port, $input['path'] ?? '/');
-        SiteAdded::dispatch($site, $this->monitors->forSite($url, $input['expected_target'] ?? null), $spread);
+        SiteAdded::dispatch($site, $this->skip($this->monitors->forSite($url, $input['expected_target'] ?? null), $skipCheckers), $spread, $skipCheckers);
 
         return $site;
+    }
+
+    /**
+     * @param  list<ProposedMonitorData>  $proposed
+     * @param  list<string>  $skipCheckers
+     * @return list<ProposedMonitorData>
+     */
+    private function skip(array $proposed, array $skipCheckers): array
+    {
+        return array_values(array_filter($proposed, fn (ProposedMonitorData $monitor): bool => ! in_array($monitor->checker, $skipCheckers, true)));
     }
 }
