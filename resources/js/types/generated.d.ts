@@ -1,4 +1,7 @@
 declare namespace App {
+namespace Checks {
+export type ArgumentType = 'int' | 'string' | 'bool' | 'intList' | 'stringList' | 'select';
+}
 namespace Data {
 export type ActivityItemData = {
 id: number,

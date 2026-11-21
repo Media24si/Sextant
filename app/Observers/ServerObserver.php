@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Server;
+use App\Monitoring\MonitorEffects;
 
 class ServerObserver extends InventoryObserver
 {
@@ -37,5 +38,6 @@ class ServerObserver extends InventoryObserver
     public function restored(Server $server): void
     {
         $this->record('server.restored', $server, "Server {$server->name} restored");
+        MonitorEffects::runSoon($server);
     }
 }

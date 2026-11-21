@@ -10,9 +10,8 @@ use Illuminate\Foundation\Events\Dispatchable;
 /**
  * A site was added through Add site, Add domain or an import (SPEC §10.4).
  *
- * SPEC: monitors arrive in Phase 3 (P3.1). Until then this event carries the
- * monitors detection proposed; P3's listener attaches them (§4.4) and claims
- * them for an immediate run.
+ * Carries the monitors detection proposed; `AttachDefaultMonitors` attaches
+ * them after commit (§4.4) and claims them for an immediate run.
  */
 class SiteAdded implements ShouldDispatchAfterCommit
 {
@@ -24,5 +23,7 @@ class SiteAdded implements ShouldDispatchAfterCommit
     public function __construct(
         public Site $site,
         public array $monitors,
+        /** Bulk import: spread first runs over the first interval (§5.1). */
+        public bool $spread = false,
     ) {}
 }

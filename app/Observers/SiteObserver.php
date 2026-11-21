@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\ExternalService;
 use App\Models\Server;
 use App\Models\Site;
+use App\Monitoring\MonitorEffects;
 
 class SiteObserver extends InventoryObserver
 {
@@ -30,6 +31,7 @@ class SiteObserver extends InventoryObserver
                 ...$path,
                 'path' => ['old' => $old, 'new' => $new],
             ]);
+            MonitorEffects::runSoon($site, 'site.path');
         }
 
         $other = array_diff_key($this->changes($site), array_flip(self::PATH));
@@ -47,6 +49,7 @@ class SiteObserver extends InventoryObserver
     public function restored(Site $site): void
     {
         $this->record('site.restored', $site, "Site {$site->display_hostname} restored");
+        MonitorEffects::runSoon($site);
     }
 
     /**

@@ -9,7 +9,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 
 /**
  * A domain was created along with its first sites (SPEC §10.4, §10.5).
- * Like `SiteAdded`, the hook for attaching default monitors in Phase 3.
+ * Like `SiteAdded`, `AttachDefaultMonitors` attaches its default monitors.
  */
 class DomainAdded implements ShouldDispatchAfterCommit
 {
@@ -21,5 +21,7 @@ class DomainAdded implements ShouldDispatchAfterCommit
     public function __construct(
         public Domain $domain,
         public array $monitors,
+        /** Bulk import: spread first runs over the first interval (§5.1). */
+        public bool $spread = false,
     ) {}
 }

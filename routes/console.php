@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\MonitorRun;
 use Illuminate\Support\Facades\Schedule;
 
 /*
@@ -8,6 +9,9 @@ use Illuminate\Support\Facades\Schedule;
  * 30 seconds (SPEC §14). Tasks with ->sentryMonitor() check in to Sentry Crons.
  */
 
+Schedule::command('monitors:dispatch')->everyMinute()->withoutOverlapping()->sentryMonitor();
+Schedule::command('sextant:sweep')->everyMinute()->withoutOverlapping();
+Schedule::command('model:prune', ['--model' => [MonitorRun::class]])->dailyAt('03:30');
 Schedule::command('horizon:snapshot')->everyFiveMinutes()->sentryMonitor();
 
 Schedule::command('proxies:refresh')->daily()->withoutOverlapping();

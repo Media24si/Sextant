@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Data\ServingPathData;
 use App\Enums\Status;
+use App\Models\Concerns\HasMonitors;
+use App\Models\Concerns\Monitorable;
 use App\Observers\SiteObserver;
 use App\Support\Hostname;
 use Database\Factories\SiteFactory;
@@ -42,10 +44,10 @@ use Illuminate\Support\Carbon;
  */
 #[ObservedBy(SiteObserver::class)]
 #[Fillable(['domain_id', 'hostname', 'scheme', 'port', 'front_service_id', 'server_id', 'description', 'github_url', 'notes'])]
-class Site extends Model
+class Site extends Model implements Monitorable
 {
     /** @use HasFactory<SiteFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasMonitors, SoftDeletes;
 
     /**
      * @return array<string, string>
@@ -127,5 +129,10 @@ class Site extends Model
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
+    }
+
+    public function resourceName(): string
+    {
+        return $this->display_hostname;
     }
 }

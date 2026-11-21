@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\Status;
+use App\Models\Concerns\HasMonitors;
+use App\Models\Concerns\Monitorable;
 use App\Observers\DomainObserver;
 use App\Support\Hostname;
 use Database\Factories\DomainFactory;
@@ -32,10 +34,10 @@ use Illuminate\Support\Carbon;
  */
 #[ObservedBy(DomainObserver::class)]
 #[Fillable(['name', 'notes'])]
-class Domain extends Model
+class Domain extends Model implements Monitorable
 {
     /** @use HasFactory<DomainFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasMonitors, SoftDeletes;
 
     /**
      * @return array<string, string>
@@ -81,5 +83,10 @@ class Domain extends Model
     public function hasLiveSites(): bool
     {
         return $this->sites()->exists();
+    }
+
+    public function resourceName(): string
+    {
+        return $this->display_name;
     }
 }

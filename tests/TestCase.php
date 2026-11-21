@@ -29,7 +29,8 @@ abstract class TestCase extends BaseTestCase
         FakeDnsResolver::install();
         FakeHttpProbe::install();
         FakeTlsProbe::install();
-        FakeTcpProbe::install();
+        // Sextant's own network is healthy unless a test says otherwise (SPEC §5.4).
+        FakeTcpProbe::install()->openCanary();
         FakePingProbe::install();
         FakeRdapClient::install();
         FakeWhoisClient::install();

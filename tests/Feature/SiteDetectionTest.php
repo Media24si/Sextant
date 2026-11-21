@@ -66,7 +66,7 @@ it('detects a site that points straight at one of our servers', function () {
         ->and($result->probe->http_status)->toBe(Status::Ok)
         ->and($result->probe->tls)->toContain("Let's Encrypt · valid until")->toContain('(74 days)')
         ->and($result->probe->redirect)->toBe('No redirect')
-        ->and(collect($result->monitors)->pluck('checker')->all())->toBe(['site.http', 'site.ssl', 'site.path', 'site.redirect']);
+        ->and(collect($result->monitors)->pluck('checker')->all())->toBe(['site.http', 'site.ssl', 'site.path']);
 });
 
 it('detects Cloudflare by its published ranges and suggests the siblings\' backend', function () {
@@ -184,7 +184,7 @@ it('previews the registry for a new domain and proposes its checks', function ()
         ->and($result->domain->value->registry->server)->toBe('rdap.verisign.com')
         ->and($result->domain->value->registry->expires_at)->toBe('2027-08-13')
         ->and($result->domain->value->registry->nameservers)->toBe(['elliott.ns.cloudflare.com', 'hera.ns.cloudflare.com'])
-        ->and(collect($result->monitors)->pluck('checker')->all())->toContain('domain.expiration', 'domain.nameservers');
+        ->and(collect($result->monitors)->pluck('checker')->all())->toContain('domain.expiration');
 });
 
 it('falls back to WHOIS for a TLD without RDAP', function () {
@@ -213,9 +213,10 @@ it('records a redirect as the expected target and offers the www site', function
 
     expect($result->probe->redirect)->toBe('Redirects to https://www.oglasi24.si/?utm=1')
         ->and($result->probe->redirect_status)->toBe(Status::Ok)
-        ->and($result->offer_www)->toBe('www.oglasi24.si')
-        ->and(collect($result->monitors)->firstWhere('checker', 'site.redirect')->arguments)
-        ->toBe(['expected_target' => 'https://www.oglasi24.si/']);
+        ->and($result->offer_www)->toBe('www.oglasi24.si');
+
+    // SPEC: site.redirect is registered in Phase 8; until then the target isn't proposed.
+    expect(collect($result->monitors)->pluck('checker'))->not->toContain('site.redirect');
 });
 
 it('keeps a non-root path for the HTTP check', function () {

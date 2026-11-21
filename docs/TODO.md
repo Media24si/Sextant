@@ -115,31 +115,31 @@
 ## Phase 3 — Monitoring engine and core checkers (§18)
 
 ### Data
-- [ ] **P3.1** `monitors` (§3.8), `monitor_states` (§3.9), `monitor_runs` (§3.10, no FK, `MassPrunable` at 90 days).
+- [x] **P3.1** `monitors` (§3.8), `monitor_states` (§3.9), `monitor_runs` (§3.10, no FK, `MassPrunable` at 90 days).
 
 ### Registry and contracts (§4)
-- [ ] **P3.2** `Checker`, `CheckResult`, `CheckCouldNotRun`, base classes `ServerChecker`, `DomainChecker`, `SiteChecker`.
-- [ ] **P3.3** `config/checkers.php` exactly as §4.3 and a `CheckerRegistry` service.
-- [ ] **P3.4** `Argument` schema builder and `Arguments` value object with typed getters that throw on unknown keys; settings resolution (§4.5); schema serialised to JSON for the UI (§4.6).
-- [ ] **P3.5** `sextant:checkers` validation command.
+- [x] **P3.2** `Checker`, `CheckResult`, `CheckCouldNotRun`, base classes `ServerChecker`, `DomainChecker`, `SiteChecker`.
+- [x] **P3.3** `config/checkers.php` exactly as §4.3 and a `CheckerRegistry` service.
+- [x] **P3.4** `Argument` schema builder and `Arguments` value object with typed getters that throw on unknown keys; settings resolution (§4.5); schema serialised to JSON for the UI (§4.6).
+- [x] **P3.5** `sextant:checkers` validation command.
 
 ### Running (§5)
-- [ ] **P3.6** `monitors:dispatch` (compare-and-set claim, batches of 200, 50 s cap, Sentry cron) and a shared `MonitorClaimer`.
-- [ ] **P3.7** `RunMonitor` job (§5.2) and the pipeline exactly as §5.3.
-- [ ] **P3.8** `NetworkHealth::isHealthy()` (§5.4).
-- [ ] **P3.9** State machine **without incidents** (failures show as pending), stale handling, confirmation re-check (§5.1, §6.1, §6.2).
-- [ ] **P3.10** `ResourceStatus::refresh()` (§7); `ChangeDetector` + `detected` activities (§8.3).
-- [ ] **P3.11** `sextant:sweep` (statuses, stale states), pruning schedule, `monitors:run`, `monitors:sync-defaults --checker` (required) (§14).
+- [x] **P3.6** `monitors:dispatch` (compare-and-set claim, batches of 200, 50 s cap, Sentry cron) and a shared `MonitorClaimer`.
+- [x] **P3.7** `RunMonitor` job (§5.2) and the pipeline exactly as §5.3.
+- [x] **P3.8** `NetworkHealth::isHealthy()` (§5.4).
+- [x] **P3.9** State machine **without incidents** (failures show as pending), stale handling, confirmation re-check (§5.1, §6.1, §6.2).
+- [x] **P3.10** `ResourceStatus::refresh()` (§7); `ChangeDetector` + `detected` activities (§8.3).
+- [x] **P3.11** `sextant:sweep` (statuses, stale states), pruning schedule, `monitors:run`, `monitors:sync-defaults --checker` (required) (§14).
 
 ### Checkers (§9)
-- [ ] **P3.12** `server.tcp` (§9.1).
-- [ ] **P3.13** `site.http` (§9.5).
-- [ ] **P3.14** `site.ssl` (§9.6), with "(edge certificate, {service})" behind a front service.
-- [ ] **P3.15** `site.path` (§9.7) with every situation in its table.
-- [ ] **P3.16** `domain.expiration` (§9.3), RDAP then WHOIS, side effects written quietly.
+- [x] **P3.12** `server.tcp` (§9.1).
+- [x] **P3.13** `site.http` (§9.5).
+- [x] **P3.14** `site.ssl` (§9.6), with "(edge certificate, {service})" behind a front service.
+- [x] **P3.15** `site.path` (§9.7) with every situation in its table.
+- [x] **P3.16** `domain.expiration` (§9.3), RDAP then WHOIS, side effects written quietly.
 
 ### Defaults and UI
-- [ ] **P3.17** Default monitors on create with `only_if` conditions (`PortIsOpen`, `UsesHttps`); wire Phase 2's hook; spread first runs on import; backfill command for existing resources (§4.4).
+- [x] **P3.17** Default monitors on create with `only_if` conditions (`PortIsOpen`, `UsesHttps`); wire Phase 2's hook; spread first runs on import; backfill command for existing resources (§4.4).
 - [ ] **P3.18** Monitors UI: tab on server, domain and site pages; global Monitors list (filters: checker, status, enabled, muted, pending); drawer with effective settings, state and last 100 runs; form with `MonitorArgumentsForm` (empty = inherit, inherited value as placeholder); Run now; §6.4 effects.
 - [ ] **P3.19** Tests: StateMachine table tests (no incidents yet), settings resolution, registry validation, `RunMonitor` end to end with `FakeChecker`, dispatch double-claim prevention, canary, `ChangeDetector`, `site.path` situations.
 - [ ] **P3.20** **[HUMAN]** Before go-live: Sextant's IP in fail2ban `ignoreip` on monitored servers and allowlisted in Cloudflare/WAF (§16).
@@ -292,6 +292,11 @@ Carried over from the previous version of this list (still open in SPEC v0.2):
 - [x] `return_to` (Add server / external service from Add site's unknown IP) only accepts paths on this app. Add site re-runs detection from `?url=` when you come back.
 - [x] §10.7 re-run detection needs a way to apply the result; §13.3 lists only `POST /sites/{site}/detect-again`. Added `PUT /sites/{site}/path` (front service and backend only). Findings Sextant isn't sure of keep the site's current values.
 - [x] §10.6 doesn't say how the Import page handles ~80 URLs within a request's time. Decision: the page sends one URL per request (`POST /sites/import`) and shows progress; `sextant:import` runs them in one process.
+- [x] §4.3 lists `server.ping`, `server.versions`, `domain.nameservers` and `site.redirect`, but their classes come in Phases 7–8. Decision: `config/checkers.php` registers only implemented checkers; each later phase adds its entry and runs `monitors:sync-defaults --checker=…`. Until `site.redirect` exists, detection's `expected_target` isn't proposed or stored.
+- [x] §5.2 names Laravel's `RateLimited('registry')` middleware, but with `$tries = 1` a released job fails and the run is lost for a day. Decision: the runner applies the limit (10 per minute per TLD) and moves an over-limit run 1–3 minutes later.
+- [x] §5.4 asks for a DNS lookup "through each configured resolver"; `DnsResolver` tries its resolvers in turn, so the canary counts DNS as one target (three TCP targets + one DNS, healthy at 2).
+- [x] §4.4 doesn't say whether default monitors reach the change feed. Decision: they're written quietly (the resource's own `created` entry is the change); admin-added monitors are recorded. A new server's monitors attach in a queued job (`PortIsOpen` probes each port for up to 3 s).
+- [x] §4.2 puts `Status` in `App\Checks`; it already lives in `App\Enums\Status` (P0.10) and stays there.
 
 ## Out of scope for v1 (don't build)
 

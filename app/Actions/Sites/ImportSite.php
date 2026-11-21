@@ -53,7 +53,7 @@ class ImportSite
             'front_service_id' => $front?->service_id,
             'server_id' => $backend?->server_id,
             'expected_target' => is_string($expectedTarget) ? $expectedTarget : null,
-        ]])[0];
+        ]], spread: true)[0];
 
         if ($backend !== null) {
             return new ImportResultData(

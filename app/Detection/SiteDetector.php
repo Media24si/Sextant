@@ -50,6 +50,7 @@ class SiteDetector
         private ExternalServiceMatcher $services,
         private ServerMatcher $servers,
         private ProposedMonitors $monitors,
+        private BackendSuggester $siblings,
     ) {}
 
     /**
@@ -350,55 +351,12 @@ class SiteDetector
             }
         }
 
-        return $this->fromSiblings($url, $domain, $front, $ignore);
-    }
-
-    /**
-     * The most common backend among the domain's other sites behind the same front.
-     *
-     * @return array{BackendFindingData, list<BackendCandidateData>}
-     */
-    private function fromSiblings(NormalizedUrl $url, ?Domain $domain, ExternalService $front, ?Site $ignore): array
-    {
-        $siblings = $domain === null ? collect() : Site::query()
-            ->with('server')
-            ->where('domain_id', $domain->id)
-            ->where('front_service_id', $front->id)
-            ->when($ignore !== null, fn ($query) => $query->whereKeyNot($ignore?->id))
-            ->get();
-
-        $candidates = $siblings
-            ->filter(fn (Site $site): bool => $site->server !== null)
-            ->groupBy('server_id')
-            ->map(fn (Collection $sites): BackendCandidateData => new BackendCandidateData(
-                (int) $sites->first()->server_id,
-                (string) $sites->first()->server?->name,
-                $sites->count(),
-            ))
-            ->sortBy([['sibling_count', 'desc'], ['name', 'asc']])
-            ->values();
-
-        $domainName = Hostname::display($domain === null ? (string) $this->suffixes->registrableDomain($url->hostname) : $domain->name);
-        $cantSee = "Sextant can't see behind {$front->name}.";
-
-        if ($candidates->isEmpty()) {
-            return [new BackendFindingData(null, Confidence::NotFound, "{$cantSee} No other {$domainName} site behind it has a backend yet, so pick the server."), []];
-        }
-
-        /** @var BackendCandidateData $top */
-        $top = $candidates->first();
-
-        if ($candidates->count() > 1 && $candidates->get(1)?->sibling_count === $top->sibling_count) {
-            $tied = $candidates->where('sibling_count', $top->sibling_count)->pluck('name')->join(', ', ' and ');
-
-            return [new BackendFindingData(null, Confidence::NotFound, "{$cantSee} The {$domainName} sites behind it are split between {$tied}, so pick the server."), array_values($candidates->all())];
-        }
-
-        $explanation = $siblings->count() === 1
-            ? "{$cantSee} The other {$domainName} site behind {$front->name} uses {$top->name}."
-            : "{$cantSee} {$top->sibling_count} of the {$siblings->count()} {$domainName} sites behind {$front->name} use {$top->name}.";
-
-        return [new BackendFindingData(new DetectedServerData($top->server_id, $top->name), Confidence::Suggested, $explanation), array_values($candidates->all())];
+        return $this->siblings->suggest(
+            $domain,
+            Hostname::display($domain === null ? (string) $this->suffixes->registrableDomain($url->hostname) : $domain->name),
+            $front,
+            $ignore,
+        );
     }
 
     private function probeSummary(NormalizedUrl $url, HttpResult $http, TlsResult|string|null $tls): ProbeSummaryData

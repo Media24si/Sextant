@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Domain;
+use App\Monitoring\MonitorEffects;
 
 class DomainObserver extends InventoryObserver
 {
@@ -33,5 +34,6 @@ class DomainObserver extends InventoryObserver
     public function restored(Domain $domain): void
     {
         $this->record('domain.restored', $domain, "Domain {$domain->display_name} restored");
+        MonitorEffects::runSoon($domain);
     }
 }

@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Saves reviewed sites in one transaction (SPEC §10.4): the domain if it's
  * new, then each site. Observers record the activity; `SiteAdded` and
- * `DomainAdded` fire after commit so Phase 3 can attach monitors.
+ * `DomainAdded` fire after commit and attach the default monitors.
  *
  * @phpstan-type SiteInput array{hostname: string, scheme: string, port?: int|null, path?: string|null, front_service_id?: int|null, server_id?: int|null, description?: string|null, github_url?: string|null, expected_target?: string|null}
  */
@@ -25,26 +25,27 @@ class AddSites
      * @param  string  $domainName  registrable domain, lowercase punycode
      * @param  list<SiteInput>  $sites
      * @param  string|null  $notes  for a new domain (Add domain)
+     * @param  bool  $spread  bulk import: spread the first runs (§5.1)
      * @return list<Site>
      */
-    public function handle(string $domainName, array $sites, ?string $notes = null): array
+    public function handle(string $domainName, array $sites, ?string $notes = null, bool $spread = false): array
     {
-        return DB::transaction(function () use ($domainName, $sites, $notes): array {
+        return DB::transaction(function () use ($domainName, $sites, $notes, $spread): array {
             $domain = Domain::query()->where('name', $domainName)->first();
 
             if ($domain === null) {
                 $domain = Domain::query()->create(['name' => $domainName, 'notes' => $notes]);
-                DomainAdded::dispatch($domain, $this->monitors->forDomain());
+                DomainAdded::dispatch($domain, $this->monitors->forDomain(), $spread);
             }
 
-            return array_map(fn (array $input): Site => $this->addSite($domain, $input), $sites);
+            return array_map(fn (array $input): Site => $this->addSite($domain, $input, $spread), $sites);
         });
     }
 
     /**
      * @param  SiteInput  $input
      */
-    private function addSite(Domain $domain, array $input): Site
+    private function addSite(Domain $domain, array $input, bool $spread): Site
     {
         $site = $domain->sites()->create([
             'hostname' => $input['hostname'],
@@ -57,7 +58,7 @@ class AddSites
         ]);
 
         $url = new NormalizedUrl($site->scheme, $site->hostname, $site->port, $input['path'] ?? '/');
-        SiteAdded::dispatch($site, $this->monitors->forSite($url, $input['expected_target'] ?? null));
+        SiteAdded::dispatch($site, $this->monitors->forSite($url, $input['expected_target'] ?? null), $spread);
 
         return $site;
     }

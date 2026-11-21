@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Domain;
 use App\Models\ExternalService;
+use App\Models\Monitor;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\User;
@@ -68,6 +69,7 @@ class AppServiceProvider extends ServiceProvider
             'domain' => Domain::class,
             'site' => Site::class,
             'user' => User::class,
+            'monitor' => Monitor::class,
         ]);
     }
 

@@ -13,6 +13,7 @@ use App\Data\TrafficGroupData;
 use App\Enums\ChoiceList;
 use App\Enums\Status;
 use App\Http\Requests\ServerRequest;
+use App\Jobs\AttachServerMonitors;
 use App\Models\Activity;
 use App\Models\Choice;
 use App\Models\Server;
@@ -102,6 +103,7 @@ class ServerController extends Controller
         /** @var array{name: string, hostname?: string|null, provider?: string|null, os_choice_id?: int|null, notes?: string|null, addresses: list<array{ip: string, is_primary: bool}>, backup_location_ids?: list<int>} $input */
         $input = $request->validated();
         $server = $saveServer->handle(new Server, $input);
+        AttachServerMonitors::dispatch($server);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "Server {$server->name} added."]);
         $returnTo = ReturnTo::from($request);

@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Activity\ActivityRecorder;
 use App\Enums\ActivityCategory;
 use App\Enums\Status;
+use App\Models\Concerns\HasMonitors;
+use App\Models\Concerns\Monitorable;
 use App\Observers\ServerObserver;
 use App\Support\Hostname;
 use Database\Factories\ServerFactory;
@@ -45,10 +47,10 @@ use Illuminate\Support\Carbon;
 #[ObservedBy(ServerObserver::class)]
 #[Fillable(['name', 'hostname', 'provider', 'os_choice_id', 'notes', 'versions_url'])]
 #[Hidden(['versions_token'])]
-class Server extends Model
+class Server extends Model implements Monitorable
 {
     /** @use HasFactory<ServerFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasMonitors, SoftDeletes;
 
     /**
      * @return array<string, string>
@@ -141,5 +143,10 @@ class Server extends Model
             "{$this->name} backups: ".($after === [] ? 'none' : implode(', ', $after)).' (was '.($before === [] ? 'none' : implode(', ', $before)).')',
             ['old' => $before, 'new' => $after],
         );
+    }
+
+    public function resourceName(): string
+    {
+        return $this->name;
     }
 }
