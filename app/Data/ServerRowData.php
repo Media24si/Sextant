@@ -19,7 +19,6 @@ class ServerRowData extends Data
     public function __construct(
         public int $id,
         public string $name,
-        public ?string $hostname,
         public Status $status,
         public ?string $primary_ip,
         public ?string $os,
@@ -36,7 +35,6 @@ class ServerRowData extends Data
         return new self(
             id: $server->id,
             name: $server->name,
-            hostname: $server->hostname,
             status: $server->status,
             primary_ip: $server->primaryAddress?->ip,
             os: $server->os?->label,

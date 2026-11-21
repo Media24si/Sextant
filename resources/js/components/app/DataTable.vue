@@ -2,13 +2,21 @@
 import type { RequestPayload } from '@inertiajs/core';
 import type { InertiaLinkProps } from '@inertiajs/vue3';
 import { router } from '@inertiajs/vue3';
-import { ArrowDown, ArrowUp, ArrowUpDown, Search } from '@lucide/vue';
-import type { ColumnDef } from '@tanstack/vue-table';
+import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, Search } from '@lucide/vue';
+import type { ColumnDef, VisibilityState } from '@tanstack/vue-table';
 import { FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table';
-import { useDebounceFn } from '@vueuse/core';
+import { useDebounceFn, useLocalStorage } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 import EmptyState from '@/components/app/EmptyState.vue';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -27,7 +35,9 @@ import type { TableFilterChip, TableRows } from '@/types';
  * only renders the current page and turns chips, search, column sorts and
  * paging into query-string visits (`filter[key]=…`, `sort=-column`, `page=n`).
  * A column is sortable when its `id` is an allowed sort and `enableSorting`
- * is true.
+ * is true. A column can be shown or hidden from the Columns menu when
+ * `enableHiding` is true; `hiddenColumns` start hidden, and the viewer's
+ * choice is remembered in this browser under `columnsKey`.
  */
 const props = withDefaults(
     defineProps<{
@@ -45,6 +55,10 @@ const props = withDefaults(
         emptyTitle?: string;
         emptyDescription?: string;
         rowKey?: (row: TRow) => string | number;
+        /** Ids of hideable columns that start hidden. */
+        hiddenColumns?: string[];
+        /** localStorage key that remembers which columns are shown. */
+        columnsKey?: string;
     }>(),
     {
         chips: () => [],
@@ -54,8 +68,24 @@ const props = withDefaults(
         emptyTitle: 'Nothing here',
         emptyDescription: undefined,
         rowKey: undefined,
+        hiddenColumns: () => [],
+        columnsKey: undefined,
     },
 );
+
+/* Column visibility */
+
+const defaultVisibility: VisibilityState = Object.fromEntries(
+    props.hiddenColumns.map((id) => [id, false]),
+);
+
+const columnVisibility = props.columnsKey
+    ? useLocalStorage<VisibilityState>(
+          `data-table-columns:${props.columnsKey}`,
+          defaultVisibility,
+          { mergeDefaults: true },
+      )
+    : ref<VisibilityState>(defaultVisibility);
 
 const table = useVueTable({
     get data() {
@@ -63,6 +93,17 @@ const table = useVueTable({
     },
     get columns() {
         return props.columns;
+    },
+    state: {
+        get columnVisibility() {
+            return columnVisibility.value;
+        },
+    },
+    onColumnVisibilityChange: (updater) => {
+        columnVisibility.value =
+            typeof updater === 'function'
+                ? updater(columnVisibility.value)
+                : updater;
     },
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row, index) =>
@@ -190,6 +231,19 @@ function ariaSort(columnId: string): 'ascending' | 'descending' | undefined {
     return direction === 'asc' ? 'ascending' : 'descending';
 }
 
+// Opt-in per column, like sorting: only columns marked `enableHiding: true` appear in the menu.
+const hideableColumns = computed(() =>
+    table
+        .getAllLeafColumns()
+        .filter((column) => column.columnDef.enableHiding === true),
+);
+
+function columnLabel(columnDef: ColumnDef<TRow, unknown>): string {
+    return typeof columnDef.header === 'string'
+        ? columnDef.header
+        : (columnDef.id ?? '');
+}
+
 /* Paging */
 
 const meta = computed(() => props.rows.meta);
@@ -206,7 +260,12 @@ const lastShown = computed(() =>
 <template>
     <div class="flex flex-col gap-4">
         <div
-            v-if="chips.length > 0 || searchPlaceholder || $slots.filters"
+            v-if="
+                chips.length > 0 ||
+                searchPlaceholder ||
+                $slots.filters ||
+                hideableColumns.length > 0
+            "
             class="flex flex-wrap items-center justify-between gap-3"
         >
             <div
@@ -252,6 +311,33 @@ const lastShown = computed(() =>
                         data-test="data-table-search"
                     />
                 </div>
+                <DropdownMenu v-if="hideableColumns.length > 0">
+                    <DropdownMenuTrigger as-child>
+                        <Button
+                            variant="outline"
+                            class="bg-card"
+                            data-test="data-table-columns"
+                        >
+                            <Columns3 class="size-4" aria-hidden="true" />
+                            Columns
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" class="w-44">
+                        <DropdownMenuLabel>Show columns</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuCheckboxItem
+                            v-for="column in hideableColumns"
+                            :key="column.id"
+                            :model-value="column.getIsVisible()"
+                            @update:model-value="
+                                (visible) => column.toggleVisibility(!!visible)
+                            "
+                            @select.prevent
+                        >
+                            {{ columnLabel(column.columnDef) }}
+                        </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </div>
 
@@ -332,7 +418,10 @@ const lastShown = computed(() =>
                         </TableCell>
                     </TableRow>
                     <TableRow v-if="rows.data.length === 0">
-                        <TableCell :colspan="columns.length" class="p-0">
+                        <TableCell
+                            :colspan="table.getVisibleLeafColumns().length"
+                            class="p-0"
+                        >
                             <EmptyState
                                 :title="emptyTitle"
                                 :description="emptyDescription"

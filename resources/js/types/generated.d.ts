@@ -151,7 +151,6 @@ versions_token_masked: string | null,
 export type ServerRowData = {
 id: number,
 name: string,
-hostname: string | null,
 status: App.Enums.Status,
 primary_ip: string | null,
 os: string | null,

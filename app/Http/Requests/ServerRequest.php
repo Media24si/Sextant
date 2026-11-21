@@ -11,7 +11,9 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 /**
- * Add / edit server (SPEC §3.2–3.4, §13.6). Routes are admin only.
+ * Add / edit server (SPEC §3.2–3.4, §13.6). Routes are admin only. The
+ * hostname is the machine's own name, so a bare `mainserver` is as valid as
+ * `web06.media24.si`.
  */
 class ServerRequest extends FormRequest
 {
@@ -30,7 +32,7 @@ class ServerRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:100', Rule::unique('servers', 'name')->withoutTrashed()->ignore($server)],
-            'hostname' => ['nullable', 'string', 'max:253', 'regex:/^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]{2,63}\.?$/i'],
+            'hostname' => ['nullable', 'string', 'max:253', 'regex:/^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\.?$/i'],
             'provider' => ['nullable', 'string', 'max:100'],
             'os_choice_id' => ['nullable', 'integer', Rule::exists('choices', 'id')->where('list', ChoiceList::Os->value)],
             'notes' => ['nullable', 'string', 'max:5000'],

@@ -42,6 +42,7 @@ const versionColumn = (
 ): ColumnDef<Row, unknown> => ({
     id: software,
     header,
+    enableHiding: true,
     cell: ({ row }) => {
         const versions = row.original.versions.filter(
             (version) => version.software === software,
@@ -70,6 +71,9 @@ const versionColumn = (
     },
 });
 
+/* Version columns are rarely needed day to day; the Columns menu brings them back. */
+const hiddenColumns = ['kernel', 'nginx', 'php', 'mysql', 'openssl'];
+
 const columns: ColumnDef<Row, unknown>[] = [
     {
         id: 'status',
@@ -84,31 +88,24 @@ const columns: ColumnDef<Row, unknown>[] = [
         header: 'Server',
         enableSorting: true,
         cell: ({ row }) =>
-            h('div', [
-                h(
-                    Link,
-                    {
-                        href: ServerController.show(row.original.id),
-                        class: 'font-mono font-medium hover:underline',
-                    },
-                    () => row.original.name,
-                ),
-                row.original.hostname
-                    ? h(
-                          'div',
-                          { class: 'mt-0.5 text-xs text-muted-foreground' },
-                          row.original.hostname,
-                      )
-                    : null,
-            ]),
+            h(
+                Link,
+                {
+                    href: ServerController.show(row.original.id),
+                    class: 'font-mono font-medium hover:underline',
+                },
+                () => row.original.name,
+            ),
     },
     {
         id: 'primary_ip',
+        enableHiding: true,
         header: 'Primary IP',
         cell: ({ row }) => mono(row.original.primary_ip),
     },
     {
         id: 'os',
+        enableHiding: true,
         header: 'OS',
         cell: ({ row }) => row.original.os ?? '—',
     },
@@ -116,10 +113,12 @@ const columns: ColumnDef<Row, unknown>[] = [
         id: 'sites_count',
         header: 'Sites',
         enableSorting: true,
+        enableHiding: true,
         cell: ({ row }) => row.original.sites_count,
     },
     {
         id: 'backups',
+        enableHiding: true,
         header: 'Backups',
         cell: ({ row }) =>
             row.original.backup_locations.length > 0
@@ -182,6 +181,8 @@ const chips = computed<TableFilterChip[]>(() => [
         <DataTable
             :url="ServerController.index()"
             :columns="columns"
+            :hidden-columns="hiddenColumns"
+            columns-key="servers"
             :rows="rows"
             :filters="filters"
             :sort="sort"

@@ -132,6 +132,7 @@ test('server input is validated', function (array $overrides, string $error) {
 })->with([
     'name taken' => [['name' => 'web02'], 'name'],
     'bad hostname' => [['hostname' => 'not a host'], 'hostname'],
+    'hostname with a leading hyphen' => [['hostname' => '-mainserver'], 'hostname'],
     'no addresses' => [['addresses' => []], 'addresses'],
     'two primaries' => [['addresses' => [['ip' => '198.51.100.1', 'is_primary' => true], ['ip' => '198.51.100.2', 'is_primary' => true]]], 'addresses'],
     'no primary' => [['addresses' => [['ip' => '198.51.100.1', 'is_primary' => false]]], 'addresses'],
@@ -141,6 +142,14 @@ test('server input is validated', function (array $overrides, string $error) {
     'external service ip' => [['addresses' => [['ip' => '203.0.113.9', 'is_primary' => true]]], 'addresses.0.ip'],
     'os from the wrong list' => [['os_choice_id' => fn () => Choice::ofList(ChoiceList::BackupLocation)->value('id')], 'os_choice_id'],
 ]);
+
+test('a bare machine name is a valid hostname', function (string $hostname) {
+    $this->actingAs($this->admin)
+        ->post(route('servers.store'), serverPayload(['hostname' => $hostname]))
+        ->assertSessionHasNoErrors();
+
+    expect(Server::query()->sole()->hostname)->toBe(strtolower($hostname));
+})->with(['mainserver', 'Web-06', 'web06.media24.si']);
 
 test('editing keeps unchanged addresses and moves the primary', function () {
     $this->actingAs($this->admin)->post(route('servers.store'), serverPayload());
