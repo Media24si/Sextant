@@ -110,8 +110,13 @@ class MonitorRunner
 
         if ($transition->recheckSoon) {
             // Confirm a failure a minute later instead of after the full interval (§5.1).
-            Monitor::query()->whereKey($monitor->id)->where('next_run_at', '>', now()->addMinute())
-                ->toBase()->update(['next_run_at' => now()->addMinute()->startOfSecond()]);
+            // Due at the start of that minute, so the next dispatch tick claims it
+            // rather than the one after (GOAL: an outage reaches Discord within
+            // interval × threshold + 1 minute).
+            $recheckAt = now()->addMinute()->startOfMinute();
+
+            Monitor::query()->whereKey($monitor->id)->where('next_run_at', '>', $recheckAt)
+                ->toBase()->update(['next_run_at' => $recheckAt]);
         }
 
         return new RunOutcome($result, $durationMs, $transition);

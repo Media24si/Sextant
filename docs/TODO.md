@@ -219,7 +219,7 @@
 ## Phase 9 — Hardening and launch (§18)
 
 - [ ] **P9.1** **[HUMAN]** One week of real data; review every incident; tune thresholds and intervals.
-- [ ] **P9.2** Verify each GOAL success criterion and record evidence in `docs/launch-checklist.md`:
+- [ ] **P9.2** Verify each GOAL success criterion and record evidence in `docs/launch-checklist.md` (prepared: automated and local evidence per criterion; each production check still to do, **[HUMAN]**):
   - [ ] Add a site from its URL in under a minute with the right domain, serving path and monitors.
   - [ ] Find how a site is served and which sites depend on a server within seconds.
   - [ ] Set a minimum after a CVE and see every affected server within a minute.
@@ -229,7 +229,7 @@
   - [ ] Certificate and domain expiries show at least 30 days ahead.
   - [ ] The dashboard answers "is anything broken?" within seconds, without refresh.
   - [ ] Readers can browse everything and change nothing.
-- [ ] **P9.3** README runbook: deploying, adding a checker (class + config + test), installing the collector, rotating a token, handling a false positive.
+- [x] **P9.3** README runbook: deploying, adding a checker (class + config + test), installing the collector, rotating a token, handling a false positive.
 - [ ] **P9.4** **[HUMAN]** Daily MySQL dump configured and a restore verified.
 - [ ] **Exit P9**: the team uses Sextant as its source of truth and all GOAL success criteria are met.
 
@@ -296,6 +296,7 @@ Found in Phase 0 (2026-11-20):
 - [x] §9.2 pings the primary address, but the Sextant server can't ping over IPv6 (docs/spikes/icmp.md). Decision: `server.ping` and `RespondsToPing` use the primary address when it's IPv4, otherwise the server's first IPv4 address; with none, the check is Unknown.
 - [x] §9.4 "Error when the NS lookup fails": an empty NS answer (NXDOMAIN, no records) is an Error; a resolver timeout is Sextant's failure and stays Unknown (§9.0). When the registry's list can't be read (no RDAP, rate limit), the set comparison is skipped instead of failing.
 - [x] §9.8 `max_redirects` is limited to 1–5 because `HttpProbe` follows at most 5 hops; longer chains report "More than N redirects".
+- [x] GOAL "an outage reaches Discord within interval × failure threshold + 1 minute" (3 min for HTTP and TCP) could be missed: the one-minute confirmation run was due 60 s after the failing run, so the minute-granular dispatcher claimed it a tick later (worst case about 3 min 50 s). Fixed in P9.2: it's due at the start of the next minute (worst case about 2 min 55 s), covered by a test.
 - [x] With `site.redirect` registered (P8.2), detection proposes it again with `expected_target`, so sites added from now on keep their redirect target. Sites added between Phase 3 and now got `site.redirect` through `monitors:sync-defaults` without one (it warns only when the target is on another domain).
 - [x] P1.1's morph map lists `monitor`, `incident` and `minimum_version`, whose models arrive in Phases 3, 4 and 7. `Relation::enforceMorphMap()` needs real classes, so each joins the map with its model.
 - [x] The choices seeds (§3.4) and the Cloudflare row (§3.5) are reference data that production needs, but deploys run `migrate`, not `db:seed`. Decision: the create-table migrations insert them.

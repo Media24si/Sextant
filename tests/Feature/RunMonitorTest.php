@@ -58,7 +58,7 @@ it('keeps the data of failing runs and confirms the failure a minute later', fun
     expect($run->data)->toBe(['code' => 500])
         ->and($run->message)->toBe('Down')
         ->and($this->monitor->state()->first()->isPending())->toBeTrue()
-        ->and($this->monitor->fresh()->next_run_at->diffInSeconds(now()->addMinute(), true))->toBeLessThan(2);
+        ->and($this->monitor->fresh()->next_run_at->toDateTimeString())->toBe(now()->addMinute()->startOfMinute()->toDateTimeString());
 });
 
 it('turns CheckCouldNotRun into Unknown without reporting it', function () {

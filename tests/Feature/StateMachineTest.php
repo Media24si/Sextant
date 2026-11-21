@@ -12,6 +12,8 @@ use App\Models\MonitorState;
 use App\Models\Site;
 use App\Monitoring\IncidentManager;
 use App\Monitoring\IncidentPresenter;
+use App\Monitoring\MonitorClaimer;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Tests\Fakes\FakeChecker;
 
@@ -163,4 +165,32 @@ it('never has two open incidents for one monitor', function () {
 
     expect(fn () => Incident::factory()->create(['monitor_id' => $this->monitor->id]))
         ->toThrow(UniqueConstraintViolationException::class);
+});
+
+it('reaches an open incident within interval × threshold + 1 minute, dispatching on whole minutes', function () {
+    // GOAL success criterion: HTTP every minute, two failures. The outage starts
+    // just after a passing run at 10:00:05; dispatch runs at the top of each minute.
+    FakeChecker::register(['interval' => 1]);
+    Monitor::query()->whereKey($this->monitor->id)->update(['next_run_at' => null]);
+    $this->travelTo(CarbonImmutable::parse('2026-11-21 10:00:05'));
+    $claimer = app(MonitorClaimer::class);
+    $this->monitor->forceFill(['next_run_at' => now()->startOfMinute()])->saveQuietly();
+    $outageStart = now();
+
+    $openedAt = null;
+
+    foreach (range(1, 5) as $minute) {
+        $this->travelTo(CarbonImmutable::parse('2026-11-21 10:00:00')->addMinutes($minute));
+        FakeChecker::then(CheckResult::error('Down'));
+        $claimer->dispatchDue(now()->addSeconds(50));
+
+        if (openIncident() !== null) {
+            $openedAt = openIncident()->opened_at;
+            break;
+        }
+    }
+
+    // Settle 20 s and the 30 s flush bring the Discord message under 3 minutes.
+    expect($openedAt)->not->toBeNull()
+        ->and($outageStart->diffInSeconds($openedAt->copy()->addSeconds(20 + 30)))->toBeLessThanOrEqual(180);
 });
