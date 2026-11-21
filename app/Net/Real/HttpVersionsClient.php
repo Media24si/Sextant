@@ -45,6 +45,7 @@ class HttpVersionsClient implements VersionsClient
 
         match (true) {
             $response->status() === 401 => throw new CheckCouldNotRun('Token rejected (401)'),
+            $response->status() === 403 && str_starts_with(strtolower($url), 'http://') => throw new CheckCouldNotRun('Plain HTTP refused (403): run the install command again so versions.php allows http://'),
             $response->status() === 503 => throw new CheckCouldNotRun('Endpoint says: '.($response->json('error') ?? 'unavailable')),
             ! $response->successful() => throw new CheckCouldNotRun("Endpoint returned HTTP {$response->status()}"),
             $sink->overflowed => throw $tooLarge,

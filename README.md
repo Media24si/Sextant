@@ -163,9 +163,12 @@ A checker is a class, a registry entry and tests (SPEC §4).
 
 ## Installing the versions collector on a server
 
-Sextant never logs in to servers. An hourly root cron writes `/var/lib/sextant/versions.json` (readable by every user, so any PHP-FPM pool can serve it); a small `versions.php` hands it to Sextant over HTTPS with a token (SPEC §11). It needs Linux with bash; it can't run on Windows.
+Sextant never logs in to servers. An hourly root cron writes `/var/lib/sextant/versions.json` (readable by every user, so any PHP-FPM pool can serve it); a small `versions.php` hands it to Sextant with a token, over HTTPS (SPEC §11). It needs Linux with bash; it can't run on Windows.
 
 1. In Sextant: **Servers → the server → Edit → Software versions**. Enter the endpoint URL, e.g. `https://web02.media24.si/.sextant/versions.php`, and save.
+
+    Plain `http://` works too, e.g. `http://195.95.158.68:8080/.sextant/versions.php`, but only use it for a listener nobody but Sextant can reach (firewall the port): the token travels unencrypted. `versions.php` accepts plain HTTP only when the server's URL is `http://`, so run the install command again after switching between the two.
+
 2. **Copy install command** and paste it on the server (it makes a token if there's none):
 
     ```bash
@@ -174,7 +177,7 @@ Sextant never logs in to servers. An hourly root cron writes `/var/lib/sextant/v
 
     The link works for 30 minutes. The installer writes `/usr/local/bin/sextant-collect`, `/etc/cron.d/sextant` (only if missing) and `/var/www/sextant/versions.php`, runs the collector once, and prints the nginx block with the server's PHP-FPM socket. The server must reach Sextant over HTTPS.
 
-3. Add that block to the server's HTTPS nginx site, then `nginx -t && systemctl reload nginx`:
+3. Add that block to the nginx server block the endpoint URL reaches, then `nginx -t && systemctl reload nginx`:
 
     ```nginx
     location = /.sextant/versions.php {

@@ -17,7 +17,7 @@ set -u
 
 # Bump when this script or versions.php.stub changes; servers that report an
 # older number show "Collector outdated" in Sextant (SPEC §11.8).
-SEXTANT_COLLECTOR_VERSION=3
+SEXTANT_COLLECTOR_VERSION=4
 
 # Where versions.json goes; versions.php reads it from here. The file is
 # readable by everyone (0644), so versions.php works whichever user its

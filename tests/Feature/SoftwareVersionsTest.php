@@ -1,5 +1,6 @@
 <?php
 
+use App\Checks\CheckCouldNotRun;
 use App\Enums\Software;
 use App\Enums\Status;
 use App\Jobs\RunMonitor;
@@ -11,10 +12,12 @@ use App\Models\MonitorRun;
 use App\Models\Server;
 use App\Models\ServerSoftware;
 use App\Models\User;
+use App\Net\Real\HttpVersionsClient;
 use App\Net\VersionsClient;
 use App\Versions\CollectorKit;
 use App\Versions\VersionsFile;
 use App\Versions\VersionsRecorder;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -254,25 +257,37 @@ it('flags servers whose collector is older than the one Sextant ships', function
             ->where('rows.data.0.collector_outdated', true));
 });
 
-it('runs the rendered versions.php: 401 without or with a wrong token, 405 on POST, 200 with the token', function () {
+/**
+ * Serves versions.php as rendered for the server with `php -S`, and hands its
+ * URL to $requests. `php -S` doesn't speak HTTPS; with $behindHttps the router
+ * marks requests as HTTPS like nginx would.
+ */
+function serveVersionsPhp(Server $server, bool $behindHttps, Closure $requests): void
+{
     $dir = sys_get_temp_dir().'/sextant-php-'.uniqid();
     mkdir($dir);
     file_put_contents("{$dir}/versions.json", json_encode(versionsFile()));
     config(['sextant.versions.file_path' => "{$dir}/versions.json"]);
-    $php = $this->actingAs($this->admin)->get(route('servers.versions-php', $this->web02))->getContent();
-    file_put_contents("{$dir}/versions.php", $php);
-    // php -S doesn't speak HTTPS; the router marks requests as HTTPS like nginx would.
-    file_put_contents("{$dir}/router.php", "<?php \$_SERVER['HTTPS'] = 'on'; require __DIR__.'/versions.php';");
+    file_put_contents("{$dir}/versions.php", app(CollectorKit::class)->endpointPhp($server));
+    file_put_contents("{$dir}/router.php", '<?php '.($behindHttps ? "\$_SERVER['HTTPS'] = 'on'; " : '')."require __DIR__.'/versions.php';");
 
     $port = random_int(20000, 40000);
     $process = new Process([PHP_BINARY, '-S', "127.0.0.1:{$port}", "{$dir}/router.php"]);
     $process->start();
     usleep(400_000);
+    Http::allowStrayRequests();
 
     try {
-        Illuminate\Support\Facades\Http::allowStrayRequests();
-        $url = "http://127.0.0.1:{$port}/";
+        $requests("http://127.0.0.1:{$port}/");
+    } finally {
+        $process->stop();
+        array_map('unlink', glob("{$dir}/*") ?: []);
+        rmdir($dir);
+    }
+}
 
+it('runs the rendered versions.php: 401 without or with a wrong token, 405 on POST, 200 with the token', function () {
+    serveVersionsPhp($this->web02, behindHttps: true, requests: function (string $url) {
         expect(Http::get($url)->status())->toBe(401)
             ->and(Http::withToken('sxt_wrong')->get($url)->status())->toBe(401)
             ->and(Http::withToken('sxt_'.str_repeat('a', 32))->post($url)->status())->toBe(405);
@@ -282,12 +297,40 @@ it('runs the rendered versions.php: 401 without or with a wrong token, 405 on PO
         expect($ok->status())->toBe(200)
             ->and($ok->header('Cache-Control'))->toContain('no-store')
             ->and($ok->json('hostname'))->toBe('web02');
-    } finally {
-        $process->stop();
-        array_map('unlink', glob("{$dir}/*") ?: []);
-        rmdir($dir);
-    }
+    });
 });
+
+it('answers plain HTTP only when the endpoint URL is http://', function () {
+    $token = 'sxt_'.str_repeat('a', 32);
+
+    // An https:// endpoint refuses plain HTTP, and the check says how to fix it once the URL is http://.
+    serveVersionsPhp($this->web02, behindHttps: false, requests: function (string $url) use ($token) {
+        expect(Http::withToken($token)->get($url)->status())->toBe(403);
+        expect(fn () => (new HttpVersionsClient)->fetch($url, $token))
+            ->toThrow(CheckCouldNotRun::class, 'Plain HTTP refused (403): run the install command again so versions.php allows http://');
+    });
+
+    $this->web02->forceFill(['versions_url' => 'http://195.95.158.68:8080/.sextant/versions.php'])->saveQuietly();
+
+    serveVersionsPhp($this->web02, behindHttps: false, requests: function (string $url) use ($token) {
+        expect((new HttpVersionsClient)->fetch($url, $token)->hostname)->toBe('web02')
+            ->and(Http::withToken('sxt_wrong')->get($url)->status())->toBe(401);
+    });
+});
+
+it('accepts http:// and https:// endpoint URLs, nothing else', function (string $url, bool $valid) {
+    $response = $this->actingAs($this->admin)->put(route('servers.update', $this->web02), [
+        'name' => 'web02',
+        'versions_url' => $url,
+        'addresses' => [['ip' => '192.0.2.60', 'is_primary' => true]],
+    ]);
+
+    $valid ? $response->assertSessionHasNoErrors() : $response->assertSessionHasErrors('versions_url');
+})->with([
+    'https' => ['https://web02.media24.si/.sextant/versions.php', true],
+    'http on a port' => ['http://195.95.158.68:8080/.sextant/version.php', true],
+    'ftp' => ['ftp://web02.media24.si/versions.php', false],
+]);
 
 it('tests the connection without storing anything', function () {
     $this->client->respond(VERSIONS_URL, versionsFile());

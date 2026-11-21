@@ -140,7 +140,7 @@ There is no public registration. Admins create users; the first admin is created
 | `os_reported` | varchar(150) null | System-maintained: `PRETTY_NAME` from the versions file |
 | `collector_version` | smallint unsigned null | System-maintained: `collector_version` from the versions file; null before version 2 (§11.8) |
 | `notes` | text null | |
-| `versions_url` | varchar(500) null | HTTPS URL of the versions endpoint (§11) |
+| `versions_url` | varchar(500) null | URL of the versions endpoint (§11): `https://`, or `http://` for a listener only Sextant can reach (§11.4) |
 | `versions_token` | text null | `encrypted` cast. Never sent to the browser |
 | `versions_token_last4` | char(4) null | Shown as `sxt_••••a91f` |
 | `status` | varchar(10) | System-maintained, default `unknown` |
@@ -1229,7 +1229,7 @@ Requirements:
 
 - Runs on PHP ≥ 7.4 (older servers).
 - Only `GET`; other methods → 405.
-- Requires HTTPS (`$_SERVER['HTTPS']`); otherwise 403.
+- Requires HTTPS (`$_SERVER['HTTPS']`); otherwise 403. Exception: when the server's `versions_url` is `http://` (e.g. `http://195.95.158.68:8080/.sextant/versions.php` on a port firewalled to Sextant), the file is rendered with `$requireHttps = false` and answers plain HTTP too. The token then travels unencrypted, so admins use it only where nobody else can listen. Switching the URL between `http://` and `https://` means running the install command again; an `https://`-only file answering an `http://` URL makes the check Unknown with "Plain HTTP refused (403): run the install command again so versions.php allows http://".
 - Reads `Authorization: Bearer …` from `HTTP_AUTHORIZATION`; compares `hash('sha256', $token)` with the embedded hash using `hash_equals`. Missing or wrong → 401 with an empty body.
 - Missing file → 503 `{"error":"versions file missing"}`.
 - Otherwise returns the file with `Content-Type: application/json` and `Cache-Control: no-store`. Nothing else is exposed.
@@ -1643,7 +1643,7 @@ return [
 - **On the monitored servers**:
   - Add Sextant's IP to fail2ban `ignoreip` (port 22 checks every minute).
   - Allowlist Sextant's IP in Cloudflare/WAF rules so HTTP checks aren't challenged.
-  - Install the collector and endpoint (§11), with an nginx location on the server's own HTTPS hostname.
+  - Install the collector and endpoint (§11), with an nginx location on the server's own HTTPS hostname (or an HTTP listener only Sextant can reach, §11.4).
 - **Backups**: daily MySQL dump. Incidents, software history and the change feed are kept; runs can be excluded.
 - **Security**: Sextant requests whatever URLs and IPs admins enter, including private ranges, by design. Only signed-in in-house admins can enter them. Version tokens are encrypted at rest and never sent to the browser after generation.
 
@@ -1675,7 +1675,7 @@ No live network in the default suite. All network I/O goes through the `app/Net`
 - `server.versions`: OK, below minimum (Warning), 401 / timeout / stale file (Unknown, versions kept), minimum change triggering runs.
 - Download endpoints: `versions.php` contains the token hash and never the token; collector served unchanged.
 - Install command: makes a token when there's none; its signed link serves the installer with the hash and the unchanged collector, never the token; 403 without a signature, with a wrong one or after expiry. Outdated collectors on the server page and the list filter. Live group: the installer installs and then updates in Ubuntu 24.04 and Debian 12 containers, keeping a customised cron, with the file readable by `nobody` under `umask 077`.
-- The rendered `versions.php` served with `php -S` against a fixture file: 401 without/with a wrong token, 405 on POST, 200 with the right token.
+- The rendered `versions.php` served with `php -S` against a fixture file: 401 without/with a wrong token, 405 on POST, 200 with the right token; plain HTTP refused (403) for an `https://` URL and answered for an `http://` one.
 - **Authorization matrix**: every route in §13.3 marked admin-only returns 403 for a reader and succeeds for an admin; readers' Inertia props have `can.manage = false`.
 - Inertia pages: `assertInertia` on component name and key props for each page.
 - Observers: admin edits record activities; `saveQuietly()` system writes don't; secrets never appear in `properties`.
@@ -1778,7 +1778,7 @@ Each phase ends with something usable and an exit check.
 | CDN blind spots: behind Cloudflare we only see the edge | Accepted for v1. Certificate messages say "edge certificate"; the backend server has its own TCP checks |
 | Backend behind a front service is only suggested | Admin confirms; optional backend header (§10.3, GOAL open question) |
 | Distribution backports make versions look older than they are | Package versions shown beside upstream; admins acknowledge (GOAL open question) |
-| Versions endpoint exposure | HTTPS only, token hash only on the server, constant-time comparison, minimal data, token rotation |
+| Versions endpoint exposure | HTTPS only unless an admin sets an `http://` URL for a listener only Sextant can reach, token hash only on the server, constant-time comparison, minimal data, token rotation |
 | One probe location | The canary covers Sextant's own connectivity, not partial routes. Revisit in Phase 9 if false positives show up |
 | Bot protection or fail2ban blocking Sextant | Allowlisting (§16), done before Phase 3 goes live |
 | TLDs without RDAP and with hard-to-parse WHOIS | Phase 0 spike lists every TLD; per-pattern fixtures |

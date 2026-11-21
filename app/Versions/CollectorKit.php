@@ -36,13 +36,17 @@ class CollectorKit
         return $hasReadings && ($server->collector_version ?? 1) < $this->version();
     }
 
-    /** `versions.php` for the server. Holds the token's SHA-256 hash, never the token. */
+    /**
+     * `versions.php` for the server. Holds the token's SHA-256 hash, never the
+     * token, and refuses plain HTTP unless the endpoint URL is http://.
+     */
     public function endpointPhp(Server $server): string
     {
         return strtr((string) file_get_contents(resource_path('collector/versions.php.stub')), [
             '{{server}}' => $this->comment($server->name),
             '{{token_hash}}' => hash('sha256', (string) $server->versions_token),
             '{{file_path}}' => addslashes((string) config('sextant.versions.file_path')),
+            '{{require_https}}' => $this->allowsPlainHttp($server) ? 'false' : 'true',
         ]);
     }
 
@@ -60,6 +64,15 @@ class CollectorKit
             '{{endpoint_file}}' => (string) config('sextant.versions.endpoint_file'),
             '{{location}}' => $this->location($server),
         ]);
+    }
+
+    /**
+     * Whether `versions.php` answers over plain HTTP: only when the endpoint
+     * URL is http://, e.g. a listener reachable only from Sextant.
+     */
+    public function allowsPlainHttp(Server $server): bool
+    {
+        return $server->versions_url !== null && strtolower((string) parse_url($server->versions_url, PHP_URL_SCHEME)) === 'http';
     }
 
     /**

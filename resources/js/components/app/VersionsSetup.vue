@@ -76,15 +76,15 @@ const nginx = computed(
         <p class="text-sm text-muted-foreground">
             Sextant never logs in to servers. A small collector writes the
             versions to a file every hour, and a PHP endpoint hands that file to
-            Sextant over HTTPS with a token. The collector needs Linux; it can't
-            run on Windows servers.
+            Sextant with a token. The collector needs Linux; it can't run on
+            Windows servers.
         </p>
 
         <FormField
             label="Versions endpoint URL"
             for="versions_url"
             :error="error"
-            description="HTTPS address of versions.php on this server. Empty = versions aren't read."
+            description="Address of versions.php on this server. Use https; plain http only for a listener that just Sextant can reach, since the token travels unencrypted. After switching between them, run the install command again. Empty = versions are not read."
         >
             <Input
                 id="versions_url"
@@ -169,8 +169,8 @@ const nginx = computed(
                     </div>
                 </li>
                 <li>
-                    Add the printed location block to the server's HTTPS nginx
-                    site and reload nginx.
+                    Add the printed location block to the nginx server block the
+                    URL reaches and reload nginx.
                 </li>
                 <li>Save this form with the endpoint URL, then test:</li>
             </ol>
@@ -214,7 +214,8 @@ const nginx = computed(
                         >.
                     </li>
                     <li>
-                        Add to the server's HTTPS nginx site and reload nginx:
+                        Add to the nginx server block the URL reaches and reload
+                        nginx:
                         <pre
                             class="mt-1.5 overflow-x-auto rounded-lg bg-muted/50 p-3 font-mono text-xs"
                             >{{ nginx }}</pre>

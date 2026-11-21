@@ -80,7 +80,7 @@ install_sextant() {
 
         cat <<NGINX
 
-Add this to the server's HTTPS nginx site, then run: nginx -t && systemctl reload nginx
+Add this to the nginx server block the endpoint URL reaches, then run: nginx -t && systemctl reload nginx
 
 location = ${LOCATION} {
     include fastcgi_params;
