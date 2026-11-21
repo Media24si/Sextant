@@ -18,6 +18,7 @@ import ChoiceController from '@/actions/App/Http/Controllers/ChoiceController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
 import IncidentController from '@/actions/App/Http/Controllers/IncidentController';
+import MinimumVersionController from '@/actions/App/Http/Controllers/MinimumVersionController';
 import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
 import UserController from '@/actions/App/Http/Controllers/UserController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
@@ -65,7 +66,11 @@ const mainNavItems = computed<SidebarNavItem[]>(() => [
 ]);
 
 const adminNavItems: SidebarNavItem[] = [
-    { title: 'Minimum versions', icon: ShieldCheck },
+    {
+        title: 'Minimum versions',
+        href: MinimumVersionController.index(),
+        icon: ShieldCheck,
+    },
     {
         title: 'External services',
         href: ExternalServiceController.index(),

@@ -8,6 +8,7 @@ use App\Net\Fake\FakePingProbe;
 use App\Net\Fake\FakeRdapClient;
 use App\Net\Fake\FakeTcpProbe;
 use App\Net\Fake\FakeTlsProbe;
+use App\Net\Fake\FakeVersionsClient;
 use App\Net\Fake\FakeWhoisClient;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Http;
@@ -34,6 +35,7 @@ abstract class TestCase extends BaseTestCase
         FakePingProbe::install();
         FakeRdapClient::install();
         FakeWhoisClient::install();
+        FakeVersionsClient::install();
         Http::preventStrayRequests();
         Storage::fake();
     }

@@ -34,6 +34,7 @@ class ServerRequest extends FormRequest
             'provider' => ['nullable', 'string', 'max:100'],
             'os_choice_id' => ['nullable', 'integer', Rule::exists('choices', 'id')->where('list', ChoiceList::Os->value)],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'versions_url' => ['nullable', 'string', 'max:500', 'url:https'],
             'addresses' => ['required', 'array', 'min:1', 'max:20'],
             'addresses.*.ip' => ['required', 'string', 'ip', 'distinct:ignore_case', new IpAddressIsFree($server)],
             'addresses.*.is_primary' => ['required', 'boolean'],

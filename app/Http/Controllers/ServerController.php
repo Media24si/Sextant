@@ -9,6 +9,8 @@ use App\Data\ServedSiteData;
 use App\Data\ServerData;
 use App\Data\ServerFormData;
 use App\Data\ServerRowData;
+use App\Data\ServerVersionData;
+use App\Data\ServerVersionsPanelData;
 use App\Data\TrafficGroupData;
 use App\Enums\ChoiceList;
 use App\Enums\Status;
@@ -23,6 +25,7 @@ use App\Monitoring\IncidentPresenter;
 use App\Monitoring\MonitorProps;
 use App\Support\ReturnTo;
 use App\Support\TableQuery;
+use App\Versions\MinimumVersions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\RedirectResponse;
@@ -43,11 +46,13 @@ class ServerController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = QueryBuilder::for(Server::query()->with(['primaryAddress', 'os', 'backupLocations'])->withCount('sites'), $request)
+        $below = app(MinimumVersions::class)->serverIdsBelow();
+        $query = QueryBuilder::for(Server::query()->with(['primaryAddress', 'os', 'backupLocations', 'software'])->withCount('sites'), $request)
             ->allowedFilters(
-                AllowedFilter::callback('show', function (Builder $query, mixed $value): void {
+                AllowedFilter::callback('show', function (Builder $query, mixed $value) use ($below): void {
                     match ($value) {
                         'problems' => $query->whereIn('status', [Status::Warning, Status::Error]),
+                        'below_minimum' => $query->whereKey($below),
                         'no_backup' => $query->doesntHave('backupLocations'),
                         'deleted' => $query->withoutGlobalScope(SoftDeletingScope::class)->whereNotNull('servers.deleted_at'),
                         default => null,
@@ -62,6 +67,7 @@ class ServerController extends Controller
             'counts' => [
                 'all' => Server::query()->count(),
                 'problems' => Server::query()->whereIn('status', [Status::Warning, Status::Error])->count(),
+                'below_minimum' => count($below),
                 'no_backup' => Server::query()->doesntHave('backupLocations')->count(),
                 'deleted' => Server::onlyTrashed()->count(),
             ],
@@ -80,6 +86,7 @@ class ServerController extends Controller
 
         return Inertia::render('servers/Show', [
             ...MonitorProps::for($server),
+            'versions' => $this->versionsPanel($server),
             'incidents' => app(IncidentPresenter::class)->latestFor($server),
             'server' => ServerData::fromModel($server),
             'traffic' => $this->traffic(array_values($sites->all())),
@@ -104,7 +111,7 @@ class ServerController extends Controller
 
     public function store(ServerRequest $request, SaveServer $saveServer): RedirectResponse
     {
-        /** @var array{name: string, hostname?: string|null, provider?: string|null, os_choice_id?: int|null, notes?: string|null, addresses: list<array{ip: string, is_primary: bool}>, backup_location_ids?: list<int>} $input */
+        /** @var array{name: string, hostname?: string|null, provider?: string|null, os_choice_id?: int|null, notes?: string|null, versions_url?: string|null, addresses: list<array{ip: string, is_primary: bool}>, backup_location_ids?: list<int>} $input */
         $input = $request->validated();
         $server = $saveServer->handle(new Server, $input);
         AttachServerMonitors::dispatch($server);
@@ -124,7 +131,7 @@ class ServerController extends Controller
 
     public function update(ServerRequest $request, Server $server, SaveServer $saveServer): RedirectResponse
     {
-        /** @var array{name: string, hostname?: string|null, provider?: string|null, os_choice_id?: int|null, notes?: string|null, addresses: list<array{ip: string, is_primary: bool}>, backup_location_ids?: list<int>} $input */
+        /** @var array{name: string, hostname?: string|null, provider?: string|null, os_choice_id?: int|null, notes?: string|null, versions_url?: string|null, addresses: list<array{ip: string, is_primary: bool}>, backup_location_ids?: list<int>} $input */
         $input = $request->validated();
         $saveServer->handle($server, $input);
 
@@ -176,11 +183,30 @@ class ServerController extends Controller
         return to_route('servers.show', $server);
     }
 
+    private function versionsPanel(Server $server): ServerVersionsPanelData
+    {
+        $rows = $server->software()->get();
+        $monitor = $server->monitors()->where('checker', 'server.versions')->with('state')->first();
+
+        return new ServerVersionsPanelData(
+            configured: $server->versions_url !== null && $server->versions_token !== null,
+            endpoint_url: $server->versions_url,
+            token_masked: ServerVersionsController::maskedToken($server),
+            read_at: $rows->max('read_at')?->toIso8601String(),
+            fetched_at: $rows->max('fetched_at')?->toIso8601String(),
+            os_reported: $server->os_reported,
+            os_set: $server->os?->label,
+            last_message: $monitor?->state?->message,
+            versions: array_values($rows->map(ServerVersionData::fromModel(...))->all()),
+        );
+    }
+
     private function form(ServerFormData $form, ?string $returnTo = null): Response
     {
         return Inertia::render('servers/Form', [
             'form' => $form,
             'return_to' => $returnTo,
+            'versions_default_path' => (string) config('sextant.versions.default_path'),
             'os_choices' => Choice::ofList(ChoiceList::Os)->get()->map(ChoiceData::fromModel(...)),
             'backup_choices' => Choice::ofList(ChoiceList::BackupLocation)->get()->map(ChoiceData::fromModel(...)),
         ]);

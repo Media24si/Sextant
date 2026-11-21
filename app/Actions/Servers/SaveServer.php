@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class SaveServer
 {
     /**
-     * @param  array{name: string, hostname?: string|null, provider?: string|null, os_choice_id?: int|null, notes?: string|null, addresses: list<array{ip: string, is_primary: bool|string|int}>, backup_location_ids?: list<int>}  $input
+     * @param  array{name: string, hostname?: string|null, provider?: string|null, os_choice_id?: int|null, notes?: string|null, versions_url?: string|null, addresses: list<array{ip: string, is_primary: bool|string|int}>, backup_location_ids?: list<int>}  $input
      */
     public function handle(Server $server, array $input): Server
     {
@@ -24,6 +24,7 @@ class SaveServer
                 'provider' => $input['provider'] ?? null,
                 'os_choice_id' => $input['os_choice_id'] ?? null,
                 'notes' => $input['notes'] ?? null,
+                'versions_url' => $input['versions_url'] ?? null,
             ])->save();
 
             $this->syncAddresses($server, $input['addresses']);

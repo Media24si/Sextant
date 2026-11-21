@@ -2,6 +2,7 @@
 
 namespace App\Data;
 
+use App\Http\Controllers\ServerVersionsController;
 use App\Models\Choice;
 use App\Models\Server;
 use App\Models\ServerAddress;
@@ -25,6 +26,9 @@ class ServerFormData extends Data
         public ?string $notes,
         public array $addresses,
         public array $backup_location_ids,
+        public ?string $versions_url = null,
+        /** "sxt_••••a91f" once a token exists; the token itself never reaches the browser. */
+        public ?string $versions_token_masked = null,
     ) {}
 
     /**
@@ -46,6 +50,8 @@ class ServerFormData extends Data
             notes: $server->notes,
             addresses: array_values($server->addresses->map(fn (ServerAddress $address): array => ['ip' => $address->ip, 'is_primary' => $address->is_primary])->all()),
             backup_location_ids: array_values($server->backupLocations->map(fn (Choice $choice): int => $choice->id)->all()),
+            versions_url: $server->versions_url,
+            versions_token_masked: ServerVersionsController::maskedToken($server),
         );
     }
 }

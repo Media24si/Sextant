@@ -8,20 +8,25 @@ use App\Data\Dashboard\IncidentItemData;
 use App\Data\Dashboard\IssueGroupData;
 use App\Data\Dashboard\ResolvedItemData;
 use App\Data\Dashboard\ResourceRefData;
+use App\Data\Dashboard\SoftwareMinimumRowData;
 use App\Data\Dashboard\StatusCountsData;
 use App\Data\Dashboard\SystemHealthData;
 use App\Data\Dashboard\TotalsData;
+use App\Enums\Software;
 use App\Enums\Status;
 use App\Models\Activity;
 use App\Models\Concerns\Monitorable;
 use App\Models\Domain;
 use App\Models\Incident;
+use App\Models\MinimumVersion;
 use App\Models\Monitor;
 use App\Models\MonitorState;
 use App\Models\Server;
+use App\Models\ServerSoftware;
 use App\Models\Site;
 use App\Monitoring\MonitorClaimer;
 use App\Monitoring\NetworkHealth;
+use App\Versions\MinimumVersions;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -46,7 +51,46 @@ class DashboardBuilder
 
     private const CHANGES_SHOWN = 50;
 
-    public function __construct(private NetworkHealth $network) {}
+    public function __construct(
+        private NetworkHealth $network,
+        private MinimumVersions $minimums,
+    ) {}
+
+    /**
+     * Each software (and PHP branch) seen on servers or with a minimum, the
+     * minimum, and the servers below it (§13.7).
+     *
+     * @return list<SoftwareMinimumRowData>
+     */
+    public function software(): array
+    {
+        $readings = ServerSoftware::query()->where('software', '!=', Software::Os)->whereHas('server')->with('server')->get();
+        $rows = [];
+
+        foreach ($readings as $reading) {
+            $rows["{$reading->software->value}:{$reading->branch}"] ??= ['software' => $reading->software, 'branch' => $reading->branch];
+        }
+
+        foreach (MinimumVersion::query()->get() as $minimum) {
+            $rows["{$minimum->software->value}:{$minimum->branch}"] ??= ['software' => $minimum->software, 'branch' => $minimum->branch];
+        }
+
+        $order = array_flip(array_map(fn (Software $software): string => $software->value, Software::cases()));
+        uasort($rows, fn (array $a, array $b): int => [$order[$a['software']->value], $a['branch']] <=> [$order[$b['software']->value], $b['branch']]);
+
+        return array_values(array_map(function (array $row) use ($readings): SoftwareMinimumRowData {
+            /** @var Software $software */
+            $software = $row['software'];
+            $minimum = $this->minimums->for($software, $row['branch']);
+            $below = $readings
+                ->filter(fn (ServerSoftware $reading): bool => $reading->software === $software && $reading->branch === $row['branch'] && $this->minimums->isBelow($reading))
+                ->map(fn (ServerSoftware $reading): array => ['server' => $reading->server->name, 'version' => $reading->version])
+                ->values()
+                ->all();
+
+            return new SoftwareMinimumRowData($software->labelWithBranch($row['branch']), $row['branch'], $minimum?->min_version, array_values($below));
+        }, $rows));
+    }
 
     public function totals(): TotalsData
     {
@@ -55,8 +99,7 @@ class DashboardBuilder
             domains: $this->counts(Domain::query()),
             sites: $this->counts(Site::query()),
             sites_unassigned: Site::query()->whereNull('server_id')->count(),
-            // SPEC: software versions arrive in Phase 7.
-            servers_below_minimum: 0,
+            servers_below_minimum: count($this->minimums->serverIdsBelow()),
         );
     }
 

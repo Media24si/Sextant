@@ -17,6 +17,7 @@ const props = defineProps<
         counts: {
             all: number;
             problems: number;
+            below_minimum: number;
             no_backup: number;
             deleted: number;
         };
@@ -30,15 +31,43 @@ const mono = (text: string | null) =>
         ? h('span', { class: 'font-mono' }, text)
         : h('span', { class: 'text-muted-foreground' }, '—');
 
-// Version columns stay empty until software versions arrive (Phase 7).
+/*
+ * Version columns (SPEC §11.6, §13.6): orange when below the minimum, the
+ * package version on hover. PHP lists every branch. "not configured" when the
+ * server has no versions endpoint (§11.7).
+ */
 const versionColumn = (
-    id: string,
+    software: string,
     header: string,
-    placeholder = '—',
 ): ColumnDef<Row, unknown> => ({
-    id,
+    id: software,
     header,
-    cell: () => h(VersionCell, { version: null, placeholder }),
+    cell: ({ row }) => {
+        const versions = row.original.versions.filter(
+            (version) => version.software === software,
+        );
+
+        if (versions.length === 0) {
+            return h(VersionCell, {
+                version: null,
+                placeholder: row.original.versions_configured
+                    ? '—'
+                    : 'not configured',
+            });
+        }
+
+        return h(
+            'div',
+            { class: 'flex flex-col gap-0.5' },
+            versions.map((version) =>
+                h(VersionCell, {
+                    version: version.version,
+                    packageVersion: version.package_version,
+                    belowMinimum: version.below_minimum,
+                }),
+            ),
+        );
+    },
 });
 
 const columns: ColumnDef<Row, unknown>[] = [
@@ -107,7 +136,7 @@ const columns: ColumnDef<Row, unknown>[] = [
                       'None set',
                   ),
     },
-    versionColumn('kernel', 'Kernel', 'not configured'),
+    versionColumn('kernel', 'Kernel'),
     versionColumn('nginx', 'nginx'),
     versionColumn('php', 'PHP'),
     versionColumn('mysql', 'MySQL'),
@@ -117,6 +146,11 @@ const columns: ColumnDef<Row, unknown>[] = [
 const chips = computed<TableFilterChip[]>(() => [
     { label: 'All', value: null, count: props.counts.all },
     { label: 'Problems', value: 'problems', count: props.counts.problems },
+    {
+        label: 'Below minimum',
+        value: 'below_minimum',
+        count: props.counts.below_minimum,
+    },
     {
         label: 'No backup location',
         value: 'no_backup',
@@ -136,7 +170,7 @@ const chips = computed<TableFilterChip[]>(() => [
     >
         <PageHeader
             title="Servers"
-            :description="`${counts.all} ${counts.all === 1 ? 'server' : 'servers'} · software versions arrive with the versions collector`"
+            :description="`${counts.all} ${counts.all === 1 ? 'server' : 'servers'} · orange versions are below the minimum`"
         >
             <template v-if="page.props.can.manage" #actions>
                 <Button as-child>
@@ -164,8 +198,9 @@ const chips = computed<TableFilterChip[]>(() => [
         />
 
         <p class="text-[13px] text-muted-foreground">
-            Orange "None set" means no backup location is ticked. Version
-            columns fill in once a server's versions endpoint is set up.
+            Orange "None set" means no backup location is ticked. Orange
+            versions are below the minimum; hover for the package version, which
+            may carry a backported fix.
         </p>
     </div>
 </template>

@@ -81,6 +81,16 @@ class Server extends Model implements Monitorable
     }
 
     /**
+     * The latest version readings (SPEC §3.14).
+     *
+     * @return HasMany<ServerSoftware, $this>
+     */
+    public function software(): HasMany
+    {
+        return $this->hasMany(ServerSoftware::class)->orderBy('software')->orderByDesc('branch');
+    }
+
+    /**
      * The address checks target unless told otherwise (SPEC §3.3).
      *
      * @return HasOne<ServerAddress, $this>

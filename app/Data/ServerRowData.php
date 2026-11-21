@@ -26,6 +26,9 @@ class ServerRowData extends Data
         public int $sites_count,
         public array $backup_locations,
         public bool $deleted,
+        public bool $versions_configured = false,
+        /** @var list<ServerVersionData> */
+        public array $versions = [],
     ) {}
 
     public static function fromModel(Server $server): self
@@ -40,6 +43,8 @@ class ServerRowData extends Data
             sites_count: (int) $server->getAttribute('sites_count'),
             backup_locations: array_values($server->backupLocations->map(fn (Choice $choice): string => $choice->label)->all()),
             deleted: $server->trashed(),
+            versions_configured: $server->versions_url !== null,
+            versions: array_values($server->software->map(ServerVersionData::fromModel(...))->all()),
         );
     }
 }

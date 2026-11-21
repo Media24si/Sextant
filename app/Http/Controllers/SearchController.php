@@ -7,6 +7,7 @@ use App\Enums\SearchResultType;
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
+use App\Models\ServerSoftware;
 use App\Models\Site;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -42,6 +43,21 @@ class SearchController extends Controller
         ])->take(self::LIMIT)->values();
 
         return response()->json(['results' => SearchResultData::collect($results)]);
+    }
+
+    /**
+     * "nginx 1.24.0" when the search matched one of the server's versions.
+     *
+     * @param  list<string>  $terms
+     */
+    private function matchingVersion(Server $server, array $terms): ?string
+    {
+        // Terms come as LIKE patterns: "%8.2.20%".
+        $needles = array_map(fn (string $term): string => stripcslashes(trim($term, '%')), $terms);
+        $row = $server->software->first(fn (ServerSoftware $row): bool => collect($needles)
+            ->contains(fn (string $needle): bool => str_contains(strtolower($row->version.' '.$row->package_version), $needle)));
+
+        return $row === null ? null : "{$row->label()} {$row->version}";
     }
 
     /**
@@ -93,9 +109,11 @@ class SearchController extends Controller
             ->where(function (Builder $query) use ($terms): void {
                 $this->whereLike($query, ['name', 'hostname', 'os_reported'], $terms);
                 $query->orWhereHas('addresses', fn (Builder $addresses) => $this->whereLike($addresses, ['ip'], $terms))
-                    ->orWhereHas('os', fn (Builder $os) => $this->whereLike($os, ['label'], $terms));
+                    ->orWhereHas('os', fn (Builder $os) => $this->whereLike($os, ['label'], $terms))
+                    // Search by software version, e.g. "1.24.0" or "8.2.20" (SPEC §13.8).
+                    ->orWhereHas('software', fn (Builder $software) => $this->whereLike($software, ['version', 'package_version'], $terms));
             })
-            ->with(['primaryAddress', 'os'])
+            ->with(['primaryAddress', 'os', 'software'])
             ->withCount('sites')
             ->orderBy('name')
             ->limit(self::PER_TYPE)
@@ -106,7 +124,7 @@ class SearchController extends Controller
                 label: $server->name,
                 context: collect([
                     $server->primaryAddress?->ip,
-                    $server->os->label ?? $server->os_reported,
+                    $this->matchingVersion($server, $terms) ?? $server->os->label ?? $server->os_reported,
                     $this->count((int) $server->getAttribute('sites_count'), 'site'),
                 ])->filter()->implode(' · '),
                 status: $server->status,

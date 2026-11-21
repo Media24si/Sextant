@@ -1,9 +1,11 @@
 <?php
 
+use App\Checks\Conditions\HasVersionsEndpoint;
 use App\Checks\Conditions\PortIsOpen;
 use App\Checks\Conditions\UsesHttps;
 use App\Checks\Domain\DomainExpirationChecker;
 use App\Checks\Server\TcpChecker;
+use App\Checks\Server\VersionsChecker;
 use App\Checks\Site\HttpChecker;
 use App\Checks\Site\ServingPathChecker;
 use App\Checks\Site\SslCertificateChecker;
@@ -12,8 +14,8 @@ use App\Checks\Site\SslCertificateChecker;
  * The checker registry (SPEC §4.3). Keys are `{type}.{name}`; the prefix must
  * match the class's base type (`sextant:checkers` validates this).
  *
- * SPEC: §4.3 also lists server.ping, server.versions, domain.nameservers and
- * site.redirect. Their classes arrive in Phases 7 and 8; each is added here
+ * SPEC: §4.3 also lists server.ping, domain.nameservers and site.redirect.
+ * Their classes arrive in Phase 8; each is added here
  * with its class, and `monitors:sync-defaults --checker=…` attaches it to
  * existing resources.
  */
@@ -28,6 +30,16 @@ return [
             'failures_before_incident' => 2,
             'successes_before_resolve' => 1,
             'arguments' => ['port' => 443, 'address' => null, 'timeout' => 5],
+        ],
+
+        'server.versions' => [
+            'class' => VersionsChecker::class,
+            'queue' => 'checks-slow',
+            'interval' => 1440,
+            'failures_before_incident' => 1,   // deterministic: a version is below the minimum or it isn't
+            'successes_before_resolve' => 1,
+            'max_severity' => 'warning',
+            'arguments' => [],
         ],
 
         'domain.expiration' => [
@@ -79,6 +91,7 @@ return [
             ['checker' => 'server.tcp', 'label' => 'SSH', 'arguments' => ['port' => 22], 'only_if' => PortIsOpen::class],
             ['checker' => 'server.tcp', 'label' => 'HTTP', 'arguments' => ['port' => 80], 'only_if' => PortIsOpen::class],
             ['checker' => 'server.tcp', 'label' => 'HTTPS', 'arguments' => ['port' => 443], 'only_if' => PortIsOpen::class],
+            ['checker' => 'server.versions', 'only_if' => HasVersionsEndpoint::class],
         ],
 
         'domain' => [

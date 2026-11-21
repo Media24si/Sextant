@@ -20,8 +20,7 @@ class DashboardController extends Controller
             'muted' => fn () => $dashboard->muted(),
             'pending_count' => fn () => $dashboard->pendingCount(),
             'resolved' => fn () => $dashboard->resolved(),
-            // SPEC: the Software vs minimum panel arrives in Phase 7.
-            'software' => fn () => [],
+            'software' => fn () => $dashboard->software(),
             'expiring' => fn () => $dashboard->expiring(),
             'changes' => fn () => $dashboard->changes(),
             'system' => fn () => $dashboard->system(),

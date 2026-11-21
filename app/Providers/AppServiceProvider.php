@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Incident;
+use App\Models\MinimumVersion;
 use App\Models\Monitor;
 use App\Models\Server;
 use App\Models\Site;
@@ -14,6 +15,7 @@ use App\Net\HttpProbe;
 use App\Net\PingProbe;
 use App\Net\RdapClient;
 use App\Net\Real\GuzzleHttpProbe;
+use App\Net\Real\HttpVersionsClient;
 use App\Net\Real\IanaRdapClient;
 use App\Net\Real\NetDnsResolver;
 use App\Net\Real\SocketTcpProbe;
@@ -22,7 +24,9 @@ use App\Net\Real\StreamTlsProbe;
 use App\Net\Real\SystemPingProbe;
 use App\Net\TcpProbe;
 use App\Net\TlsProbe;
+use App\Net\VersionsClient;
 use App\Net\WhoisClient;
+use App\Versions\MinimumVersions;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -48,6 +52,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(PingProbe::class, SystemPingProbe::class);
         $this->app->singleton(RdapClient::class, IanaRdapClient::class);
         $this->app->singleton(WhoisClient::class, SocketWhoisClient::class);
+        $this->app->singleton(VersionsClient::class, HttpVersionsClient::class);
+        // Minimums are cached per request or job.
+        $this->app->scoped(MinimumVersions::class);
     }
 
     /**
@@ -84,6 +91,7 @@ class AppServiceProvider extends ServiceProvider
             'user' => User::class,
             'monitor' => Monitor::class,
             'incident' => Incident::class,
+            'minimum_version' => MinimumVersion::class,
         ]);
     }
 

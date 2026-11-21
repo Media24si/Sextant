@@ -15,6 +15,7 @@ class ResourceUrl
             'domain' => route('domains.show', $id, false),
             'site' => route('sites.show', $id, false),
             'external_service' => route('external-services.index', [], false),
+            'minimum_version' => route('minimum-versions.index', [], false),
             default => null,
         };
     }

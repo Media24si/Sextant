@@ -5,6 +5,7 @@ use App\Models\Choice;
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Incident;
+use App\Models\MinimumVersion;
 use App\Models\Monitor;
 use App\Models\Server;
 use App\Models\Site;
@@ -59,6 +60,14 @@ $adminRoutes = [
     'mute domain' => ['post', 'domains.mute', fn () => ['domain' => Domain::factory()->create()]],
     'mute site' => ['post', 'sites.mute', fn () => ['site' => Site::factory()->create()]],
     'acknowledge incident' => ['post', 'incidents.acknowledge', fn () => ['incident' => Incident::factory()->create()]],
+    'set minimum version' => ['post', 'minimum-versions.store', null],
+    'change minimum version' => ['put', 'minimum-versions.update', fn () => ['minimum_version' => MinimumVersion::factory()->create()]],
+    'remove minimum version' => ['delete', 'minimum-versions.destroy', fn () => ['minimum_version' => MinimumVersion::factory()->create()]],
+    'generate versions token' => ['post', 'servers.versions-token', fn () => ['server' => Server::factory()->create()]],
+    'download collector' => ['get', 'servers.collector', fn () => ['server' => Server::factory()->create()]],
+    'download versions.php' => ['get', 'servers.versions-php', fn () => ['server' => Server::factory()->create()]],
+    'test versions connection' => ['post', 'servers.versions.test', fn () => ['server' => Server::factory()->create()]],
+    'refresh versions' => ['post', 'servers.versions.refresh', fn () => ['server' => Server::factory()->create()]],
     'add list entry' => ['post', 'lists.store', null],
     'rename list entry' => ['put', 'lists.update', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'move list entry' => ['post', 'lists.move', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],

@@ -72,6 +72,22 @@ ranges_source: App.Enums.RangeSource | null,
 sites_count: number,
 deleted: boolean,
 };
+export type MinimumVersionRowData = {
+id: number,
+software: string,
+branch: string,
+label: string,
+min_version: string,
+cve_url: string | null,
+note: string | null,
+servers_below: {
+id: number,
+name: string,
+version: string,
+}[],
+set_by: string,
+updated_at: string,
+};
 export type OptionData = {
 id: number,
 label: string,
@@ -125,6 +141,8 @@ ip: string,
 is_primary: boolean,
 }[],
 backup_location_ids: number[],
+versions_url: string | null,
+versions_token_masked: string | null,
 };
 export type ServerRowData = {
 id: number,
@@ -136,6 +154,30 @@ os: string | null,
 sites_count: number,
 backup_locations: string[],
 deleted: boolean,
+versions_configured: boolean,
+versions: App.Data.ServerVersionData[],
+};
+export type ServerVersionData = {
+software: string,
+branch: string,
+label: string,
+version: string,
+package_version: string | null,
+min_version: string | null,
+below_minimum: boolean,
+read_at: string,
+details: Record<string, any> | null,
+};
+export type ServerVersionsPanelData = {
+configured: boolean,
+endpoint_url: string | null,
+token_masked: string | null,
+read_at: string | null,
+fetched_at: string | null,
+os_reported: string | null,
+os_set: string | null,
+last_message: string | null,
+versions: App.Data.ServerVersionData[],
 };
 export type ServingPathData = {
 front: string | null,
@@ -520,6 +562,7 @@ export type IncidentEventType = 'opened' | 'escalated' | 'deescalated' | 'acknow
 export type IncidentResolution = 'recovered' | 'monitor_disabled' | 'monitor_deleted' | 'resource_deleted';
 export type RangeSource = 'cloudflare' | 'fastly' | 'cloudfront';
 export type SearchResultType = 'server' | 'external_service' | 'domain' | 'site';
+export type Software = 'os' | 'kernel' | 'nginx' | 'php' | 'mysql' | 'openssl';
 export type Status = 'ok' | 'warning' | 'error' | 'unknown';
 export type UserRole = 'admin' | 'reader';
 }

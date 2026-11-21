@@ -7,6 +7,7 @@ import RunChecksController from '@/actions/App/Http/Controllers/RunChecksControl
 import ActivityList from '@/components/app/ActivityList.vue';
 import IncidentList from '@/components/app/IncidentList.vue';
 import MonitorList from '@/components/app/MonitorList.vue';
+import ServerVersionsPanel from '@/components/app/ServerVersionsPanel.vue';
 import MuteDialog from '@/components/app/MuteDialog.vue';
 import MuteController from '@/actions/App/Http/Controllers/MuteController';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
@@ -27,10 +28,13 @@ const props = defineProps<{
     monitors: App.Data.Monitors.MonitorRowData[];
     checker_options: App.Data.Monitors.CheckerOptionData[];
     incidents: App.Data.Incidents.IncidentRowData[];
+    versions: App.Data.ServerVersionsPanelData;
 }>();
 
 // Results arrive while the page is open (SPEC §13.7).
-usePoll(10_000, { only: ['monitors', 'incidents', 'activity', 'server'] });
+usePoll(10_000, {
+    only: ['monitors', 'incidents', 'activity', 'server', 'versions'],
+});
 
 const muting = ref(false);
 
@@ -335,6 +339,8 @@ function restore(): void {
                 </div>
                 <EmptyState v-else title="No sites yet" />
             </section>
+
+            <ServerVersionsPanel :server-id="server.id" :panel="versions" />
 
             <IncidentList
                 :incidents="incidents"

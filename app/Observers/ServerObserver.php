@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Enums\IncidentResolution;
 use App\Models\Server;
+use App\Monitoring\DefaultMonitors;
 use App\Monitoring\IncidentManager;
 use App\Monitoring\MonitorEffects;
 
@@ -23,6 +24,11 @@ class ServerObserver extends InventoryObserver
     {
         if ($server->wasChanged('versions_token')) {
             $this->record('server.versions_token_rotated', $server, "{$server->name}: versions token rotated");
+        }
+
+        // The versions monitor joins once the endpoint and a token are set (§4.4).
+        if ($server->wasChanged(['versions_url', 'versions_token'])) {
+            app(DefaultMonitors::class)->attach($server, onlyChecker: 'server.versions');
         }
 
         $changes = $this->changes($server);

@@ -6,11 +6,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\ExternalServiceController;
 use App\Http\Controllers\IncidentController;
+use App\Http\Controllers\MinimumVersionController;
 use App\Http\Controllers\MonitorController;
 use App\Http\Controllers\MuteController;
 use App\Http\Controllers\RunChecksController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ServerController;
+use App\Http\Controllers\ServerVersionsController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SiteImportController;
 use App\Http\Controllers\UserController;
@@ -26,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/lists', [ChoiceController::class, 'index'])->name('lists.index');
     Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
     Route::get('monitors', [MonitorController::class, 'index'])->name('monitors.index');
+    Route::get('minimum-versions', [MinimumVersionController::class, 'index'])->name('minimum-versions.index');
     Route::get('incidents', [IncidentController::class, 'index'])->name('incidents.index');
     Route::get('incidents/{incident}', [IncidentController::class, 'show'])->name('incidents.show');
     Route::get('search', SearchController::class)->name('search');
@@ -65,6 +68,10 @@ Route::middleware('auth')->group(function () {
         Route::post('sites/{site}/detect-again', [SiteController::class, 'detectAgain'])->name('sites.detect-again');
         Route::put('sites/{site}/path', [SiteController::class, 'updatePath'])->name('sites.path');
 
+        Route::post('minimum-versions', [MinimumVersionController::class, 'store'])->name('minimum-versions.store');
+        Route::put('minimum-versions/{minimum_version}', [MinimumVersionController::class, 'update'])->name('minimum-versions.update');
+        Route::delete('minimum-versions/{minimum_version}', [MinimumVersionController::class, 'destroy'])->name('minimum-versions.destroy');
+
         Route::post('monitors', [MonitorController::class, 'store'])->name('monitors.store');
         Route::put('monitors/{monitor}', [MonitorController::class, 'update'])->name('monitors.update');
         Route::delete('monitors/{monitor}', [MonitorController::class, 'destroy'])->name('monitors.destroy');
@@ -74,6 +81,11 @@ Route::middleware('auth')->group(function () {
         Route::post('domains/{domain}/mute', [MuteController::class, 'domain'])->name('domains.mute');
         Route::post('sites/{site}/mute', [MuteController::class, 'site'])->name('sites.mute');
         Route::post('incidents/{incident}/acknowledge', [IncidentController::class, 'acknowledge'])->name('incidents.acknowledge');
+        Route::post('servers/{server}/versions-token', [ServerVersionsController::class, 'token'])->name('servers.versions-token');
+        Route::get('servers/{server}/collector.sh', [ServerVersionsController::class, 'collector'])->name('servers.collector');
+        Route::get('servers/{server}/versions.php', [ServerVersionsController::class, 'endpoint'])->name('servers.versions-php');
+        Route::post('servers/{server}/versions/test', [ServerVersionsController::class, 'test'])->name('servers.versions.test');
+        Route::post('servers/{server}/versions/refresh', [ServerVersionsController::class, 'refresh'])->name('servers.versions.refresh');
         Route::post('servers/{server}/run-checks', [RunChecksController::class, 'server'])->name('servers.run-checks');
         Route::post('domains/{domain}/run-checks', [RunChecksController::class, 'domain'])->name('domains.run-checks');
         Route::post('sites/{site}/run-checks', [RunChecksController::class, 'site'])->name('sites.run-checks');

@@ -4,6 +4,7 @@ import { computed } from 'vue';
 import ActivityController from '@/actions/App/Http/Controllers/ActivityController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import IncidentController from '@/actions/App/Http/Controllers/IncidentController';
+import MinimumVersionController from '@/actions/App/Http/Controllers/MinimumVersionController';
 import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
@@ -109,6 +110,15 @@ const lastCheck = computed(() =>
 );
 
 const since = (iso: string) => Duration.since(iso, now.value);
+
+/** "nginx on web03 · PHP 8.2 on web02", as in the prototype. */
+const belowSummary = computed(() => {
+    const items = props.software.flatMap((row) =>
+        row.below.map((below) => `${row.software} on ${below.server}`),
+    );
+
+    return items.length > 0 ? items.join(' · ') : null;
+});
 </script>
 
 <template>
@@ -199,9 +209,17 @@ const since = (iso: string) => Duration.since(iso, now.value);
                             : 'servers'
                     }}
                 </span>
-                <span class="text-sm text-muted-foreground"
-                    >Software versions are read once collectors are set
-                    up.</span
+                <span
+                    class="text-sm"
+                    :class="
+                        belowSummary
+                            ? 'text-status-warning-fg'
+                            : 'text-muted-foreground'
+                    "
+                    >{{
+                        belowSummary ??
+                        'Every reading is at or above its minimum.'
+                    }}</span
                 >
             </div>
         </section>
@@ -440,6 +458,78 @@ const since = (iso: string) => Duration.since(iso, now.value);
             </div>
 
             <div class="flex min-w-0 flex-col gap-6">
+                <section
+                    v-if="software.length > 0"
+                    class="overflow-hidden rounded-xl border bg-card"
+                    aria-labelledby="software"
+                >
+                    <div
+                        class="flex items-center justify-between border-b px-5 py-4"
+                    >
+                        <h2 id="software" class="text-lg font-semibold">
+                            Software vs minimum
+                        </h2>
+                        <Link
+                            :href="MinimumVersionController.index()"
+                            class="text-sm text-primary hover:underline"
+                            >{{
+                                page.props.can.manage ? 'Manage' : 'Minimums'
+                            }}</Link
+                        >
+                    </div>
+                    <table class="w-full text-sm">
+                        <thead class="text-left text-muted-foreground">
+                            <tr class="border-b">
+                                <th class="px-5 py-2 font-medium">Software</th>
+                                <th class="px-5 py-2 font-medium">Minimum</th>
+                                <th class="px-5 py-2 text-right font-medium">
+                                    Below
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr
+                                v-for="row in software"
+                                :key="`${row.software}`"
+                            >
+                                <td class="px-5 py-2">{{ row.software }}</td>
+                                <td class="px-5 py-2">
+                                    <span
+                                        v-if="row.min_version"
+                                        class="font-mono"
+                                        >{{ row.min_version }}</span
+                                    >
+                                    <span v-else class="text-muted-foreground"
+                                        >not set</span
+                                    >
+                                </td>
+                                <td class="px-5 py-2 text-right">
+                                    <span
+                                        v-if="!row.min_version"
+                                        class="text-muted-foreground"
+                                        >—</span
+                                    >
+                                    <span
+                                        v-else-if="row.below.length === 0"
+                                        class="text-status-ok-fg"
+                                        >0</span
+                                    >
+                                    <span
+                                        v-else
+                                        class="font-semibold text-status-warning-fg"
+                                        >{{ row.below.length }} ·
+                                        {{
+                                            row.below
+                                                .map((below) => below.server)
+                                                .join(', ')
+                                        }}</span
+                                    >
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
                 <section
                     class="overflow-hidden rounded-xl border bg-card"
                     aria-labelledby="expiring"

@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "generated_at": "2026-11-20T06:00:02Z",
+  "hostname": "web02",
+  "os": { "id": "ubuntu", "version_id": "24.04", "pretty_name": "Ubuntu 24.04.1 LTS" },
+  "kernel": { "version": "6.8.0-49-generic" },
+  "nginx": { "version": "1.26.2", "package": "1.26.2-1~noble" },
+  "php": [
+    { "branch": "8.3", "version": "8.3.14", "cli": true, "fpm": true, "package": "8.3.14-1+ubuntu24.04.1" },
+    { "branch": "8.2", "version": "8.2.20", "cli": true, "fpm": true, "package": "8.2.20-1+ubuntu24.04.1" }
+  ],
+  "mysql": null,
+  "openssl": { "version": "3.0.13", "package": "3.0.13-0ubuntu3.4" },
+  "unknown_extra_field": { "ignored": true }
+}

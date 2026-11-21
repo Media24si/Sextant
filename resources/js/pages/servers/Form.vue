@@ -6,6 +6,7 @@ import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import FormField from '@/components/app/FormField.vue';
 import PageHeader from '@/components/app/PageHeader.vue';
 import InputError from '@/components/InputError.vue';
+import VersionsSetup from '@/components/app/VersionsSetup.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,7 @@ const props = defineProps<{
     backup_choices: App.Data.ChoiceData[];
     /** Set when opened from Add site's unknown address (SPEC §10.4). */
     return_to: string | null;
+    versions_default_path: string;
 }>();
 
 const editing = computed(() => props.form.id !== null);
@@ -25,6 +27,7 @@ const editing = computed(() => props.form.id !== null);
 const form = useForm({
     return_to: props.return_to,
     name: props.form.name,
+    versions_url: props.form.versions_url ?? '',
     hostname: props.form.hostname ?? '',
     provider: props.form.provider ?? '',
     os_choice_id: props.form.os_choice_id,
@@ -353,21 +356,21 @@ function submit(): void {
                 </section>
 
                 <section
-                    class="flex flex-col gap-2 rounded-xl border border-dashed bg-card p-6 text-muted-foreground"
+                    class="flex flex-col gap-4 rounded-xl border bg-card p-6"
                     aria-labelledby="versions"
                 >
-                    <h2
-                        id="versions"
-                        class="text-lg font-semibold text-foreground"
-                    >
+                    <h2 id="versions" class="text-lg font-semibold">
                         <span class="text-muted-foreground">3</span> Software
                         versions
                     </h2>
-                    <p class="text-sm">
-                        Not available yet. Once the versions collector arrives,
-                        this is where you generate the token, download the two
-                        files and set the endpoint URL.
-                    </p>
+                    <VersionsSetup
+                        v-model:url="form.versions_url"
+                        :server-id="props.form.id"
+                        :hostname="form.hostname || null"
+                        :token-masked="props.form.versions_token_masked"
+                        :default-path="versions_default_path"
+                        :error="form.errors.versions_url"
+                    />
                 </section>
 
                 <div class="flex justify-end gap-3">

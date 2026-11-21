@@ -189,17 +189,17 @@
 
 ## Phase 7 — Software versions (§18)
 
-- [ ] **P7.1** Migrations `server_software` (§3.14) and `minimum_versions` (§3.15); `servers.os_reported`, `versions_url`, `versions_token`, `versions_token_last4` if not already present.
-- [ ] **P7.2** Collector `resources/collector/sextant-collect.sh` exactly as §11.3 (no `jq`, atomic write, missing software = `null`, package versions via `dpkg-query`); `shellcheck` in CI.
-- [ ] **P7.3** `versions.php.stub` exactly as §11.4 (PHP ≥ 7.4, GET only, HTTPS only, `hash_equals` on SHA-256, 401/405/403/503 rules, `Cache-Control: no-store`).
-- [ ] **P7.4** Token generation and rotation (shown once, encrypted, last4), download routes for both files, install instructions with the nginx snippet, Test connection (§11.2, §11.4, §13.3).
-- [ ] **P7.5** `VersionsClient` and `VersionsFile` validation (schema 1, 256 KB cap, 10 s timeout).
-- [ ] **P7.6** `VersionsRecorder` (§11.5): upserts, removals, `os_reported`, `software.*` and `server.os_changed` activities; nothing on the first reading.
-- [ ] **P7.7** Version normalisation and comparison (§11.6), including kernel strings.
-- [ ] **P7.8** `server.versions` checker (§9.9) and its attachment when an endpoint is configured (§4.4); Refresh claims a run.
-- [ ] **P7.9** Minimum versions page (§13.6); set/change/remove claims runs of all versions monitors (§6.4); `minimum_version.*` activities.
-- [ ] **P7.10** UI: version columns and "Below minimum" filter on Servers; versions panel on the server page (installed, package, minimum, read time, endpoint, masked token, downloads, Test connection, Refresh, OS reported vs set); Software vs minimum on the dashboard; servers below minimum in totals; search by version; Windows note on Add server.
-- [ ] **P7.11** Tests: validation fixtures, comparison, recorder changes, checker outcomes (OK, Warning, 401/timeout/stale → Unknown with versions kept), rendered `versions.php` via `php -S` (401/405/200), the downloaded file contains the hash and never the token; live-group collector run in Ubuntu 24.04 and Debian 12 containers.
+- [x] **P7.1** Migrations `server_software` (§3.14) and `minimum_versions` (§3.15); `servers.os_reported`, `versions_url`, `versions_token`, `versions_token_last4` if not already present.
+- [x] **P7.2** Collector `resources/collector/sextant-collect.sh` exactly as §11.3 (no `jq`, atomic write, missing software = `null`, package versions via `dpkg-query`); `shellcheck` in CI.
+- [x] **P7.3** `versions.php.stub` exactly as §11.4 (PHP ≥ 7.4, GET only, HTTPS only, `hash_equals` on SHA-256, 401/405/403/503 rules, `Cache-Control: no-store`).
+- [x] **P7.4** Token generation and rotation (shown once, encrypted, last4), download routes for both files, install instructions with the nginx snippet, Test connection (§11.2, §11.4, §13.3).
+- [x] **P7.5** `VersionsClient` and `VersionsFile` validation (schema 1, 256 KB cap, 10 s timeout).
+- [x] **P7.6** `VersionsRecorder` (§11.5): upserts, removals, `os_reported`, `software.*` and `server.os_changed` activities; nothing on the first reading.
+- [x] **P7.7** Version normalisation and comparison (§11.6), including kernel strings.
+- [x] **P7.8** `server.versions` checker (§9.9) and its attachment when an endpoint is configured (§4.4); Refresh claims a run.
+- [x] **P7.9** Minimum versions page (§13.6); set/change/remove claims runs of all versions monitors (§6.4); `minimum_version.*` activities.
+- [x] **P7.10** UI: version columns and "Below minimum" filter on Servers; versions panel on the server page (installed, package, minimum, read time, endpoint, masked token, downloads, Test connection, Refresh, OS reported vs set); Software vs minimum on the dashboard; servers below minimum in totals; search by version; Windows note on Add server.
+- [x] **P7.11** Tests: validation fixtures, comparison, recorder changes, checker outcomes (OK, Warning, 401/timeout/stale → Unknown with versions kept), rendered `versions.php` via `php -S` (401/405/200), the downloaded file contains the hash and never the token; live-group collector run in Ubuntu 24.04 and Debian 12 containers.
 - [ ] **P7.12** **[HUMAN]** Install the collector and endpoint on two real servers, one with two PHP versions.
 - [ ] **Exit P7** **[HUMAN]**: setting a minimum above a server's version turns it orange within a minute and posts a Discord warning without `@here`; upgrading clears it; stopping the cron shows the reading's age with no alert.
 
@@ -288,6 +288,11 @@ Found in Phase 0 (2026-11-20):
 - [x] §13.7 names the builder `DashboardData`; that's the laravel-data class typing the props (`App\Data\Dashboard\DashboardData`), and the builder is `App\Dashboard\DashboardBuilder`. Each prop is its own lazy closure so `usePoll(..., { only })` reloads just those.
 - [x] §13.4's health pill has no rules for its states. Decision: "Checks not running yet" (no dispatch ever), "Checks stopped" (no dispatch for 3 minutes, error), "network down" (canary failed, warning), "N stale" (warning), otherwise "Checks running · network OK". `system` is shared on every page for the header and polled on the dashboard.
 - [x] The prototype's Overview has a "Below minimum version" card and a "Software vs minimum" panel; both stay empty until Phase 7 fills `servers_below_minimum` and `software`. The Sites card also shows how many sites have no backend.
+- [x] §11.5 says the recorder runs "in the run's transaction", but the checker runs before the runner opens its transaction (§5.3). The recorder uses its own transaction; a failed run still records nothing.
+- [x] §11.3: the collector also honours `SEXTANT_DIR` (default `/var/lib/sextant`), so it can be tested without root. `versions.php` also reads `REDIRECT_HTTP_AUTHORIZATION`, which Apache-style setups pass instead of `HTTP_AUTHORIZATION`.
+- [x] §11.4 "Test connection" and "Generate token" answer with JSON (the token appears once in the browser and is never sent again). Rotating asks for confirmation, since the old versions.php stops working.
+- [x] §11.6 doesn't say how an unparseable version compares. Decision: it's never "below" (it can't be judged); the server page shows it as read.
+- [x] §13.6 "Software vs minimum" lists each software and PHP branch seen on servers or with a minimum; rows without a minimum say "not set", as in the prototype. Minimum versions is in the Admin group of the sidebar, but readers can open the page (CRUD is admin only).
 - [x] P1.1's morph map lists `monitor`, `incident` and `minimum_version`, whose models arrive in Phases 3, 4 and 7. `Relation::enforceMorphMap()` needs real classes, so each joins the map with its model.
 - [x] The choices seeds (§3.4) and the Cloudflare row (§3.5) are reference data that production needs, but deploys run `migrate`, not `db:seed`. Decision: the create-table migrations insert them.
 - [x] P1.5's "IP not inside any external service's ranges" can only check admin-entered `ranges` until `proxies:refresh` caches the published ranges (P2.3/P2.4). `IpAddressIsFree` has a `// SPEC:` note; P2.3 extends it.
