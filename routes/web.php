@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ChoiceController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\ExternalServiceController;
 use App\Http\Controllers\IncidentController;
@@ -16,7 +17,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
-    Route::inertia('/', 'Dashboard')->name('dashboard');
+    Route::get('/', DashboardController::class)->name('dashboard');
 
     Route::get('servers', [ServerController::class, 'index'])->name('servers.index');
     Route::get('external-services', [ExternalServiceController::class, 'index'])->name('external-services.index');

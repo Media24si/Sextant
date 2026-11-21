@@ -178,11 +178,11 @@
 
 ## Phase 6 — Live dashboard (§18)
 
-- [ ] **P6.1** `DashboardData` building `DashboardProps` (§13.7) with a handful of queries; types generated from laravel-data.
-- [ ] **P6.2** Dashboard page per the prototype: totals; Current issues (grouped, Acknowledge for admins, recovering/acknowledged markers, serving paths on children); Recently resolved; Expiring in 60 days; Recent changes; footer with system health and pending count. Add domain / Add server / Add site buttons for admins.
-- [ ] **P6.3** `usePoll(10_000, { only: [...] })` on the dashboard; polling on server, site and incident pages (§13.7).
-- [ ] **P6.4** Header health pill wired to `system`.
-- [ ] **P6.5** Feature test that props match the contract and ordering/grouping rules hold.
+- [x] **P6.1** `DashboardData` building `DashboardProps` (§13.7) with a handful of queries; types generated from laravel-data.
+- [x] **P6.2** Dashboard page per the prototype: totals; Current issues (grouped, Acknowledge for admins, recovering/acknowledged markers, serving paths on children); Recently resolved; Expiring in 60 days; Recent changes; footer with system health and pending count. Add domain / Add server / Add site buttons for admins.
+- [x] **P6.3** `usePoll(10_000, { only: [...] })` on the dashboard; polling on server, site and incident pages (§13.7).
+- [x] **P6.4** Header health pill wired to `system`.
+- [x] **P6.5** Feature test that props match the contract and ordering/grouping rules hold.
 - [ ] **Exit P6**: during a scripted outage the issue appears within 10 s of opening, without a reload.
 
 ---
@@ -285,6 +285,9 @@ Found in Phase 0 (2026-11-20):
 - [x] §12.1 doesn't say what happens without `DISCORD_WEBHOOK_URL`. Decision: events are still marked, with `suppressed_reason = no_webhook`, so the outbox doesn't grow while the webhook isn't set.
 - [x] §12.1 "fails after 5 attempts" with `RateLimited` and 429 releases: the job has `maxExceptions = 5` (only real failures count) and keeps trying for an hour (`retryUntil`), so rate-limit waits never use up attempts.
 - [x] §12.2 Sentry Crons slugs: `sextant-queue-checks`, `sextant-queue-checks-slow`, `sextant-queue-notifications` (heartbeats, every 5 min, 2-minute margin) and the scheduler's `monitors:dispatch` monitor from `->sentryMonitor()`.
+- [x] §13.7 names the builder `DashboardData`; that's the laravel-data class typing the props (`App\Data\Dashboard\DashboardData`), and the builder is `App\Dashboard\DashboardBuilder`. Each prop is its own lazy closure so `usePoll(..., { only })` reloads just those.
+- [x] §13.4's health pill has no rules for its states. Decision: "Checks not running yet" (no dispatch ever), "Checks stopped" (no dispatch for 3 minutes, error), "network down" (canary failed, warning), "N stale" (warning), otherwise "Checks running · network OK". `system` is shared on every page for the header and polled on the dashboard.
+- [x] The prototype's Overview has a "Below minimum version" card and a "Software vs minimum" panel; both stay empty until Phase 7 fills `servers_below_minimum` and `software`. The Sites card also shows how many sites have no backend.
 - [x] P1.1's morph map lists `monitor`, `incident` and `minimum_version`, whose models arrive in Phases 3, 4 and 7. `Relation::enforceMorphMap()` needs real classes, so each joins the map with its model.
 - [x] The choices seeds (§3.4) and the Cloudflare row (§3.5) are reference data that production needs, but deploys run `migrate`, not `db:seed`. Decision: the create-table migrations insert them.
 - [x] P1.5's "IP not inside any external service's ranges" can only check admin-entered `ranges` until `proxies:refresh` caches the published ranges (P2.3/P2.4). `IpAddressIsFree` has a `// SPEC:` note; P2.3 extends it.

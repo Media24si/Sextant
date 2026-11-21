@@ -1,30 +1,28 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import StatusDot from '@/components/app/StatusDot.vue';
+import { useNow } from '@/composables/useNow';
+import { systemHealth } from '@/lib/health';
 import { statusToneClasses } from '@/lib/status';
 
 /*
- * Header pill for Sextant's own health (SPEC §13.4), e.g. "Checks running ·
- * network OK". Wired to the `system` prop in P6.4; until then it shows Unknown.
+ * Header pill for Sextant's own health (SPEC §13.4): are the checks being
+ * dispatched, is the network canary happy, are monitors going stale.
  */
-withDefaults(
-    defineProps<{
-        status?: App.Enums.Status;
-        label?: string;
-    }>(),
-    {
-        status: 'unknown',
-        label: 'Checks not running yet',
-    },
-);
+const page = usePage();
+const now = useNow();
+
+const health = computed(() => systemHealth(page.props.system, now.value));
 </script>
 
 <template>
     <span
         role="status"
         class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] whitespace-nowrap"
-        :class="statusToneClasses[status]"
+        :class="statusToneClasses[health.status]"
     >
-        <StatusDot :status="status" />
-        {{ label }}
+        <StatusDot :status="health.status" />
+        {{ health.label }}
     </span>
 </template>

@@ -21,6 +21,7 @@ declare module '@inertiajs/core' {
             auth: Auth;
             can: Can;
             nav: { servers: number; domains: number; incidents: number } | null;
+            system: App.Data.Dashboard.SystemHealthData | null;
             sidebarOpen: boolean;
             [key: string]: unknown;
         };

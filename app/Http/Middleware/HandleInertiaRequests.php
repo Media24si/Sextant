@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Dashboard\DashboardBuilder;
 use App\Data\AuthUserData;
+use App\Data\Dashboard\SystemHealthData;
 use App\Models\Domain;
 use App\Models\Incident;
 use App\Models\Server;
@@ -56,6 +58,8 @@ class HandleInertiaRequests extends Middleware
                 'domains' => Domain::query()->count(),
                 'incidents' => Incident::query()->open()->roots()->count(),
             ] : null,
+            // The header's health pill on every page (SPEC §13.4); the dashboard also polls it.
+            'system' => fn (): ?SystemHealthData => $user ? app(DashboardBuilder::class)->system() : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

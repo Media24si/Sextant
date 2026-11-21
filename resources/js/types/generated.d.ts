@@ -193,6 +193,85 @@ role: App.Enums.UserRole,
 created_at: string | null,
 is_you: boolean,
 };
+namespace Dashboard {
+export type DashboardData = {
+totals: App.Data.Dashboard.TotalsData,
+issues: App.Data.Dashboard.IssueGroupData[],
+muted: App.Data.Dashboard.IssueGroupData[],
+pending_count: number,
+resolved: App.Data.Dashboard.ResolvedItemData[],
+software: App.Data.Dashboard.SoftwareMinimumRowData[],
+expiring: App.Data.Dashboard.ExpiringItemData[],
+changes: App.Data.ActivityItemData[],
+system: App.Data.Dashboard.SystemHealthData,
+};
+export type ExpiringItemData = {
+kind: string,
+name: string,
+expires_at: string,
+days: number,
+url: string,
+};
+export type IncidentItemData = {
+id: number,
+title: string,
+message: string,
+severity: App.Enums.Status,
+opened_at: string,
+acknowledged_by: string | null,
+recovering: boolean,
+serving_path: string | null,
+url: string,
+};
+export type IssueGroupData = {
+resource: App.Data.Dashboard.ResourceRefData,
+incidents: App.Data.Dashboard.IncidentItemData[],
+children: App.Data.Dashboard.IncidentItemData[],
+};
+export type ResolvedItemData = {
+id: number,
+title: string,
+opened_at: string,
+resolved_at: string,
+children_count: number,
+url: string,
+};
+export type ResourceRefData = {
+type: string,
+id: number,
+name: string,
+status: App.Enums.Status,
+url: string,
+};
+export type SoftwareMinimumRowData = {
+software: string,
+branch: string,
+min_version: string | null,
+below: {
+server: string,
+version: string,
+}[],
+};
+export type StatusCountsData = {
+total: number,
+ok: number,
+warning: number,
+error: number,
+unknown: number,
+};
+export type SystemHealthData = {
+last_dispatch_at: string | null,
+stale_monitors: number,
+network_healthy: boolean | null,
+};
+export type TotalsData = {
+servers: App.Data.Dashboard.StatusCountsData,
+domains: App.Data.Dashboard.StatusCountsData,
+sites: App.Data.Dashboard.StatusCountsData,
+sites_unassigned: number,
+servers_below_minimum: number,
+};
+}
 namespace Detection {
 export type BackendCandidateData = {
 server_id: number,
