@@ -15,6 +15,10 @@
 
 set -u
 
+# Bump when this script or versions.php.stub changes; servers that report an
+# older number show "Collector outdated" in Sextant (SPEC §11.8).
+SEXTANT_COLLECTOR_VERSION=2
+
 # The group the web server's PHP runs as; it must be able to read the file.
 SEXTANT_GROUP="${SEXTANT_GROUP:-www-data}"
 # Where versions.json goes; versions.php reads it from here.
@@ -195,6 +199,7 @@ main() {
     {
         printf '{\n'
         printf '  "schema": 1,\n'
+        printf '  "collector_version": %s,\n' "$SEXTANT_COLLECTOR_VERSION"
         printf '  "generated_at": %s,\n' "$(json_string "$(date -u +%Y-%m-%dT%H:%M:%SZ)")"
         printf '  "hostname": %s,\n' "$(json_string "$(hostname 2>/dev/null || true)")"
         printf '  "os": %s,\n' "$(os_json)"

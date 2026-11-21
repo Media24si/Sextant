@@ -50,7 +50,7 @@ test('readers see the servers list with addresses, sites and backups', function 
             ->where('rows.data.1.primary_ip', '192.0.2.12')
             ->where('rows.data.1.sites_count', 2)
             ->where('rows.data.1.backup_locations', ['Provider snapshots'])
-            ->where('counts', ['all' => 2, 'problems' => 0, 'below_minimum' => 0, 'no_backup' => 1, 'deleted' => 0])
+            ->where('counts', ['all' => 2, 'problems' => 0, 'below_minimum' => 0, 'no_backup' => 1, 'collector_outdated' => 0, 'deleted' => 0])
             ->where('nav.servers', 2));
 });
 

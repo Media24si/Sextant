@@ -88,9 +88,9 @@ jobs:
       - name: Check generated TypeScript types are committed
         run: git diff --exit-code -- resources/js/types/generated.d.ts
 
-      # The versions collector runs on monitored servers (SPEC §11.3, §17).
-      - name: Shellcheck the collector
-        run: shellcheck resources/collector/sextant-collect.sh
+      # The versions collector and its installer run on monitored servers (SPEC §11.3, §11.8, §17).
+      - name: Shellcheck the collector and installer
+        run: shellcheck resources/collector/sextant-collect.sh && shellcheck --shell=bash resources/collector/install.sh.stub
 
       # Lint and format (vp check), vue-tsc, Vitest, Pint, Larastan, Pest on MySQL 9.7.
       - name: Run CI checks

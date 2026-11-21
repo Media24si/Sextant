@@ -19,6 +19,7 @@ const props = defineProps<
             problems: number;
             below_minimum: number;
             no_backup: number;
+            collector_outdated: number;
             deleted: number;
         };
     }
@@ -155,6 +156,15 @@ const chips = computed<TableFilterChip[]>(() => [
         value: 'no_backup',
         count: props.counts.no_backup,
     },
+    ...(props.counts.collector_outdated > 0
+        ? [
+              {
+                  label: 'Collector outdated',
+                  value: 'collector_outdated',
+                  count: props.counts.collector_outdated,
+              },
+          ]
+        : []),
     ...(props.counts.deleted > 0
         ? [{ label: 'Deleted', value: 'deleted', count: props.counts.deleted }]
         : []),

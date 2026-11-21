@@ -180,6 +180,7 @@ backup_locations: string[],
 deleted: boolean,
 versions_configured: boolean,
 versions: App.Data.ServerVersionData[],
+collector_outdated: boolean,
 };
 export type ServerVersionData = {
 software: string,
@@ -202,6 +203,9 @@ os_reported: string | null,
 os_set: string | null,
 last_message: string | null,
 versions: App.Data.ServerVersionData[],
+collector_version: number | null,
+collector_latest: number,
+collector_outdated: boolean,
 };
 export type ServingPathData = {
 front: string | null,
@@ -263,6 +267,11 @@ email: string,
 role: App.Enums.UserRole,
 created_at: string | null,
 is_you: boolean,
+};
+export type VersionsInstallCommandData = {
+command: string,
+expires_at: string,
+token_masked: string,
 };
 export type VersionsTestReadingData = {
 software: string,

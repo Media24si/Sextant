@@ -4,6 +4,7 @@ import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import ServerVersionsController from '@/actions/App/Http/Controllers/ServerVersionsController';
 import RelativeTime from '@/components/app/RelativeTime.vue';
 import VersionCell from '@/components/app/VersionCell.vue';
+import VersionsInstallCommand from '@/components/app/VersionsInstallCommand.vue';
 import VersionsTestConnection from '@/components/app/VersionsTestConnection.vue';
 import { Button } from '@/components/ui/button';
 import { formatDateTime } from '@/lib/datetime';
@@ -12,8 +13,9 @@ import { formatDateTime } from '@/lib/datetime';
  * Software versions on a server page (SPEC §13.6, prototype ServerDetail):
  * installed and package versions against the minimums, when they were read,
  * and Refresh. Until versions have been read it also shows the endpoint,
- * masked token, downloads and Test connection; after that those live only on
- * the edit page.
+ * masked token, the install command and Test connection; after that those
+ * live only on the edit page. An outdated collector gets the update command
+ * here (§11.8).
  */
 const props = defineProps<{
     serverId: number;
@@ -69,6 +71,27 @@ function refresh(): void {
                 @click="refresh"
                 >Refresh now</Button
             >
+        </div>
+
+        <div
+            v-if="panel.collector_outdated"
+            class="flex flex-col gap-2 border-b bg-status-warning-bg/40 px-5 py-3 text-sm"
+        >
+            <p>
+                <span class="font-semibold text-status-warning-fg"
+                    >Collector outdated:</span
+                >
+                the server runs version {{ panel.collector_version ?? 1 }};
+                version {{ panel.collector_latest }} is available.
+                <template v-if="page.props.can.manage"
+                    >Run the update command on the server.</template
+                >
+            </p>
+            <VersionsInstallCommand
+                v-if="page.props.can.manage"
+                :server-id="serverId"
+                label="Copy update command"
+            />
         </div>
 
         <p
@@ -202,25 +225,11 @@ function refresh(): void {
                             : 'Set up versions'
                     }}</Link>
                 </Button>
-                <template v-if="panel.configured">
-                    <Button variant="outline" size="sm" as-child>
-                        <a
-                            :href="
-                                ServerVersionsController.collector(serverId).url
-                            "
-                            >sextant-collect.sh</a
-                        >
-                    </Button>
-                    <Button variant="outline" size="sm" as-child>
-                        <a
-                            :href="
-                                ServerVersionsController.endpoint(serverId).url
-                            "
-                            >versions.php</a
-                        >
-                    </Button>
-                </template>
             </div>
+            <VersionsInstallCommand
+                v-if="page.props.can.manage && panel.configured"
+                :server-id="serverId"
+            />
             <VersionsTestConnection
                 v-if="page.props.can.manage && panel.configured"
                 :server-id="serverId"

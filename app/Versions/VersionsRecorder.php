@@ -12,8 +12,9 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Stores a server's readings (SPEC §11.5): one row per software and PHP
- * branch, removals deleted, `os_reported` written quietly, and a `detected`
- * entry per change. The first reading records nothing in the feed.
+ * branch, removals deleted, `os_reported` and `collector_version` written
+ * quietly, and a `detected` entry per change. The first reading records
+ * nothing in the feed.
  */
 class VersionsRecorder
 {
@@ -57,8 +58,10 @@ class VersionsRecorder
                 }
             }
 
-            if ($server->os_reported !== $file->osPrettyName) {
-                $server->forceFill(['os_reported' => $file->osPrettyName])->saveQuietly();
+            $server->forceFill(['os_reported' => $file->osPrettyName, 'collector_version' => $file->collectorVersion]);
+
+            if ($server->isDirty(['os_reported', 'collector_version'])) {
+                $server->saveQuietly();
             }
         });
     }

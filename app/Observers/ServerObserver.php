@@ -12,7 +12,7 @@ class ServerObserver extends InventoryObserver
 {
     protected function excluded(): array
     {
-        return ['os_reported', 'versions_token', 'versions_token_last4'];
+        return ['os_reported', 'collector_version', 'versions_token', 'versions_token_last4'];
     }
 
     public function created(Server $server): void

@@ -25,6 +25,7 @@ use App\Monitoring\IncidentPresenter;
 use App\Monitoring\MonitorProps;
 use App\Support\ReturnTo;
 use App\Support\TableQuery;
+use App\Versions\CollectorKit;
 use App\Versions\MinimumVersions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -47,13 +48,15 @@ class ServerController extends Controller
     public function index(Request $request): Response
     {
         $below = app(MinimumVersions::class)->serverIdsBelow();
+        $latest = app(CollectorKit::class)->version();
         $query = QueryBuilder::for(Server::query()->with(['primaryAddress', 'os', 'backupLocations', 'software'])->withCount('sites'), $request)
             ->allowedFilters(
-                AllowedFilter::callback('show', function (Builder $query, mixed $value) use ($below): void {
+                AllowedFilter::callback('show', function (Builder $query, mixed $value) use ($below, $latest): void {
                     match ($value) {
                         'problems' => $query->whereIn('status', [Status::Warning, Status::Error]),
                         'below_minimum' => $query->whereKey($below),
                         'no_backup' => $query->doesntHave('backupLocations'),
+                        'collector_outdated' => $query->whereIn('servers.id', Server::query()->collectorOutdated($latest)->select('servers.id')),
                         'deleted' => $query->withoutGlobalScope(SoftDeletingScope::class)->whereNotNull('servers.deleted_at'),
                         default => null,
                     };
@@ -69,6 +72,7 @@ class ServerController extends Controller
                 'problems' => Server::query()->whereIn('status', [Status::Warning, Status::Error])->count(),
                 'below_minimum' => count($below),
                 'no_backup' => Server::query()->doesntHave('backupLocations')->count(),
+                'collector_outdated' => Server::query()->collectorOutdated($latest)->count(),
                 'deleted' => Server::onlyTrashed()->count(),
             ],
         ]);
@@ -186,6 +190,7 @@ class ServerController extends Controller
     private function versionsPanel(Server $server): ServerVersionsPanelData
     {
         $rows = $server->software()->get();
+        $kit = app(CollectorKit::class);
         $monitor = $server->monitors()->where('checker', 'server.versions')->with('state')->first();
 
         return new ServerVersionsPanelData(
@@ -198,6 +203,9 @@ class ServerController extends Controller
             os_set: $server->os?->label,
             last_message: $monitor?->state?->message,
             versions: array_values($rows->map(ServerVersionData::fromModel(...))->all()),
+            collector_version: $server->collector_version,
+            collector_latest: $kit->version(),
+            collector_outdated: $kit->isOutdated($server, $rows->isNotEmpty()),
         );
     }
 
@@ -207,6 +215,7 @@ class ServerController extends Controller
             'form' => $form,
             'return_to' => $returnTo,
             'versions_default_path' => (string) config('sextant.versions.default_path'),
+            'versions_endpoint_file' => (string) config('sextant.versions.endpoint_file'),
             'os_choices' => Choice::ofList(ChoiceList::Os)->get()->map(ChoiceData::fromModel(...)),
             'backup_choices' => Choice::ofList(ChoiceList::BackupLocation)->get()->map(ChoiceData::fromModel(...)),
         ]);

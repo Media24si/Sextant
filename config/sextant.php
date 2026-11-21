@@ -55,6 +55,8 @@ return [
         'token_prefix' => 'sxt_',
         'default_path' => '/.sextant/versions.php',
         'file_path' => '/var/lib/sextant/versions.json',
+        'endpoint_file' => '/var/www/sextant/versions.php',
+        'install_link_minutes' => 30,
     ],
 
     'whois' => [

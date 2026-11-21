@@ -8,7 +8,8 @@ use Throwable;
 
 /**
  * A parsed `versions.json`, schema 1 (SPEC §11.3). Software that isn't
- * installed is null; fields Sextant doesn't know are ignored.
+ * installed is null; fields Sextant doesn't know are ignored. Collectors
+ * before version 2 don't write `collector_version`.
  */
 final readonly class VersionsFile
 {
@@ -24,6 +25,8 @@ final readonly class VersionsFile
         public ?string $hostname,
         public ?string $osPrettyName,
         public array $readings,
+        /** What the collector reports as SEXTANT_COLLECTOR_VERSION; null before version 2 (§11.8) */
+        public ?int $collectorVersion = null,
     ) {}
 
     /**
@@ -112,6 +115,7 @@ final readonly class VersionsFile
             hostname: self::optionalString($data['hostname'] ?? null),
             osPrettyName: is_array($os) ? self::optionalString($os['pretty_name'] ?? null) : null,
             readings: $readings,
+            collectorVersion: is_int($data['collector_version'] ?? null) && $data['collector_version'] > 0 ? $data['collector_version'] : null,
         );
     }
 

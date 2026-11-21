@@ -4,20 +4,22 @@ import { computed, ref } from 'vue';
 import ServerVersionsController from '@/actions/App/Http/Controllers/ServerVersionsController';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import FormField from '@/components/app/FormField.vue';
+import VersionsInstallCommand from '@/components/app/VersionsInstallCommand.vue';
 import VersionsTestConnection from '@/components/app/VersionsTestConnection.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 /*
- * Software versions setup on the server form (SPEC §11.2–§11.4, §13.6): the
- * endpoint URL, the token (shown once), the two files to install, the nginx
- * snippet and Test connection.
+ * Software versions setup on the server form (SPEC §11.2–§11.4, §11.8,
+ * §13.6): the endpoint URL, the token (shown once), the install command, the
+ * two files and nginx snippet for installing by hand, and Test connection.
  */
 const props = defineProps<{
     serverId: number | null;
     hostname: string | null;
     tokenMasked: string | null;
     defaultPath: string;
+    endpointFile: string;
     error?: string;
 }>();
 
@@ -63,7 +65,7 @@ echo '17 * * * * root /usr/local/bin/sextant-collect' > /etc/cron.d/sextant
 const nginx = computed(
     () => `location = ${props.defaultPath} {
     include fastcgi_params;
-    fastcgi_param SCRIPT_FILENAME /var/www/sextant/versions.php;
+    fastcgi_param SCRIPT_FILENAME ${props.endpointFile};
     fastcgi_pass unix:/run/php/php8.3-fpm.sock;   # adjust to the server's PHP-FPM socket
 }`,
 );
@@ -97,8 +99,7 @@ const nginx = computed(
             v-if="serverId === null"
             class="rounded-lg border border-dashed p-3 text-sm text-muted-foreground"
         >
-            Save the server first; then generate its token and download the two
-            files here.
+            Save the server first; then copy its install command here.
         </p>
 
         <template v-else>
@@ -145,49 +146,81 @@ const nginx = computed(
                     </span>
                     <span class="text-muted-foreground">
                         The token goes in Sextant only; versions.php holds just
-                        its hash. Download versions.php again after rotating.
+                        its hash. Run the install command again after rotating.
                     </span>
                 </div>
             </div>
 
             <ol class="flex list-decimal flex-col gap-3 pl-5 text-sm">
                 <li>
-                    Download
-                    <a
-                        :href="ServerVersionsController.collector(serverId).url"
-                        class="text-primary underline"
-                        >sextant-collect.sh</a
-                    >
-                    and install it as root, with an hourly cron:
-                    <pre
-                        class="mt-1.5 overflow-x-auto rounded-lg bg-muted/50 p-3 font-mono text-xs"
-                        >{{ cron }}</pre>
+                    <div class="flex flex-col gap-2">
+                        <span>
+                            Copy the install command and run it on the server.
+                            It installs the collector with an hourly cron and
+                            <code class="font-mono">{{ endpointFile }}</code
+                            >, runs the collector once, and prints the nginx
+                            block with the server's PHP-FPM socket. It makes a
+                            token if there's none yet.
+                        </span>
+                        <VersionsInstallCommand
+                            :server-id="serverId"
+                            @token-masked="(value) => (masked = value)"
+                        />
+                    </div>
                 </li>
                 <li>
-                    Download
-                    <a
-                        v-if="masked"
-                        :href="ServerVersionsController.endpoint(serverId).url"
-                        class="text-primary underline"
-                        >versions.php</a
-                    >
-                    <span v-else class="text-muted-foreground"
-                        >versions.php (after generating a token)</span
-                    >
-                    and save it as
-                    <code class="font-mono">/var/www/sextant/versions.php</code
-                    >.
-                </li>
-                <li>
-                    Add to the server's HTTPS nginx site and reload nginx:
-                    <pre
-                        class="mt-1.5 overflow-x-auto rounded-lg bg-muted/50 p-3 font-mono text-xs"
-                        >{{ nginx }}</pre>
+                    Add the printed location block to the server's HTTPS nginx
+                    site and reload nginx.
                 </li>
                 <li>Save this form with the endpoint URL, then test:</li>
             </ol>
 
             <VersionsTestConnection :server-id="serverId" />
+
+            <details class="text-sm">
+                <summary class="cursor-pointer text-muted-foreground">
+                    Install by hand instead
+                </summary>
+                <ol class="mt-3 flex list-decimal flex-col gap-3 pl-5">
+                    <li>
+                        Download
+                        <a
+                            :href="
+                                ServerVersionsController.collector(serverId).url
+                            "
+                            class="text-primary underline"
+                            >sextant-collect.sh</a
+                        >
+                        and install it as root, with an hourly cron:
+                        <pre
+                            class="mt-1.5 overflow-x-auto rounded-lg bg-muted/50 p-3 font-mono text-xs"
+                            >{{ cron }}</pre>
+                    </li>
+                    <li>
+                        Download
+                        <a
+                            v-if="masked"
+                            :href="
+                                ServerVersionsController.endpoint(serverId).url
+                            "
+                            class="text-primary underline"
+                            >versions.php</a
+                        >
+                        <span v-else class="text-muted-foreground"
+                            >versions.php (after generating a token)</span
+                        >
+                        and save it as
+                        <code class="font-mono">{{ endpointFile }}</code
+                        >.
+                    </li>
+                    <li>
+                        Add to the server's HTTPS nginx site and reload nginx:
+                        <pre
+                            class="mt-1.5 overflow-x-auto rounded-lg bg-muted/50 p-3 font-mono text-xs"
+                            >{{ nginx }}</pre>
+                    </li>
+                </ol>
+            </details>
         </template>
 
         <ConfirmDialog
@@ -196,8 +229,8 @@ const nginx = computed(
             confirm-label="Rotate token"
             @confirm="generate"
         >
-            The server's current versions.php stops working until you replace it
-            with a new download.
+            The server's current versions.php stops working until you run the
+            install command on it again.
         </ConfirmDialog>
     </div>
 </template>

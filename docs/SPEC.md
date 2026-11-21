@@ -138,6 +138,7 @@ There is no public registration. Admins create users; the first admin is created
 | `provider` | varchar(100) null | Free text |
 | `os_choice_id` | FK → choices, null, null on delete | The OS an admin set (§3.4) |
 | `os_reported` | varchar(150) null | System-maintained: `PRETTY_NAME` from the versions file |
+| `collector_version` | smallint unsigned null | System-maintained: `collector_version` from the versions file; null before version 2 (§11.8) |
 | `notes` | text null | |
 | `versions_url` | varchar(500) null | HTTPS URL of the versions endpoint (§11) |
 | `versions_token` | text null | `encrypted` cast. Never sent to the browser |
@@ -1172,12 +1173,12 @@ root cron (hourly) ── sextant-collect.sh ──► /var/lib/sextant/versions
 Sextant ── HTTPS GET + Authorization: Bearer sxt_… ──► nginx ──► versions.php (checks token hash)
 ```
 
-Sextant never logs in to servers (GOAL principle). Both files are generated per server and downloaded from the server page by admins.
+Sextant never logs in to servers (GOAL principle). An admin runs a one-line installer on the server (§11.8), or downloads both files from the server page and installs them by hand.
 
 ### 11.2 Token
 
 - Format: `sxt_` + 32 lowercase hex characters (128 random bits).
-- "Generate token" (admin) creates one, stores it encrypted in `servers.versions_token`, stores `versions_token_last4`, and shows the full token **once**. Regenerating rotates it; the old PHP file stops working until replaced.
+- "Generate token" (admin) creates one, stores it encrypted in `servers.versions_token`, stores `versions_token_last4`, and shows the full token **once**. Regenerating rotates it; the old PHP file stops working until replaced (by running the install command again). "Copy install command" generates a token when there's none.
 - `versions.php` contains only `hash('sha256', $token)`, never the token. Download endpoints build the file from the stored token at request time.
 
 ### 11.3 Collector script and file format
@@ -1197,13 +1198,15 @@ Requirements:
   - MySQL: `mysqld --version`.
   - OpenSSL: `openssl version`.
   - Package versions with `dpkg-query -W -f='${Version}'` when `dpkg-query` exists (`nginx`, `phpX.Y-cli`/`phpX.Y-fpm`, `mysql-server-core-*`, `openssl`).
+- Declares `SEXTANT_COLLECTOR_VERSION` near the top and writes it as `collector_version` (§11.8).
 - Checked with `shellcheck`.
 
-`versions.json`, schema 1:
+`versions.json`, schema 1 (`collector_version` is missing from collectors before version 2):
 
 ```json
 {
   "schema": 1,
+  "collector_version": 2,
   "generated_at": "2026-11-20T06:00:02Z",
   "hostname": "web02",
   "os": { "id": "ubuntu", "version_id": "24.04", "pretty_name": "Ubuntu 24.04.1 LTS" },
@@ -1249,7 +1252,7 @@ location = /.sextant/versions.php {
 
 - Upserts one `server_software` row per reading: `os` (version = `VERSION_ID`, details = `pretty_name`), `kernel`, `nginx`, `php` per branch, `mysql`, `openssl`.
 - Deletes rows for software no longer present.
-- Writes `servers.os_reported` quietly.
+- Writes `servers.os_reported` and `servers.collector_version` quietly.
 - Records `detected` activities per change: `software.upgraded` / `downgraded` (by §11.6 comparison), `installed`, `removed`, `server.os_changed`. Example summary: `web02: nginx 1.24.0 → 1.26.2`.
 
 The first reading of a server records nothing in the feed.
@@ -1269,6 +1272,20 @@ When `os_reported` doesn't correspond to the admin's OS choice, both are shown o
 ### 11.7 Windows and unconfigured servers
 
 Servers without `versions_url` have no `server.versions` monitor. Their version columns show "not configured". The Add server page tells admins that the collector can't run on Windows.
+
+### 11.8 Install command and updates
+
+Setting up or updating a server is one command, run there as root. Sextant still never logs in to servers, and servers never fetch code from Sextant on their own.
+
+- "Copy install command" (admin, `POST /servers/{server}/versions/install-command`) returns `curl -fsSL '<link>' | sudo bash`. The link is a temporary signed route to `GET /servers/{server}/install.sh`, valid for `sextant.versions.install_link_minutes` (30) and usable any number of times until then. That route needs no sign-in (the server opens it), is throttled, and answers 403 to a missing, wrong or expired signature.
+- The installer is rendered from `resources/collector/install.sh.stub` at request time with the collector and `versions.php` (token hash only, never the token) inline as base64. It's wrapped in a function called on the last line, so a cut-off download runs nothing. It:
+  - refuses to run without root;
+  - writes `/usr/local/bin/sextant-collect` (0755) and `sextant.versions.endpoint_file` (`/var/www/sextant/versions.php`, 0644) atomically;
+  - writes `/etc/cron.d/sextant` (hourly, minute 17) only when it's missing or `SEXTANT_GROUP` is passed (`… | sudo SEXTANT_GROUP=nginx bash`), so an existing cron and its group survive updates;
+  - runs the collector once;
+  - never edits nginx: when `/etc/nginx` doesn't mention the location (the endpoint URL's path, or `default_path`), it prints the location block with the newest `/run/php/php*-fpm.sock`.
+- Running it again is the update: newer collector, new `versions.php` after a token rotation.
+- **Collector version.** `SEXTANT_COLLECTOR_VERSION` in the collector versions both files; bump it whenever the collector or `versions.php.stub` changes. A server is **outdated** when it has readings and its `collector_version` (null = 1) is lower. The server page shows "Collector outdated" with "Copy update command" for admins; the Servers list has a "Collector outdated" filter when any server is. No alert and no status change.
 
 ---
 
@@ -1356,6 +1373,8 @@ All routes require login except the kit's auth routes and `/up`.
 | `POST /servers/{server}/restore` · `/run-checks` · `/mute` | Actions | ✓ |
 | `POST /servers/{server}/versions-token` | Generate or rotate token; returns it once | ✓ |
 | `GET /servers/{server}/collector.sh` · `/versions.php` | Downloads | ✓ |
+| `POST /servers/{server}/versions/install-command` | Signed install command (JSON, §11.8) | ✓ |
+| `GET /servers/{server}/install.sh?expires=…&signature=…` | Installer, signed link only, no sign-in (§11.8) | |
 | `POST /servers/{server}/versions/test` · `/versions/refresh` | Test connection (JSON) · claim versions run | ✓ |
 | `GET /external-services` (+ CRUD) | External services | CRUD ✓ |
 | `GET /domains` · `/domains/{domain}` | Domains with subdomains · Domain page | |
@@ -1572,6 +1591,8 @@ return [
         'token_prefix' => 'sxt_',
         'default_path' => '/.sextant/versions.php',
         'file_path' => '/var/lib/sextant/versions.json',
+        'endpoint_file' => '/var/www/sextant/versions.php',
+        'install_link_minutes' => 30,
     ],
 
     'whois' => [
@@ -1653,6 +1674,7 @@ No live network in the default suite. All network I/O goes through the `app/Net`
 - Import: created, needs review, skipped.
 - `server.versions`: OK, below minimum (Warning), 401 / timeout / stale file (Unknown, versions kept), minimum change triggering runs.
 - Download endpoints: `versions.php` contains the token hash and never the token; collector served unchanged.
+- Install command: makes a token when there's none; its signed link serves the installer with the hash and the unchanged collector, never the token; 403 without a signature, with a wrong one or after expiry. Outdated collectors on the server page and the list filter. Live group: the installer installs and then updates in Ubuntu 24.04 and Debian 12 containers, keeping a customised cron.
 - The rendered `versions.php` served with `php -S` against a fixture file: 401 without/with a wrong token, 405 on POST, 200 with the right token.
 - **Authorization matrix**: every route in §13.3 marked admin-only returns 403 for a reader and succeeds for an admin; readers' Inertia props have `can.manage = false`.
 - Inertia pages: `assertInertia` on component name and key props for each page.

@@ -20,6 +20,7 @@ const props = defineProps<{
     /** Set when opened from Add site's unknown address (SPEC §10.4). */
     return_to: string | null;
     versions_default_path: string;
+    versions_endpoint_file: string;
 }>();
 
 const editing = computed(() => props.form.id !== null);
@@ -369,6 +370,7 @@ function submit(): void {
                         :hostname="form.hostname || null"
                         :token-masked="props.form.versions_token_masked"
                         :default-path="versions_default_path"
+                        :endpoint-file="versions_endpoint_file"
                         :error="form.errors.versions_url"
                     />
                 </section>

@@ -65,6 +65,7 @@ $adminRoutes = [
     'change minimum version' => ['put', 'minimum-versions.update', fn () => ['minimum_version' => MinimumVersion::factory()->create()]],
     'remove minimum version' => ['delete', 'minimum-versions.destroy', fn () => ['minimum_version' => MinimumVersion::factory()->create()]],
     'generate versions token' => ['post', 'servers.versions-token', fn () => ['server' => Server::factory()->create()]],
+    'copy versions install command' => ['post', 'servers.versions.install-command', fn () => ['server' => Server::factory()->create()]],
     'download collector' => ['get', 'servers.collector', fn () => ['server' => Server::factory()->create()]],
     'download versions.php' => ['get', 'servers.versions-php', fn () => ['server' => Server::factory()->create()]],
     'test versions connection' => ['post', 'servers.versions.test', fn () => ['server' => Server::factory()->create()]],

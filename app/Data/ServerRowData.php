@@ -5,6 +5,7 @@ namespace App\Data;
 use App\Enums\Status;
 use App\Models\Choice;
 use App\Models\Server;
+use App\Versions\CollectorKit;
 use Spatie\LaravelData\Data;
 
 /**
@@ -28,6 +29,7 @@ class ServerRowData extends Data
         public bool $versions_configured = false,
         /** @var list<ServerVersionData> */
         public array $versions = [],
+        public bool $collector_outdated = false,
     ) {}
 
     public static function fromModel(Server $server): self
@@ -43,6 +45,7 @@ class ServerRowData extends Data
             deleted: $server->trashed(),
             versions_configured: $server->versions_url !== null,
             versions: array_values($server->software->map(ServerVersionData::fromModel(...))->all()),
+            collector_outdated: app(CollectorKit::class)->isOutdated($server, $server->software->isNotEmpty()),
         );
     }
 }

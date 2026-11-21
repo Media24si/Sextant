@@ -5,8 +5,8 @@ namespace App\Data;
 use Spatie\LaravelData\Data;
 
 /**
- * The Software versions panel of a server page (SPEC §13.6). Carries the
- * masked token only.
+ * The Software versions panel of a server page (SPEC §13.6, §11.8). Carries
+ * the masked token only.
  */
 class ServerVersionsPanelData extends Data
 {
@@ -22,5 +22,9 @@ class ServerVersionsPanelData extends Data
         public ?string $last_message,
         /** @var list<ServerVersionData> */
         public array $versions,
+        /** The collector version the server reports; null before version 2 */
+        public ?int $collector_version = null,
+        public int $collector_latest = 1,
+        public bool $collector_outdated = false,
     ) {}
 }

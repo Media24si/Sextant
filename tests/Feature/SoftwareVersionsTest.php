@@ -12,9 +12,11 @@ use App\Models\Server;
 use App\Models\ServerSoftware;
 use App\Models\User;
 use App\Net\VersionsClient;
+use App\Versions\CollectorKit;
 use App\Versions\VersionsFile;
 use App\Versions\VersionsRecorder;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
 use Symfony\Component\Process\Process;
 
@@ -186,6 +188,70 @@ it('serves the collector unchanged and versions.php with the hash, never the tok
     expect($php)->toContain(hash('sha256', 'sxt_'.str_repeat('a', 32)))
         ->and($php)->not->toContain('sxt_'.str_repeat('a', 32))
         ->and($php)->toContain("'/var/lib/sextant/versions.json'");
+});
+
+it('copies an install command whose signed link serves the installer with the hash, never the token', function () {
+    $server = Server::factory()->create(['name' => 'web03', 'versions_url' => 'https://web03.media24.si/.sextant/versions.php']);
+
+    $response = $this->actingAs($this->admin)->postJson(route('servers.versions.install-command', $server))->assertOk();
+    $token = $server->fresh()->versions_token;
+
+    expect($token)->toMatch('/^sxt_[0-9a-f]{32}$/')
+        ->and($response->json('token_masked'))->toBe('sxt_••••'.substr($token, -4))
+        ->and($response->json('command'))->toMatch("~^curl -fsSL 'http\\S+/servers/{$server->id}/install\\.sh\\?expires=\\d+&signature=[0-9a-f]+' \\| sudo bash$~")
+        ->and($response->content())->not->toContain($token);
+
+    preg_match("~'(\\S+)'~", $response->json('command'), $match);
+    auth()->logout();
+    $script = $this->get($match[1])->assertOk()->assertHeader('Cache-Control', 'no-store, private')->getContent();
+
+    preg_match("~put_file \"\\\$ENDPOINT\" 0644 '([A-Za-z0-9+/=]+)'~", $script, $endpoint);
+    preg_match("~put_file \"\\\$COLLECTOR\" 0755 '([A-Za-z0-9+/=]+)'~", $script, $collector);
+
+    expect($script)->not->toContain($token)
+        ->and($script)->toContain("LOCATION='/.sextant/versions.php'")
+        ->and(base64_decode($endpoint[1]))->toContain(hash('sha256', $token))
+        ->and(base64_decode($collector[1]))->toBe(file_get_contents(resource_path('collector/sextant-collect.sh')));
+
+    // The token is kept on the next copy; only Rotate changes it.
+    $this->actingAs($this->admin)->postJson(route('servers.versions.install-command', $server))->assertOk();
+    expect($server->fresh()->versions_token)->toBe($token);
+});
+
+it('refuses the installer without a valid signature or after the link expires', function () {
+    $url = URL::temporarySignedRoute('servers.versions-install', now()->addMinutes(30), ['server' => $this->web02]);
+
+    $this->get(route('servers.versions-install', $this->web02))->assertForbidden();
+    $this->get(str_replace('signature=', 'signature=0', $url))->assertForbidden();
+
+    $this->travel(31)->minutes();
+    $this->get($url)->assertForbidden();
+});
+
+it('flags servers whose collector is older than the one Sextant ships', function () {
+    $latest = app(CollectorKit::class)->version();
+    $web03 = Server::factory()->create(['name' => 'web03']);
+    record(versionsFile());
+    app(VersionsRecorder::class)->record($web03, VersionsFile::fromArray(versionsFile(['collector_version' => $latest])), now());
+
+    expect($latest)->toBeGreaterThanOrEqual(2)
+        ->and($this->web02->fresh()->collector_version)->toBeNull()
+        ->and($web03->fresh()->collector_version)->toBe($latest);
+
+    $this->actingAs(User::factory()->reader()->create())->get(route('servers.show', $this->web02))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('versions.collector_outdated', true)
+            ->where('versions.collector_version', null)
+            ->where('versions.collector_latest', $latest));
+
+    $this->get(route('servers.show', $web03))->assertInertia(fn (Assert $page) => $page->where('versions.collector_outdated', false));
+
+    $this->get(route('servers.index', ['filter' => ['show' => 'collector_outdated']]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('counts.collector_outdated', 1)
+            ->has('rows.data', 1)
+            ->where('rows.data.0.name', 'web02')
+            ->where('rows.data.0.collector_outdated', true));
 });
 
 it('runs the rendered versions.php: 401 without or with a wrong token, 405 on POST, 200 with the token', function () {

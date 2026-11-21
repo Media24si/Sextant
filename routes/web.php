@@ -19,6 +19,11 @@ use App\Http\Controllers\SiteImportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+// Opened by the server itself with the signed link from "Copy install command" (SPEC §11.8).
+Route::get('servers/{server}/install.sh', [ServerVersionsController::class, 'install'])
+    ->middleware(['signed', 'throttle:30,1'])
+    ->name('servers.versions-install');
+
 Route::middleware('auth')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
 
@@ -91,6 +96,7 @@ Route::middleware('auth')->group(function () {
         Route::post('sites/{site}/mute', [MuteController::class, 'site'])->name('sites.mute');
         Route::post('incidents/{incident}/acknowledge', [IncidentController::class, 'acknowledge'])->name('incidents.acknowledge');
         Route::post('servers/{server}/versions-token', [ServerVersionsController::class, 'token'])->name('servers.versions-token');
+        Route::post('servers/{server}/versions/install-command', [ServerVersionsController::class, 'installCommand'])->name('servers.versions.install-command');
         Route::get('servers/{server}/collector.sh', [ServerVersionsController::class, 'collector'])->name('servers.collector');
         Route::get('servers/{server}/versions.php', [ServerVersionsController::class, 'endpoint'])->name('servers.versions-php');
         Route::post('servers/{server}/versions/test', [ServerVersionsController::class, 'test'])->name('servers.versions.test');

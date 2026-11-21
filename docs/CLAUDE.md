@@ -32,7 +32,7 @@ npm run check                    # vite-plus: oxlint + oxfmt (`npm run check:fix
 npm run types:check              # vue-tsc --noEmit
 npm run test                     # Vitest via vite-plus
 composer ci:check                # everything CI runs (needs `npm run build` first)
-shellcheck resources/collector/sextant-collect.sh
+shellcheck resources/collector/sextant-collect.sh && shellcheck --shell=bash resources/collector/install.sh.stub
 php artisan typescript:transform # regenerate TS types after changing data classes
 php artisan test --group=live    # the few tests that use the real network (DNS, TLS, RDAP)
 php artisan proxies:refresh      # download CDN IP ranges (daily in the scheduler)

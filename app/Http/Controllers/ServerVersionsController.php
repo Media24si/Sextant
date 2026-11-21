@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Checks\CheckCouldNotRun;
+use App\Data\VersionsInstallCommandData;
 use App\Data\VersionsTestReadingData;
 use App\Data\VersionsTestResultData;
 use App\Data\VersionsTokenData;
@@ -10,16 +11,19 @@ use App\Models\Monitor;
 use App\Models\Server;
 use App\Monitoring\MonitorClaimer;
 use App\Net\VersionsClient;
+use App\Versions\CollectorKit;
 use App\Versions\SoftwareReading;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 /**
- * Setting up a server's versions endpoint (SPEC §11.2, §11.4): the token,
- * the two files to install, Test connection and Refresh. Admins only.
+ * Setting up a server's versions endpoint (SPEC §11.2, §11.4, §11.8): the
+ * token, the install command and the two files, Test connection and Refresh.
+ * Admins only, except the installer, which a signed link opens.
  */
 class ServerVersionsController extends Controller
 {
@@ -29,17 +33,52 @@ class ServerVersionsController extends Controller
      */
     public function token(Server $server): JsonResponse
     {
-        $token = config('sextant.versions.token_prefix').bin2hex(random_bytes(16));
-
-        $server->forceFill(['versions_token' => $token, 'versions_token_last4' => substr($token, -4)])->save();
+        $token = $this->rotateToken($server);
 
         return response()->json(new VersionsTokenData($token, (string) $server->versions_token_last4));
     }
 
-    /** The collector script, the same for every server (§11.3). */
-    public function collector(Server $server): Response
+    /**
+     * A `curl … | sudo bash` line with a signed link to the installer (§11.8).
+     * Generates the token first when there's none: it only has to live in
+     * Sextant, and the installer carries its hash.
+     */
+    public function installCommand(Server $server): JsonResponse
     {
-        return response((string) file_get_contents(resource_path('collector/sextant-collect.sh')), 200, [
+        if ($server->versions_token === null) {
+            $this->rotateToken($server);
+        }
+
+        $expiresAt = now()->addMinutes((int) config('sextant.versions.install_link_minutes'));
+        $url = URL::temporarySignedRoute('servers.versions-install', $expiresAt, ['server' => $server]);
+
+        return response()->json(new VersionsInstallCommandData(
+            command: "curl -fsSL '{$url}' | sudo bash",
+            expires_at: $expiresAt->toIso8601String(),
+            token_masked: (string) self::maskedToken($server),
+        ));
+    }
+
+    /**
+     * The installer, opened by the signed link on the server itself. Built
+     * from the stored token at request time, like versions.php.
+     */
+    public function install(Server $server, CollectorKit $kit): Response
+    {
+        if ($server->versions_token === null) {
+            return response("echo 'No versions token: copy the install command in Sextant again.' >&2; exit 1\n", 404, ['Content-Type' => 'text/x-shellscript; charset=utf-8']);
+        }
+
+        return response($kit->installScript($server), 200, [
+            'Content-Type' => 'text/x-shellscript; charset=utf-8',
+            'Cache-Control' => 'no-store',
+        ]);
+    }
+
+    /** The collector script, the same for every server (§11.3). */
+    public function collector(Server $server, CollectorKit $kit): Response
+    {
+        return response($kit->collectorScript(), 200, [
             'Content-Type' => 'text/x-shellscript; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="sextant-collect.sh"',
         ]);
@@ -49,7 +88,7 @@ class ServerVersionsController extends Controller
      * `versions.php` for this server, built from the stored token at request
      * time. Holds the token's SHA-256 hash, never the token (§11.2).
      */
-    public function endpoint(Server $server): Response|RedirectResponse
+    public function endpoint(Server $server, CollectorKit $kit): Response|RedirectResponse
     {
         if ($server->versions_token === null) {
             Inertia::flash('toast', ['type' => 'error', 'message' => 'Generate a token first.']);
@@ -57,13 +96,7 @@ class ServerVersionsController extends Controller
             return back();
         }
 
-        $php = strtr((string) file_get_contents(resource_path('collector/versions.php.stub')), [
-            '{{server}}' => str_replace(["\n", '*/'], ' ', $server->name),
-            '{{token_hash}}' => hash('sha256', $server->versions_token),
-            '{{file_path}}' => addslashes((string) config('sextant.versions.file_path')),
-        ]);
-
-        return response($php, 200, [
+        return response($kit->endpointPhp($server), 200, [
             'Content-Type' => 'text/x-php; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="versions.php"',
             'Cache-Control' => 'no-store',
@@ -107,6 +140,16 @@ class ServerVersionsController extends Controller
             : ['type' => 'error', 'message' => 'No versions monitor yet: set the endpoint URL and a token first.']);
 
         return back();
+    }
+
+    /** Generates and stores a new token; returns it in full, this once. */
+    private function rotateToken(Server $server): string
+    {
+        $token = config('sextant.versions.token_prefix').bin2hex(random_bytes(16));
+
+        $server->forceFill(['versions_token' => $token, 'versions_token_last4' => substr($token, -4)])->save();
+
+        return $token;
     }
 
     /** "sxt_••••a91f" */
