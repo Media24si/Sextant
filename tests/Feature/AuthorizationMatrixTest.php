@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\ChoiceList;
+use App\Models\Application;
 use App\Models\Choice;
 use App\Models\Domain;
 use App\Models\ExternalService;
@@ -73,6 +74,12 @@ $adminRoutes = [
     'move list entry' => ['post', 'lists.move', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'delete list entry' => ['delete', 'lists.destroy', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'users page' => ['get', 'users.index', null],
+    'add application form' => ['get', 'applications.create', null],
+    'store application' => ['post', 'applications.store', null],
+    'edit application form' => ['get', 'applications.edit', fn () => ['application' => Application::factory()->create()]],
+    'update application' => ['put', 'applications.update', fn () => ['application' => Application::factory()->create()]],
+    'delete application' => ['delete', 'applications.destroy', fn () => ['application' => Application::factory()->create()]],
+    'restore application' => ['post', 'applications.restore', fn () => ['application' => tap(Application::factory()->create())->delete()]],
     'add user' => ['post', 'users.store', null],
     'change role' => ['put', 'users.role', fn () => ['user' => User::factory()->create()]],
     'delete user' => ['delete', 'users.destroy', fn () => ['user' => User::factory()->create()]],

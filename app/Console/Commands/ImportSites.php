@@ -4,15 +4,17 @@ namespace App\Console\Commands;
 
 use App\Actions\Sites\ImportSite;
 use App\Enums\ImportOutcome;
+use App\Models\Application;
+use App\Support\ImportLines;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 /**
- * Bulk import (SPEC §10.6): one URL per line; empty lines and lines starting
- * with # are ignored.
+ * Bulk import (SPEC §10.6): URLs or hostnames, one or more per line, or nginx
+ * `server_name` lines; empty lines and # comments are ignored.
  */
-#[Signature('sextant:import {file : A text file with one URL per line}')]
+#[Signature('sextant:import {file : A text file with one URL per line} {--application= : Add every site to this application, created if new}')]
 #[Description('Detect and add the sites listed in a file')]
 class ImportSites extends Command
 {
@@ -26,16 +28,14 @@ class ImportSites extends Command
             return self::FAILURE;
         }
 
-        $urls = collect(file($file, FILE_IGNORE_NEW_LINES) ?: [])
-            ->map(fn (string $line): string => trim($line))
-            ->reject(fn (string $line): bool => $line === '' || str_starts_with($line, '#'))
-            ->unique()
-            ->values();
+        $urls = ImportLines::parse((string) file_get_contents($file));
+        $name = trim((string) $this->option('application'));
+        $application = $name === '' ? null : Application::query()->firstOrCreate(['name' => $name]);
 
         $results = [];
 
         foreach ($urls as $url) {
-            $result = $importSite->handle($url);
+            $result = $importSite->handle($url, $application);
             $results[] = $result;
 
             $label = match ($result->outcome) {

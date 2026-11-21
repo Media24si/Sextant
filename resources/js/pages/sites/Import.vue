@@ -7,28 +7,51 @@ import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import PageHeader from '@/components/app/PageHeader.vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { Input } from '@/components/ui/input';
+import { parseImportLines } from '@/lib/importLines';
 
 /*
- * Bulk import (SPEC §10.6): paste URLs, Sextant detects each one and adds it.
- * URLs go to the server one at a time, so a long list shows progress.
+ * Bulk import (SPEC §10.6): paste URLs or an nginx server_name line, Sextant
+ * detects each one and adds it. URLs go to the server one at a time, so a long
+ * list shows progress. An application and a backend apply to all of them.
  */
 type Result = App.Data.Import.ImportResultData;
+
+const props = defineProps<{
+    applications: App.Data.OptionData[];
+    servers: App.Data.OptionData[];
+    application_id: number | null;
+}>();
+
+/** An application id, 'new' (type a name) or '' (none). */
+const application = ref<string>(
+    props.application_id === null ? '' : String(props.application_id),
+);
+const applicationName = ref('');
+const serverId = ref<string>('');
 
 const text = ref('');
 const results = ref<Result[]>([]);
 const total = ref(0);
 const running = ref(false);
 const stopping = ref(false);
-const importer = useHttp<{ url: string }, Result>({ url: '' });
+const importer = useHttp<
+    {
+        url: string;
+        application_id: number | null;
+        application_name: string | null;
+        server_id: number | null;
+    },
+    Result
+>({ url: '', application_id: null, application_name: null, server_id: null });
 
-const urls = computed(() => [
-    ...new Set(
-        text.value
-            .split('\n')
-            .map((line) => line.trim())
-            .filter((line) => line !== '' && !line.startsWith('#')),
-    ),
-]);
+const urls = computed(() => parseImportLines(text.value));
+
+const canStart = computed(
+    () =>
+        urls.value.length > 0 &&
+        (application.value !== 'new' || applicationName.value.trim() !== ''),
+);
 
 async function start(): Promise<void> {
     const list = urls.value;
@@ -37,6 +60,14 @@ async function start(): Promise<void> {
     total.value = list.length;
     running.value = true;
     stopping.value = false;
+
+    importer.application_id =
+        application.value !== '' && application.value !== 'new'
+            ? Number(application.value)
+            : null;
+    importer.application_name =
+        application.value === 'new' ? applicationName.value.trim() : null;
+    importer.server_id = serverId.value === '' ? null : Number(serverId.value);
 
     for (const url of list) {
         if (stopping.value) {
@@ -54,7 +85,11 @@ async function start(): Promise<void> {
                 input: url,
                 hostname: null,
                 outcome: 'skipped',
-                message: importer.errors.url ?? 'The request failed',
+                message:
+                    importer.errors.url ??
+                    importer.errors.application_name ??
+                    importer.errors.server_id ??
+                    'The request failed',
                 site_id: null,
             });
         }
@@ -92,7 +127,11 @@ const placeholder = [
     'svet24.si',
     'https://podjetje.svet24.si',
     'oglasi24.si/novice',
+    'server_name backend.svet24.si backend.reporter.si;',
 ].join('\n');
+
+const fieldClasses =
+    'h-9 w-full rounded-md border border-input bg-card px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30';
 </script>
 
 <template>
@@ -105,7 +144,7 @@ const placeholder = [
 
         <PageHeader
             title="Import sites"
-            description="One URL per line. Sextant detects each one and adds it. Sites whose backend isn't certain are added without one and listed under Needs review."
+            description="URLs or hostnames, one or more per line. An nginx server_name line works as it is. Sextant detects each one and adds it. Sites whose backend isn't certain get the backend chosen below, or none and are listed under Needs review."
         />
 
         <section class="flex flex-col gap-4 rounded-xl border bg-card p-6">
@@ -118,12 +157,65 @@ const placeholder = [
                 :placeholder="placeholder"
                 :disabled="running"
             />
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div class="flex flex-col gap-2">
+                    <label for="application" class="text-sm font-medium"
+                        >Application</label
+                    >
+                    <select
+                        id="application"
+                        v-model="application"
+                        :class="fieldClasses"
+                        :disabled="running"
+                    >
+                        <option value="">None</option>
+                        <option
+                            v-for="option in applications"
+                            :key="option.id"
+                            :value="String(option.id)"
+                        >
+                            {{ option.label }}
+                        </option>
+                        <option value="new">New application…</option>
+                    </select>
+                    <Input
+                        v-if="application === 'new'"
+                        v-model="applicationName"
+                        aria-label="New application name"
+                        placeholder="Media24 backend"
+                        :disabled="running"
+                    />
+                    <p class="text-xs text-muted-foreground">
+                        For hostnames of one app. Sites already added join it.
+                    </p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="server_id" class="text-sm font-medium"
+                        >Backend server</label
+                    >
+                    <select
+                        id="server_id"
+                        v-model="serverId"
+                        :class="fieldClasses"
+                        :disabled="running"
+                    >
+                        <option value="">As detected</option>
+                        <option
+                            v-for="server in servers"
+                            :key="server.id"
+                            :value="String(server.id)"
+                        >
+                            {{ server.label }}
+                        </option>
+                    </select>
+                    <p class="text-xs text-muted-foreground">
+                        Used where detection can't tell, e.g. behind Cloudflare.
+                        A detected backend always wins.
+                    </p>
+                </div>
+            </div>
             <div class="flex flex-wrap items-center gap-3">
-                <Button
-                    v-if="!running"
-                    :disabled="urls.length === 0"
-                    @click="start"
-                >
+                <Button v-if="!running" :disabled="!canStart" @click="start">
                     Import {{ urls.length }}
                     {{ urls.length === 1 ? 'URL' : 'URLs' }}
                 </Button>

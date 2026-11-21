@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router, usePage, usePoll } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import ApplicationController from '@/actions/App/Http/Controllers/ApplicationController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
@@ -141,6 +142,16 @@ function destroy(): void {
                             :href="DomainController.show(site.domain_id)"
                             class="font-mono text-foreground hover:underline"
                             >{{ site.domain }}</Link
+                        >
+                    </span>
+                    <span v-if="site.application_id">
+                        Application
+                        <Link
+                            :href="
+                                ApplicationController.show(site.application_id)
+                            "
+                            class="text-foreground hover:underline"
+                            >{{ site.application }}</Link
                         >
                     </span>
                     <RepoLink v-if="site.github_url" :url="site.github_url" />

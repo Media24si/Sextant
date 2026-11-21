@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Application;
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
@@ -30,10 +31,10 @@ beforeEach(function () {
     app(HttpProbe::class)->respond('https://oglasi24.si/', 200, redirectsTo: 'https://www.oglasi24.si/');
 });
 
-function importUrl(string $url): array
+function importUrl(string $url, array $options = []): array
 {
     return test()->actingAs(test()->admin)
-        ->postJson(route('sites.import.store'), ['url' => $url])
+        ->postJson(route('sites.import.store'), ['url' => $url, ...$options])
         ->assertOk()
         ->json();
 }
@@ -96,3 +97,41 @@ test('the import command reads a file and prints a summary', function () {
 test('the import command refuses a missing file', function () {
     $this->artisan('sextant:import', ['file' => '/nonexistent/urls.txt'])->assertFailed();
 });
+
+test('a new application is created once and every imported site joins it', function () {
+    importUrl('direct.svet24.si', ['application_name' => 'Backend']);
+    importUrl('shop.oglasi24.si', ['application_name' => 'Backend']);
+
+    $backend = Application::query()->sole();
+
+    expect($backend->name)->toBe('Backend')
+        ->and($backend->sites()->pluck('hostname')->sort()->values()->all())->toBe(['direct.svet24.si', 'shop.oglasi24.si']);
+});
+
+test('an existing site joins the chosen application', function () {
+    $backend = Application::factory()->create(['name' => 'Backend']);
+
+    expect(importUrl('svet24.si', ['application_id' => $backend->id]))->toMatchArray(['outcome' => 'skipped', 'message' => 'Already a site; added to Backend'])
+        ->and(importUrl('svet24.si', ['application_id' => $backend->id])['message'])->toBe('Already a site in Backend')
+        ->and(Site::query()->where('hostname', 'svet24.si')->sole()->application_id)->toBe($backend->id);
+});
+
+test('the backend chosen for all fills in only where detection is unsure', function () {
+    $web05 = Server::factory()->create(['name' => 'web05']);
+
+    $unsure = importUrl('vestnik.svet24.si', ['server_id' => $web05->id]);
+    $detected = importUrl('direct.svet24.si', ['server_id' => $web05->id]);
+
+    expect($unsure)->toMatchArray(['outcome' => 'created', 'message' => 'Varnish → web05 (chosen for all)'])
+        ->and(Site::query()->where('hostname', 'vestnik.svet24.si')->sole()->server_id)->toBe($web05->id)
+        ->and($detected['message'])->toBe('web02')
+        ->and(Site::query()->where('hostname', 'direct.svet24.si')->sole()->server_id)->toBe($this->web02->id);
+});
+
+test('an application or backend that is deleted is refused', function (string $field) {
+    $deleted = ['application_id' => tap(Application::factory()->create())->delete()->id, 'server_id' => tap(Server::factory()->create())->delete()->id][$field];
+
+    $this->actingAs($this->admin)
+        ->postJson(route('sites.import.store'), ['url' => 'direct.svet24.si', $field => $deleted])
+        ->assertJsonValidationErrors($field);
+})->with(['application_id', 'server_id']);

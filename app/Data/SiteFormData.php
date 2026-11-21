@@ -12,6 +12,7 @@ class SiteFormData extends Data
     public function __construct(
         public ?int $id,
         public ?int $domain_id,
+        public ?int $application_id,
         public string $hostname,
         public string $scheme,
         public ?int $port,
@@ -27,6 +28,7 @@ class SiteFormData extends Data
         return new self(
             id: $site->id,
             domain_id: $site->domain_id,
+            application_id: $site->application_id,
             hostname: Hostname::display($site->hostname),
             scheme: $site->scheme,
             port: $site->port,

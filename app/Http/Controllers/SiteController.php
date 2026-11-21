@@ -41,11 +41,11 @@ class SiteController extends Controller
 {
     private const ACTIVITY_SHOWN = 20;
 
-    private const FILTERS = ['show', 'front', 'backend', 'search'];
+    private const FILTERS = ['show', 'front', 'backend', 'application', 'search'];
 
     public function index(Request $request): Response
     {
-        $query = QueryBuilder::for(Site::query()->with(['domain', 'frontService', 'server']), $request)
+        $query = QueryBuilder::for(Site::query()->with(['domain', 'application', 'frontService', 'server']), $request)
             ->allowedFilters(
                 AllowedFilter::callback('show', function (Builder $query, mixed $value): void {
                     match ($value) {
@@ -66,6 +66,11 @@ class SiteController extends Controller
                         ? $query->whereNull('server_id')
                         : $query->where('server_id', (int) $value);
                 }),
+                AllowedFilter::callback('application', function (Builder $query, mixed $value): void {
+                    $value === 'none'
+                        ? $query->whereNull('application_id')
+                        : $query->where('application_id', (int) $value);
+                }),
                 AllowedFilter::callback('search', function (Builder $query, mixed $value): void {
                     $term = '%'.(is_array($value) ? implode(',', $value) : (string) $value).'%';
                     $query->where(fn (Builder $query) => $query->where('hostname', 'like', $term)->orWhere('description', 'like', $term));
@@ -84,12 +89,13 @@ class SiteController extends Controller
             ],
             'front_services' => $this->frontServiceOptions(),
             'servers' => $this->serverOptions(),
+            'applications' => ApplicationController::options(),
         ]);
     }
 
     public function show(Site $site): Response
     {
-        $site->load(['domain' => fn ($query) => $query->withTrashed(), 'frontService', 'server']);
+        $site->load(['domain' => fn ($query) => $query->withTrashed(), 'application' => fn ($query) => $query->withTrashed(), 'frontService', 'server']);
 
         return Inertia::render('sites/Show', [
             ...MonitorProps::for($site),
@@ -253,6 +259,7 @@ class SiteController extends Controller
             'form' => $form,
             'domains' => Domain::query()->orderBy('name')->get()
                 ->map(fn (Domain $domain): OptionData => new OptionData($domain->id, $domain->display_name)),
+            'applications' => ApplicationController::options(),
             'front_services' => $this->frontServiceOptions(),
             'servers' => $this->serverOptions(),
         ]);

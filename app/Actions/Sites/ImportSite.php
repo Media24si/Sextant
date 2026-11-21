@@ -7,11 +7,16 @@ use App\Detection\InvalidUrl;
 use App\Detection\SiteDetector;
 use App\Enums\Confidence;
 use App\Enums\ImportOutcome;
+use App\Models\Application;
+use App\Models\Server;
+use App\Models\Site;
 
 /**
  * Bulk import of one URL (SPEC §10.6): detect, then create the site with what
- * was detected. A backend that is only suggested, or not found, is left
- * unassigned so the site shows under "Needs review". Duplicates are skipped.
+ * was detected. A backend that is only suggested, or not found, takes the
+ * backend chosen for the whole import, or is left unassigned so the site shows
+ * under "Needs review". Duplicates are skipped; with an application chosen,
+ * an existing site joins it.
  */
 class ImportSite
 {
@@ -20,7 +25,11 @@ class ImportSite
         private AddSites $addSites,
     ) {}
 
-    public function handle(string $input): ImportResultData
+    /**
+     * @param  Application|null  $application  every site of this import belongs to it (SPEC §3.19)
+     * @param  Server|null  $fallbackBackend  for sites whose backend isn't Detected
+     */
+    public function handle(string $input, ?Application $application = null, ?Server $fallbackBackend = null): ImportResultData
     {
         $input = trim($input);
 
@@ -35,7 +44,9 @@ class ImportSite
                 $input,
                 $detection->display_hostname,
                 ImportOutcome::Skipped,
-                $detection->duplicate->trashed ? 'Was a site and was deleted; restore it instead' : 'Already a site',
+                $detection->duplicate->trashed
+                    ? 'Was a site and was deleted; restore it instead'
+                    : $this->joinApplication($detection->duplicate->site_id, $application),
                 $detection->duplicate->site_id,
             );
         }
@@ -50,17 +61,18 @@ class ImportSite
             'scheme' => $detection->scheme,
             'port' => $detection->port,
             'path' => $detection->path,
+            'application_id' => $application?->id,
             'front_service_id' => $front?->service_id,
-            'server_id' => $backend?->server_id,
+            'server_id' => $backend->server_id ?? $fallbackBackend?->id,
             'expected_target' => is_string($expectedTarget) ? $expectedTarget : null,
         ]], spread: true)[0];
 
-        if ($backend !== null) {
+        if ($backend !== null || $fallbackBackend !== null) {
             return new ImportResultData(
                 $input,
                 $detection->display_hostname,
                 ImportOutcome::Created,
-                implode(' → ', array_filter([$front?->name, $backend->name])),
+                implode(' → ', array_filter([$front?->name, $backend->name ?? "{$fallbackBackend?->name} (chosen for all)"])),
                 $site->id,
             );
         }
@@ -74,5 +86,25 @@ class ImportSite
             'Backend not assigned'.($suggested !== null ? " (suggested: {$suggested})" : ''),
             $site->id,
         );
+    }
+
+    /**
+     * Pasting an app's hostnames again groups the ones already added.
+     */
+    private function joinApplication(int $siteId, ?Application $application): string
+    {
+        if ($application === null) {
+            return 'Already a site';
+        }
+
+        $site = Site::query()->findOrFail($siteId);
+
+        if ($site->application_id === $application->id) {
+            return "Already a site in {$application->name}";
+        }
+
+        $site->update(['application_id' => $application->id]);
+
+        return "Already a site; added to {$application->name}";
     }
 }

@@ -46,6 +46,7 @@ class SiteRequest extends FormRequest
 
         return [
             'domain_id' => ['required', 'integer', Rule::exists('domains', 'id')->whereNull('deleted_at')],
+            'application_id' => ['nullable', 'integer', Rule::exists('applications', 'id')->whereNull('deleted_at')],
             'hostname' => [
                 'required', 'string', 'max:253',
                 'regex:'.self::HOSTNAME_PATTERN,
@@ -91,6 +92,7 @@ class SiteRequest extends FormRequest
     {
         return [
             'domain_id' => 'domain',
+            'application_id' => 'application',
             'front_service_id' => 'front service',
             'server_id' => 'backend server',
             'github_url' => 'GitHub repository',

@@ -2,6 +2,7 @@
 
 use App\Enums\Status;
 use App\Models\Activity;
+use App\Models\Application;
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
@@ -90,8 +91,26 @@ test('site edits are validated', function (array $overrides, string $error) {
     'bad scheme' => [['scheme' => 'ftp'], 'scheme'],
     'bad port' => [['port' => '70000'], 'port'],
     'deleted backend' => [['server_id' => fn () => tap(Server::factory()->create())->delete()->id], 'server_id'],
+    'deleted application' => [['application_id' => fn () => tap(Application::factory()->create())->delete()->id], 'application_id'],
     'not a repository' => [['github_url' => 'https://github.com/media24'], 'github_url'],
 ]);
+
+test('an admin puts a site in an application and the list filters by it', function () {
+    $backend = Application::factory()->create(['name' => 'Backend']);
+    $site = Site::factory()->for($this->domain)->create(['hostname' => 'backend.svet24.si']);
+    Site::factory()->for($this->domain)->create(['hostname' => 'svet24.si']);
+
+    $this->actingAs($this->admin)
+        ->put(route('sites.update', $site), sitePayload(['hostname' => 'backend.svet24.si', 'application_id' => $backend->id]))
+        ->assertSessionHasNoErrors();
+
+    $hostnames = fn (string $application) => collect($this->get(route('sites.index', ['filter' => ['application' => $application]]))
+        ->viewData('page')['props']['rows']['data'])->pluck('hostname')->all();
+
+    expect($site->fresh()->application_id)->toBe($backend->id)
+        ->and($hostnames((string) $backend->id))->toBe(['backend.svet24.si'])
+        ->and($hostnames('none'))->toBe(['svet24.si']);
+});
 
 test('an admin edits the serving path and it reaches the change feed', function () {
     $site = Site::factory()->for($this->domain)->create(['hostname' => 'svet24.si', 'server_id' => $this->web02->id]);

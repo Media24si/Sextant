@@ -103,6 +103,7 @@
 - [x] **P2.8** **Add domain** (§10.5): `POST /domains/lookup` RDAP preview; subdomain rows prefilled by detection; one save.
 - [x] **P2.9** Import page and `sextant:import urls.txt` (§10.6): created / needs review / skipped summary.
 - [x] **P2.10** Re-run detection on a site (§10.7).
+- [x] **P2.13** Applications (§3.19, §10.6): `applications` table and `sites.application_id`; Applications list and page, add/edit/delete/restore; application on the site form, Sites list column and filter, site page and search; Import parses nginx `server_name` lines and takes an application and a backend for the batch (`sextant:import --application=`).
 - [x] **P2.11** "Add site" buttons per the prototype: primary on Overview and Domains, "Add site on {domain}" in expanded domains, link from Add domain.
 
 ### Tests
@@ -324,4 +325,4 @@ Carried over from the previous version of this list (still open in SPEC v0.2):
 
 ## Out of scope for v1 (don't build)
 
-Server metrics or agents, checking that backups run, automatic CVE matching, multiple probe locations, public status page, teams or per-resource permissions, applications (web or mobile), CDN-bypass origin checks, checks of external services, serving paths longer than front + backend, on-call/escalation policies, maintenance windows beyond "mute until", uptime/SLA reports, software versions on Windows (GOAL "Not in v1").
+Server metrics or agents, checking that backups run, automatic CVE matching, multiple probe locations, public status page, teams or per-resource permissions, application checks (health endpoints, deployed versions), mobile apps, CDN-bypass origin checks, checks of external services, serving paths longer than front + backend, on-call/escalation policies, maintenance windows beyond "mute until", uptime/SLA reports, software versions on Windows (GOAL "Not in v1").

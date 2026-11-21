@@ -44,6 +44,7 @@ Readers never see edit buttons. Every change in the feed shows which admin made 
 - **External services**: things in front of our servers that we don't run, such as Cloudflare or the Varnish server. Each has a name and the IP addresses or ranges it answers on (Cloudflare's ranges are refreshed automatically). Sextant never checks them directly.
 - **Domains**: the registrable domain we renew (`svet24.si`).
 - **Sites**: one hostname each (`svet24.si`, `podjetje.svet24.si`, `njena.svet24.si` are three sites on one domain), with its serving path, an optional description and an optional GitHub repository link.
+- **Applications**: one web app answering on several hostnames, often on different domains (`backend.svet24.si`, `backend.reporter.si`). It groups those sites; each hostname keeps its own checks. Pasting an nginx `server_name` line on the Import page adds them all at once.
 
 ### 2. Serving paths
 
@@ -163,7 +164,7 @@ All thresholds are defaults and can be changed per monitor.
 - Checking from more than one location
 - A public status page
 - Multiple teams or per-resource permissions (v1 has two roles: admin and reader)
-- Applications, both web and mobile (see "After v1")
+- Application checks (health endpoints, deployed versions) and mobile apps (see "After v1")
 - Origin checks that bypass the CDN, and checks of external services themselves
 - Serving paths longer than one external service plus one backend
 - On-call rotations and escalation policies
@@ -200,7 +201,7 @@ All thresholds are defaults and can be changed per monitor.
 - Origin checks behind the CDN
 - Longer serving paths (several services in front)
 - Uptime and latency charts, SLA reports
-- **Applications**: the web application behind one or more sites (for example, one Laravel app serving several hostnames), with checks such as health endpoints and deployed versions
+- **Application checks**: health endpoints and deployed versions for applications (grouping sites into applications is in v1)
 - **Mobile apps**: App Store and Google Play listings, later on
 - Maintenance windows
 
@@ -226,6 +227,7 @@ All thresholds are defaults and can be changed per monitor.
 | 16 | Server and site details | Servers: OS and backup locations (checkboxes), no role. Sites: description and GitHub link | 2026-11-20 |
 | 17 | Interface stack | Laravel + Inertia + Vue 3 + TypeScript + shadcn-vue for everything; no Filament | 2026-11-20 |
 | 18 | Database | MySQL 9.7 LTS (already in use); no switch to PostgreSQL | 2026-11-20 |
+| 19 | One app, many hostnames | An application groups sites; each hostname stays a site with its own domain and checks. Import accepts nginx `server_name` lines. App-level checks stay after v1 | 2026-11-21 |
 
 ## Open questions
 

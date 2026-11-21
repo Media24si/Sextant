@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 const props = defineProps<{
     form: App.Data.SiteFormData;
     domains: App.Data.OptionData[];
+    applications: App.Data.OptionData[];
     front_services: App.Data.OptionData[];
     servers: App.Data.OptionData[];
 }>();
@@ -25,6 +26,7 @@ const id = props.form.id;
 
 const form = useForm({
     domain_id: props.form.domain_id,
+    application_id: props.form.application_id,
     hostname: props.form.hostname,
     scheme: props.form.scheme,
     // Text in the field; the server turns an empty value into null.
@@ -237,6 +239,27 @@ function submit(): void {
                 aria-labelledby="details"
             >
                 <h2 id="details" class="text-lg font-semibold">Details</h2>
+                <FormField
+                    label="Application"
+                    for="application_id"
+                    :error="form.errors.application_id"
+                    description="The web app behind this hostname, when it also answers on other hostnames."
+                >
+                    <select
+                        id="application_id"
+                        v-model="form.application_id"
+                        :class="fieldClasses"
+                    >
+                        <option :value="null">None</option>
+                        <option
+                            v-for="application in applications"
+                            :key="application.id"
+                            :value="application.id"
+                        >
+                            {{ application.label }}
+                        </option>
+                    </select>
+                </FormField>
                 <FormField
                     label="Description"
                     for="description"

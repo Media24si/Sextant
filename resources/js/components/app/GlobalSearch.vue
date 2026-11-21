@@ -37,6 +37,7 @@ const typeLabels: Record<App.Enums.SearchResultType, string> = {
     external_service: 'External services',
     domain: 'Domains',
     site: 'Sites',
+    application: 'Applications',
 };
 
 const groups = computed(() => {

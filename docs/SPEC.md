@@ -210,6 +210,7 @@ Seeded with Cloudflare (`cdn`, source `cloudflare`, suffix `.cdn.cloudflare.net`
 | Column | Type | Notes |
 |---|---|---|
 | `domain_id` | FK → domains | A domain with live sites can't be deleted |
+| `application_id` | FK → applications, null, null on delete | The web app behind this hostname (§3.19). Null = none |
 | `hostname` | varchar(253) | Unique among non-deleted |
 | `scheme` | varchar(5) | `https` or `http` |
 | `port` | smallint null | Null = the scheme's default |
@@ -379,7 +380,7 @@ $table->string('active_name')->nullable()
     ->unique();
 ```
 
-Used for `servers.name`, `external_services.name`, `domains.name` and `sites.hostname`.
+Used for `servers.name`, `external_services.name`, `domains.name`, `sites.hostname` and `applications.name`.
 
 ### 3.18 Relationships
 
@@ -389,6 +390,7 @@ Server *─* Choice (backup locations)      Server *─1 Choice (OS)
 Server 1─* Site                            (sites.server_id: backend, nullable)
 ExternalService 1─* Site                   (sites.front_service_id, nullable)
 Domain 1─* Site
+Application 1─* Site                       (sites.application_id, nullable)
 Server 1─* ServerSoftware
 Server|Domain|Site 1─* Monitor             (morph)
 Monitor 1─1 MonitorState
@@ -397,6 +399,19 @@ Monitor 1─* Incident
 Incident 1─* IncidentEvent
 Incident 1─* Incident                      (parent_id)
 ```
+
+### 3.19 `applications` (soft deletes)
+
+One web application answering on several hostnames, e.g. one backend behind `backend.svet24.si`, `backend.necenzurirano.si` and `backend.reporter.si` (nginx `server_name` with several names). Each hostname stays its own site, on its own domain, with its own serving path and checks (certificates, DNS and redirects differ per hostname); the application only groups them.
+
+| Column | Type | Notes |
+|---|---|---|
+| `name` | varchar(100) | Unique among non-deleted |
+| `description` | varchar(500) null | |
+| `github_url` | varchar(255) null | Validated as `https://github.com/{owner}/{repo}` |
+| `notes` | text null | |
+
+Applications have no monitors and no stored status; the list and page show the worst status of their sites. An application with live sites can't be deleted. Checks of the application itself (health endpoints, deployed versions) are after v1 (GOAL).
 
 ---
 
@@ -907,7 +922,7 @@ Software versions are compared per row by `VersionsRecorder` (§11.5), not throu
 | Category | Types |
 |---|---|
 | `status` | `incident.opened`, `incident.escalated`, `incident.deescalated`, `incident.acknowledged`, `incident.resolved` |
-| `inventory` | `{server,external_service,domain,site}.{created,updated,deleted,restored}`, `server.address_added`, `server.address_removed`, `server.backup_locations_changed`, `server.versions_token_rotated`, `site.path_changed`, `monitor.{created,updated,deleted,enabled,disabled,muted,unmuted}`, `minimum_version.{set,changed,removed}`, `user.{created,deleted,role_changed}` |
+| `inventory` | `{server,external_service,domain,site,application}.{created,updated,deleted,restored}`, `server.address_added`, `server.address_removed`, `server.backup_locations_changed`, `server.versions_token_rotated`, `site.path_changed`, `monitor.{created,updated,deleted,enabled,disabled,muted,unmuted}`, `minimum_version.{set,changed,removed}`, `user.{created,deleted,role_changed}` |
 | `detected` | `site.dns_changed`, `site.front_detected_changed`, `certificate.renewed`, `certificate.issuer_changed`, `domain.renewed`, `domain.registrar_changed`, `domain.nameservers_changed`, `redirect.target_changed`, `software.upgraded`, `software.downgraded`, `software.installed`, `software.removed`, `server.os_changed` |
 
 ---
@@ -1124,7 +1139,14 @@ For a domain with several subdomains at once: domain name → `POST /domains/loo
 
 ### 10.6 Bulk import
 
-`php artisan sextant:import urls.txt` and an Import page (a textarea of URLs). Each URL runs detection:
+`php artisan sextant:import urls.txt [--application=Name]` and an Import page (a textarea). Input is parsed by `App\Support\ImportLines` (mirrored in `resources/js/lib/importLines.ts`): one or more URLs or hostnames per line, separated by spaces; an nginx `server_name a b c;` line counts as its names; `#` comments, `_`, wildcards (`*.x`, `.x`, `x.*`), regexes (`~…`) and variables (`$host`) are left out.
+
+The Import page also takes, for the whole batch:
+
+- **Application**: an existing one or a new name (created by the first request, found by the rest). Every created site joins it; an existing site that is skipped as a duplicate joins it too ("Already a site; added to {app}"), so pasting an app's `server_name` line groups sites added earlier.
+- **Backend server**: used for sites whose backend isn't Detected (e.g. all behind Cloudflare); those are created, not left for review. A Detected backend always wins.
+
+Each URL runs detection:
 
 - Everything Detected → the site is created with its path.
 - Backend Suggested or Not found → the site is created with `server_id = null`; `site.path` warns `Backend not assigned (suggested: web02)`; the Sites list has a "Needs review" filter (no backend).
@@ -1342,6 +1364,8 @@ All routes require login except the kit's auth routes and `/up`.
 | `GET /sites/create` · `POST /sites/detect` · `POST /sites` | Add site, detection (JSON), save | ✓ |
 | `GET /sites/{site}/edit`, `PUT/DELETE`, `POST /sites/{site}/detect-again` | Edit, re-run detection | ✓ |
 | `GET /sites/import` · `POST /sites/import` | Bulk import | ✓ |
+| `GET /applications` · `/applications/{application}` | Applications list · Application page | |
+| `GET /applications/create` · `/applications/{application}/edit`, `POST/PUT/DELETE`, `POST …/restore` | Add / edit application | ✓ |
 | `GET /monitors` | Monitors list | |
 | `POST /monitors`, `PUT/DELETE /monitors/{monitor}`, `POST …/run`, `…/mute` | Monitor actions | ✓ |
 | `GET /incidents` · `/incidents/{incident}` | Incidents | |
@@ -1357,7 +1381,7 @@ Route names are used through Wayfinder (or Ziggy) in Vue; no hard-coded URLs.
 
 `AppLayout` follows the prototype:
 
-- **Sidebar** (dark): Sextant mark; Overview, Servers (count), Domains (count), Incidents (open count), Activity; an "Admin" group shown only to admins: Minimum versions, External services, Lists, Users. Stacks on phones.
+- **Sidebar** (dark): Sextant mark; Overview, Servers (count), Domains (count), Applications, Monitors, Incidents (open count), Activity; an "Admin" group shown only to admins: Minimum versions, External services, Lists, Users. Stacks on phones.
 - **Header**: global search field (opens the Command dialog; Ctrl/⌘ + K anywhere), system health pill ("Checks running · network OK"), user menu with role.
 
 Shared components in `resources/js/components/app`:
@@ -1395,10 +1419,12 @@ Shared components in `resources/js/components/app`:
 | **Domains** | Expandable rows: domain, subdomain count with failing/warning counts, expiry with days, registrar, status. Expanded: nameservers and each site with description, repo link, `ServingPath`, last result, status; "Add site on {domain}" link. Search filter; Expand/Collapse all |
 | **Domain page** | Registry data, monitors, sites, incidents, activity |
 | **Add domain** | §10.5 |
-| **Sites** | Flat list: hostname + description, domain, `ServingPath`, status, last HTTP time. Filters: status, front service, backend server, Needs review |
-| **Site page** | Hostname, description, repo link, `ServingPath`, latest results per monitor, monitors, incidents, activity; actions: edit, re-run detection, run checks, mute |
+| **Sites** | Flat list: hostname + description, domain, application, `ServingPath`, status, last HTTP time. Filters: status, front service, backend server, application, Needs review |
+| **Site page** | Hostname, description, domain, application, repo link, `ServingPath`, latest results per monitor, monitors, incidents, activity; actions: edit, re-run detection, run checks, mute |
 | **Add site** | URL field + Detect; "What Sextant found" (findings with `ConfidenceBadge` and explanations; backend select); Serving path preview; First probe; Details (description, GitHub repository); Checks to attach; `www.` offer; Add site. Side panel "How detection works". Duplicate and invalid states |
-| **Import** | Textarea of URLs → summary of created, needs review, skipped |
+| **Import** | Textarea of URLs or nginx `server_name` lines; application and backend for all (§10.6) → summary of created, needs review, skipped |
+| **Applications** | Name + description, hostnames, site count, worst site status. Search, Deleted filter |
+| **Application page** | Name, description, repo link, notes; its hostnames with domain, `ServingPath` and status; changes of it and its sites; actions: edit, delete, add hostnames (opens Import with the application chosen) |
 | **External services** | Name, kind, ranges (count, source), sites in front of |
 | **Monitors** | Global list (filters: checker, status, enabled, muted, pending); monitor drawer with effective settings, state, last 100 runs; form with `MonitorArgumentsForm` |
 | **Incidents** | List (filters: open / acknowledged / resolved, severity, resource type, server, checker) and incident page (timeline, children, first/last result, links) |
@@ -1457,6 +1483,7 @@ These types are generated from laravel-data classes, not written by hand.
 | External service | name |
 | Domain | name |
 | Site | hostname, description |
+| Application | name, description |
 
 Prefix and `LIKE '%q%'` queries are fast at this size; no search engine. Each result has its status, a one-line context (e.g. `192.0.2.12 · Ubuntu 24.04 · PHP 8.3.14, 8.2.20 · 24 sites`), and its URL. Enter opens the first result.
 

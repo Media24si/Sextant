@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property int $domain_id
+ * @property int|null $application_id
  * @property string $hostname
  * @property string $scheme
  * @property int|null $port
@@ -39,11 +40,12 @@ use Illuminate\Support\Carbon;
  * @property-read string $url
  * @property-read string $display_hostname
  * @property-read Domain $domain
+ * @property-read Application|null $application
  * @property-read ExternalService|null $frontService
  * @property-read Server|null $server
  */
 #[ObservedBy(SiteObserver::class)]
-#[Fillable(['domain_id', 'hostname', 'scheme', 'port', 'front_service_id', 'server_id', 'description', 'github_url', 'notes'])]
+#[Fillable(['domain_id', 'application_id', 'hostname', 'scheme', 'port', 'front_service_id', 'server_id', 'description', 'github_url', 'notes'])]
 class Site extends Model implements Monitorable
 {
     /** @use HasFactory<SiteFactory> */
@@ -111,6 +113,16 @@ class Site extends Model implements Monitorable
     public function domain(): BelongsTo
     {
         return $this->belongsTo(Domain::class);
+    }
+
+    /**
+     * The application this hostname belongs to, if any (SPEC §3.19).
+     *
+     * @return BelongsTo<Application, $this>
+     */
+    public function application(): BelongsTo
+    {
+        return $this->belongsTo(Application::class);
     }
 
     /**

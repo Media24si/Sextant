@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\ChoiceList;
+use App\Models\Application;
 use App\Models\Choice;
 use App\Models\Domain;
 use App\Models\ExternalService;
@@ -79,4 +80,16 @@ test('at most 20 results come back', function () {
 
 test('guests can\'t search', function () {
     $this->getJson(route('search', ['q' => 'web02']))->assertUnauthorized();
+});
+
+test('applications are found by name with their site count', function () {
+    $backend = Application::factory()->create(['name' => 'Editorial backend']);
+    Site::query()->where('hostname', 'podjetje.svet24.si')->update(['application_id' => $backend->id]);
+
+    expect(search('editorial')[0])->toMatchArray([
+        'type' => 'application',
+        'label' => 'Editorial backend',
+        'context' => 'Application · 1 site',
+        'url' => route('applications.show', $backend, false),
+    ]);
 });

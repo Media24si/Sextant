@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import {
     Activity,
+    Boxes,
     Gauge,
     Globe,
     LayoutGrid,
@@ -14,6 +15,7 @@ import {
     Users,
 } from '@lucide/vue';
 import ActivityController from '@/actions/App/Http/Controllers/ActivityController';
+import ApplicationController from '@/actions/App/Http/Controllers/ApplicationController';
 import ChoiceController from '@/actions/App/Http/Controllers/ChoiceController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
@@ -54,6 +56,11 @@ const mainNavItems = computed<SidebarNavItem[]>(() => [
         href: DomainController.index(),
         icon: Globe,
         count: page.props.nav?.domains,
+    },
+    {
+        title: 'Applications',
+        href: ApplicationController.index(),
+        icon: Boxes,
     },
     { title: 'Monitors', href: MonitorController.index(), icon: Gauge },
     {

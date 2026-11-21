@@ -7,7 +7,7 @@ use App\Models\Site;
 use Spatie\LaravelData\Data;
 
 /**
- * A site page (SPEC §13.6). Expects `domain`, `frontService` and `server` loaded.
+ * A site page (SPEC §13.6). Expects `domain`, `application`, `frontService` and `server` loaded.
  */
 class SiteData extends Data
 {
@@ -20,6 +20,8 @@ class SiteData extends Data
         public ?string $notes,
         public int $domain_id,
         public string $domain,
+        public ?int $application_id,
+        public ?string $application,
         public ServingPathData $serving_path,
         public ?int $front_service_id,
         public ?int $server_id,
@@ -38,6 +40,8 @@ class SiteData extends Data
             notes: $site->notes,
             domain_id: $site->domain_id,
             domain: $site->domain->display_name,
+            application_id: $site->application_id,
+            application: $site->application?->name,
             serving_path: $site->servingPath(),
             front_service_id: $site->frontService?->id,
             server_id: $site->server?->id,

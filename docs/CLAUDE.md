@@ -36,7 +36,7 @@ shellcheck resources/collector/sextant-collect.sh
 php artisan typescript:transform # regenerate TS types after changing data classes
 php artisan test --group=live    # the few tests that use the real network (DNS, TLS, RDAP)
 php artisan proxies:refresh      # download CDN IP ranges (daily in the scheduler)
-php artisan sextant:import urls.txt  # bulk-add sites, one URL per line
+php artisan sextant:import urls.txt [--application=Name]  # bulk-add sites: URLs or nginx server_name lines
 php artisan sextant:checkers     # list and validate config/checkers.php
 php artisan monitors:run 12 --no-save -v   # run one monitor now and print the result
 php artisan monitors:sync-defaults --checker=site.http [--dry-run]  # attach a default monitor to existing resources

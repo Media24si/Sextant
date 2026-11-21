@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\SearchResultData;
 use App\Enums\SearchResultType;
+use App\Models\Application;
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
@@ -40,6 +41,7 @@ class SearchController extends Controller
             ...$this->externalServices($terms),
             ...$this->domains($terms),
             ...$this->sites($terms),
+            ...$this->applications($terms),
         ])->take(self::LIMIT)->values();
 
         return response()->json(['results' => SearchResultData::collect($results)]);
@@ -203,6 +205,34 @@ class SearchController extends Controller
                 ])->filter()->implode(' · '),
                 status: $site->status,
                 url: route('sites.show', $site, false),
+            ))
+            ->all());
+    }
+
+    /**
+     * Name or description.
+     *
+     * @param  list<string>  $terms
+     * @return list<SearchResultData>
+     */
+    private function applications(array $terms): array
+    {
+        return array_values(Application::query()
+            ->where(fn (Builder $query) => $this->whereLike($query, ['name', 'description'], $terms))
+            ->with('sites')
+            ->orderBy('name')
+            ->limit(self::PER_TYPE)
+            ->get()
+            ->map(fn (Application $application): SearchResultData => new SearchResultData(
+                type: SearchResultType::Application,
+                id: $application->id,
+                label: $application->name,
+                context: collect([
+                    $application->description,
+                    'Application · '.$this->count($application->sites->count(), 'site'),
+                ])->filter()->implode(' · '),
+                status: $application->sites->isEmpty() ? null : $application->status(),
+                url: route('applications.show', $application, false),
             ))
             ->all());
     }

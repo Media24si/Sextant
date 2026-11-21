@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
  * new, then each site. Observers record the activity; `SiteAdded` and
  * `DomainAdded` fire after commit and attach the default monitors.
  *
- * @phpstan-type SiteInput array{hostname: string, scheme: string, port?: int|null, path?: string|null, front_service_id?: int|null, server_id?: int|null, description?: string|null, github_url?: string|null, expected_target?: string|null}
+ * @phpstan-type SiteInput array{hostname: string, scheme: string, port?: int|null, application_id?: int|null, path?: string|null, front_service_id?: int|null, server_id?: int|null, description?: string|null, github_url?: string|null, expected_target?: string|null}
  */
 class AddSites
 {
@@ -54,6 +54,7 @@ class AddSites
             'hostname' => $input['hostname'],
             'scheme' => $input['scheme'],
             'port' => $input['port'] ?? null,
+            'application_id' => $input['application_id'] ?? null,
             'front_service_id' => $input['front_service_id'] ?? null,
             'server_id' => $input['server_id'] ?? null,
             'description' => $input['description'] ?? null,

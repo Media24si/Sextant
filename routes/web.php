@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChoiceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DomainController;
@@ -25,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::get('external-services', [ExternalServiceController::class, 'index'])->name('external-services.index');
     Route::get('domains', [DomainController::class, 'index'])->name('domains.index');
     Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
+    Route::get('applications', [ApplicationController::class, 'index'])->name('applications.index');
     Route::get('settings/lists', [ChoiceController::class, 'index'])->name('lists.index');
     Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
     Route::get('monitors', [MonitorController::class, 'index'])->name('monitors.index');
@@ -55,6 +57,13 @@ Route::middleware('auth')->group(function () {
         Route::put('domains/{domain}', [DomainController::class, 'update'])->name('domains.update');
         Route::delete('domains/{domain}', [DomainController::class, 'destroy'])->name('domains.destroy');
         Route::post('domains/{domain}/restore', [DomainController::class, 'restore'])->withTrashed()->name('domains.restore');
+
+        Route::get('applications/create', [ApplicationController::class, 'create'])->name('applications.create');
+        Route::post('applications', [ApplicationController::class, 'store'])->name('applications.store');
+        Route::get('applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
+        Route::put('applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
+        Route::delete('applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
+        Route::post('applications/{application}/restore', [ApplicationController::class, 'restore'])->withTrashed()->name('applications.restore');
 
         Route::get('sites/create', [SiteController::class, 'create'])->name('sites.create');
         Route::get('sites/import', [SiteImportController::class, 'create'])->name('sites.import');
@@ -104,6 +113,7 @@ Route::middleware('auth')->group(function () {
     Route::get('servers/{server}', [ServerController::class, 'show'])->withTrashed()->name('servers.show');
     Route::get('domains/{domain}', [DomainController::class, 'show'])->withTrashed()->name('domains.show');
     Route::get('sites/{site}', [SiteController::class, 'show'])->withTrashed()->name('sites.show');
+    Route::get('applications/{application}', [ApplicationController::class, 'show'])->withTrashed()->name('applications.show');
     Route::get('monitors/{monitor}', [MonitorController::class, 'show'])->name('monitors.show');
 });
 

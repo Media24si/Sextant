@@ -2,6 +2,7 @@
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import type { ColumnDef } from '@tanstack/vue-table';
 import { computed, h } from 'vue';
+import ApplicationController from '@/actions/App/Http/Controllers/ApplicationController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
@@ -26,6 +27,7 @@ const props = defineProps<
         };
         front_services: App.Data.OptionData[];
         servers: App.Data.OptionData[];
+        applications: App.Data.OptionData[];
     }
 >();
 
@@ -67,6 +69,23 @@ const columns: ColumnDef<Row, unknown>[] = [
                 },
                 () => row.original.domain,
             ),
+    },
+    {
+        id: 'application',
+        header: 'Application',
+        cell: ({ row }) =>
+            row.original.application_id
+                ? h(
+                      Link,
+                      {
+                          href: ApplicationController.show(
+                              row.original.application_id,
+                          ),
+                          class: 'hover:underline',
+                      },
+                      () => row.original.application,
+                  )
+                : h('span', { class: 'text-muted-foreground' }, '—'),
     },
     {
         id: 'serving_path',
@@ -189,6 +208,23 @@ const selected = (event: Event) => {
                         :value="String(server.id)"
                     >
                         {{ server.label }}
+                    </option>
+                </select>
+                <select
+                    v-if="applications.length > 0"
+                    :class="selectClasses"
+                    aria-label="Application"
+                    :value="filters.application ?? ''"
+                    @change="setFilter('application', selected($event))"
+                >
+                    <option value="">Any application</option>
+                    <option value="none">No application</option>
+                    <option
+                        v-for="application in applications"
+                        :key="application.id"
+                        :value="String(application.id)"
+                    >
+                        {{ application.label }}
                     </option>
                 </select>
             </template>

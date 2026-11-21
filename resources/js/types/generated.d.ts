@@ -12,6 +12,23 @@ user: string | null,
 created_at: string,
 url: string | null,
 };
+export type ApplicationFormData = {
+id: number | null,
+name: string,
+description: string | null,
+github_url: string | null,
+notes: string | null,
+};
+export type ApplicationRowData = {
+id: number,
+name: string,
+description: string | null,
+github_url: string | null,
+sites_count: number,
+hostnames: string[],
+status: App.Enums.Status,
+deleted: boolean,
+};
 export type AuthUserData = {
 id: number,
 name: string,
@@ -195,6 +212,8 @@ github_url: string | null,
 notes: string | null,
 domain_id: number,
 domain: string,
+application_id: number | null,
+application: string | null,
 serving_path: App.Data.ServingPathData,
 front_service_id: number | null,
 server_id: number | null,
@@ -204,6 +223,7 @@ deleted: boolean,
 export type SiteFormData = {
 id: number | null,
 domain_id: number | null,
+application_id: number | null,
 hostname: string,
 scheme: string,
 port: number | null,
@@ -219,6 +239,8 @@ hostname: string,
 description: string | null,
 domain_id: number,
 domain: string,
+application_id: number | null,
+application: string | null,
 serving_path: App.Data.ServingPathData,
 server_id: number | null,
 status: App.Enums.Status,
@@ -581,7 +603,7 @@ export type ImportOutcome = 'created' | 'needs_review' | 'skipped';
 export type IncidentEventType = 'opened' | 'escalated' | 'deescalated' | 'acknowledged' | 'reminder' | 'resolved';
 export type IncidentResolution = 'recovered' | 'monitor_disabled' | 'monitor_deleted' | 'resource_deleted';
 export type RangeSource = 'cloudflare' | 'fastly' | 'cloudfront';
-export type SearchResultType = 'server' | 'external_service' | 'domain' | 'site';
+export type SearchResultType = 'server' | 'external_service' | 'domain' | 'site' | 'application';
 export type Software = 'os' | 'kernel' | 'nginx' | 'php' | 'mysql' | 'openssl';
 export type Status = 'ok' | 'warning' | 'error' | 'unknown';
 export type UserRole = 'admin' | 'reader';
