@@ -123,8 +123,21 @@ test('editing settings runs the monitor now; disabling stops it', function () {
 
     $this->put(route('monitors.update', $this->monitor), ['enabled' => false]);
 
-    expect($this->monitor->fresh())->enabled->toBeFalse()->next_run_at->toBeNull()
+    expect($this->monitor->fresh())->enabled->toBeFalse()->next_run_at->toBeNull()->arguments->toBe(['timeout' => 20])
         ->and(Activity::query()->where('type', 'monitor.disabled')->exists())->toBeTrue();
+});
+
+test('an edit that leaves fields out keeps them', function () {
+    $this->monitor->forceFill(['label' => 'Home', 'arguments' => ['timeout' => 20], 'failures_before_incident' => 4])->saveQuietly();
+
+    $this->actingAs($this->admin)->put(route('monitors.update', $this->monitor), ['interval_minutes' => 5])->assertSessionHasNoErrors();
+
+    expect($this->monitor->fresh())
+        ->enabled->toBeTrue()
+        ->label->toBe('Home')
+        ->arguments->toBe(['timeout' => 20])
+        ->failures_before_incident->toBe(4)
+        ->interval_minutes->toBe(5);
 });
 
 test('enabling a monitor resets its counters', function () {

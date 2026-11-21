@@ -25,7 +25,7 @@ const props = defineProps<
             resolved: number;
         };
         servers: App.Data.OptionData[];
-        checkers: { value: string; label: string }[];
+        checkers: App.Data.FilterOptionData[];
         severities: string[];
     }
 >();

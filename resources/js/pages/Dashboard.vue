@@ -52,7 +52,6 @@ usePoll(10_000, {
         'software',
         'expiring',
         'changes',
-        'system',
     ],
 });
 
@@ -98,7 +97,7 @@ const countLabels: Record<App.Enums.Status, string> = {
     unknown: 'unknown',
 };
 
-const health = computed(() => systemHealth(props.system, now.value));
+const health = computed(() => systemHealth(props.system));
 
 const lastCheck = computed(() =>
     props.system.last_dispatch_at

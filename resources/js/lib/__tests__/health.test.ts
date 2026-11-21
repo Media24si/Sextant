@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vite-plus/test';
 import { Duration } from '@/lib/duration';
 import { systemHealth } from '@/lib/health';
 
-const now = Date.parse('2026-11-21T10:00:00Z');
 const system = (
     overrides: Partial<App.Data.Dashboard.SystemHealthData>,
 ): App.Data.Dashboard.SystemHealthData => ({
     last_dispatch_at: '2026-11-21T09:59:30Z',
+    checks_running: true,
     stale_monitors: 0,
     network_healthy: null,
     ...overrides,
@@ -21,7 +21,10 @@ describe('systemHealth', () => {
             'Checks not running yet',
         ],
         [
-            system({ last_dispatch_at: '2026-11-21T09:55:00Z' }),
+            system({
+                last_dispatch_at: '2026-11-21T09:55:00Z',
+                checks_running: false,
+            }),
             'error',
             'Checks stopped',
         ],
@@ -37,7 +40,7 @@ describe('systemHealth', () => {
             'Checks running · network OK',
         ],
     ] as const)('%#: %s', (input, status, label) => {
-        expect(systemHealth(input, now)).toEqual({ status, label });
+        expect(systemHealth(input)).toEqual({ status, label });
     });
 });
 

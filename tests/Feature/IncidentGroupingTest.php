@@ -153,6 +153,18 @@ it('resolves incidents when the monitor is disabled or deleted, or its resource 
         ->and($serverIncident->fresh()->resolution)->toBe(IncidentResolution::ResourceDeleted);
 });
 
+it('forgets a disabled monitor\'s state, so re-enabling it starts afresh', function () {
+    openOn($this->http);
+    MonitorState::query()->whereKey($this->http->id)->update(['status' => Status::Error, 'consecutive_failures' => 3]);
+
+    $this->http->update(['enabled' => false]);
+
+    $state = MonitorState::query()->find($this->http->id);
+
+    expect($state->status)->toBe(Status::Unknown)
+        ->and($state->consecutive_failures)->toBe(0);
+});
+
 it('mutes a server together with the sites it serves', function () {
     $admin = User::factory()->admin()->create();
     $elsewhere = Monitor::factory()->on(Site::factory()->create(), 'site.fake')->create();

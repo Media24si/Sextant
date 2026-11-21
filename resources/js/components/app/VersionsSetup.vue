@@ -23,9 +23,7 @@ const props = defineProps<{
 
 const url = defineModel<string>('url', { required: true });
 
-const http = useHttp<Record<string, never>, { token: string; last4: string }>(
-    {},
-);
+const http = useHttp<Record<string, never>, App.Data.VersionsTokenData>({});
 const token = ref<string | null>(null);
 const masked = ref(props.tokenMasked);
 const confirmingRotate = ref(false);

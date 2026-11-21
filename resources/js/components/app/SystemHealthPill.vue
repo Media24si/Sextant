@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
+import { usePage, usePoll } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import StatusDot from '@/components/app/StatusDot.vue';
-import { useNow } from '@/composables/useNow';
 import { systemHealth } from '@/lib/health';
 import { statusToneClasses } from '@/lib/status';
 
@@ -11,9 +10,11 @@ import { statusToneClasses } from '@/lib/status';
  * dispatched, is the network canary happy, are monitors going stale.
  */
 const page = usePage();
-const now = useNow();
 
-const health = computed(() => systemHealth(page.props.system, now.value));
+// Every page reloads only `system`, so the pill stays current off the Overview.
+usePoll(30_000, { only: ['system'] });
+
+const health = computed(() => systemHealth(page.props.system));
 </script>
 
 <template>

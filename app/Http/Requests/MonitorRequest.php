@@ -18,8 +18,9 @@ use Illuminate\Validation\Validator;
 
 /**
  * Add / edit monitor (SPEC §3.8, §4.6). Arguments and thresholds are
- * overrides: an empty field inherits the registry value. Argument values are
- * validated with the checker's schema rules.
+ * overrides: an empty field inherits the registry value. A field left out of
+ * an edit keeps its current value. Argument values are validated with the
+ * checker's schema rules.
  */
 class MonitorRequest extends FormRequest
 {
@@ -39,10 +40,12 @@ class MonitorRequest extends FormRequest
             $this->merge(['arguments' => array_filter($arguments, fn (mixed $value): bool => $value !== null && $value !== '' && $value !== [])]);
         }
 
-        $this->merge(['label' => $this->filled('label') ? trim((string) $this->input('label')) : null]);
+        if ($this->has('label')) {
+            $this->merge(['label' => $this->filled('label') ? trim((string) $this->input('label')) : null]);
+        }
 
         foreach (['interval_minutes', 'failures_before_incident', 'successes_before_resolve'] as $field) {
-            if (! $this->filled($field)) {
+            if ($this->has($field) && ! $this->filled($field)) {
                 $this->merge([$field => null]);
             }
         }
@@ -93,14 +96,15 @@ class MonitorRequest extends FormRequest
                     }
                 }
 
+                $label = $this->has('label') ? $this->input('label') : $this->monitor()?->label;
                 $duplicate = $resource?->monitors()
                     ->where('checker', $this->checker())
-                    ->where('label', $this->input('label'))
+                    ->where('label', $label)
                     ->when($this->monitor() !== null, fn ($query) => $query->whereKeyNot($this->monitor()?->id))
                     ->exists();
 
                 if ($duplicate === true) {
-                    $validator->errors()->add('label', 'This resource already has this check'.($this->input('label') === null ? '; give this one a label.' : ' with that label.'));
+                    $validator->errors()->add('label', 'This resource already has this check'.($label === null ? '; give this one a label.' : ' with that label.'));
                 }
             },
         ];

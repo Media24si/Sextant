@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 
 test('guests are redirected to the login page', function () {
     $response = $this->get(route('dashboard'));
@@ -49,7 +50,7 @@ test('the dashboard props follow the contract', function () {
                 ->has('servers', fn (Assert $counts) => $counts->hasAll(['total', 'ok', 'warning', 'error', 'unknown']))
                 ->hasAll(['domains', 'sites', 'sites_unassigned', 'servers_below_minimum']))
             ->hasAll(['issues', 'muted', 'pending_count', 'resolved', 'software', 'expiring', 'changes'])
-            ->has('system', fn (Assert $system) => $system->hasAll(['last_dispatch_at', 'stale_monitors', 'network_healthy'])));
+            ->has('system', fn (Assert $system) => $system->hasAll(['last_dispatch_at', 'checks_running', 'stale_monitors', 'network_healthy'])));
 });
 
 test('totals count resources by status', function () {
@@ -132,6 +133,7 @@ test('expiring lists domains and certificates within 60 days, soonest first', fu
 });
 
 test('system health comes from the last dispatch and stale monitors', function () {
+    $this->travelTo(CarbonImmutable::parse('2026-11-21 10:02:59'));
     Cache::forever(MonitorClaimer::LAST_DISPATCH_KEY, '2026-11-21T10:00:00+00:00');
     $monitor = Monitor::factory()->create();
     MonitorState::query()->whereKey($monitor->id)->update(['stale_at' => now()->subMinute()]);
@@ -139,8 +141,19 @@ test('system health comes from the last dispatch and stale monitors', function (
     $this->actingAs(User::factory()->create())->get(route('dashboard'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('system.last_dispatch_at', '2026-11-21T10:00:00+00:00')
+            ->where('system.checks_running', true)
             ->where('system.stale_monitors', 1)
             ->where('system.network_healthy', null));
+});
+
+test('checks count as stopped three minutes after the last dispatch, by the server\'s clock', function () {
+    Cache::forever(MonitorClaimer::LAST_DISPATCH_KEY, '2026-11-21T10:00:00+00:00');
+    $this->travelTo(CarbonImmutable::parse('2026-11-21 10:03:01'));
+
+    $this->actingAs(User::factory()->create())->get(route('servers.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('system.checks_running', false)
+            ->reloadOnly(['system'], fn (Assert $reload) => $reload->has('system')->missing('rows')));
 });
 
 test('a poll reloads only the props it asks for', function () {

@@ -36,6 +36,17 @@ it('reads the expiry from RDAP and stores it quietly', function () {
         ->and(Activity::query()->where('type', 'domain.updated')->exists())->toBeFalse();
 });
 
+it('stores nothing when run with --no-save', function () {
+    app(RdapClient::class)->fixture('svet24.si', 'svet24.si.json', 'https://rdap.register.si/');
+    $monitor = Monitor::factory()->on($this->domain, 'domain.expiration')->create();
+
+    $this->artisan('monitors:run', ['monitor' => $monitor->id, '--no-save' => true])
+        ->expectsOutputToContain('Expires 2027-07-18')
+        ->assertSuccessful();
+
+    expect($this->domain->fresh()->expires_at)->toBeNull();
+});
+
 it('grades the days left', function (string $expires, Status $status) {
     app(RdapClient::class)->record('svet24.si', new RdapDomain(true, 'rdap.example', expiresAt: CarbonImmutable::parse($expires, 'Europe/Ljubljana')));
 

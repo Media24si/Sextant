@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Checks\CheckCouldNotRun;
+use App\Data\VersionsTestReadingData;
+use App\Data\VersionsTestResultData;
+use App\Data\VersionsTokenData;
 use App\Models\Monitor;
 use App\Models\Server;
 use App\Monitoring\MonitorClaimer;
@@ -30,7 +33,7 @@ class ServerVersionsController extends Controller
 
         $server->forceFill(['versions_token' => $token, 'versions_token_last4' => substr($token, -4)])->save();
 
-        return response()->json(['token' => $token, 'last4' => $server->versions_token_last4]);
+        return response()->json(new VersionsTokenData($token, (string) $server->versions_token_last4));
     }
 
     /** The collector script, the same for every server (§11.3). */
@@ -73,25 +76,25 @@ class ServerVersionsController extends Controller
     public function test(Server $server, VersionsClient $client): JsonResponse
     {
         if ($server->versions_url === null || $server->versions_token === null) {
-            return response()->json(['ok' => false, 'error' => 'Set the endpoint URL and generate a token first.']);
+            return response()->json(VersionsTestResultData::failed('Set the endpoint URL and generate a token first.'));
         }
 
         try {
             $file = $client->fetch($server->versions_url, $server->versions_token);
         } catch (CheckCouldNotRun $exception) {
-            return response()->json(['ok' => false, 'error' => $exception->getMessage()]);
+            return response()->json(VersionsTestResultData::failed($exception->getMessage()));
         }
 
-        return response()->json([
-            'ok' => true,
-            'generated_at' => $file->generatedAt->toIso8601String(),
-            'hostname' => $file->hostname,
-            'readings' => array_map(fn (SoftwareReading $reading): array => [
-                'software' => $reading->software->labelWithBranch($reading->branch),
-                'version' => $reading->version,
-                'package' => $reading->package,
-            ], $file->readings),
-        ]);
+        return response()->json(new VersionsTestResultData(
+            ok: true,
+            generated_at: $file->generatedAt->toIso8601String(),
+            hostname: $file->hostname,
+            readings: array_map(fn (SoftwareReading $reading): VersionsTestReadingData => new VersionsTestReadingData(
+                software: $reading->software->labelWithBranch($reading->branch),
+                version: $reading->version,
+                package: $reading->package,
+            ), $file->readings),
+        ));
     }
 
     /** Refresh: claim the versions monitor for an immediate run (§5.1). */

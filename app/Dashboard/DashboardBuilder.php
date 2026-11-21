@@ -51,6 +51,9 @@ class DashboardBuilder
 
     private const CHANGES_SHOWN = 50;
 
+    /** Without a dispatch for this long, checks count as stopped (SPEC §13.7). */
+    private const DISPATCH_GRACE_SECONDS = 180;
+
     public function __construct(
         private NetworkHealth $network,
         private MinimumVersions $minimums,
@@ -224,8 +227,12 @@ class DashboardBuilder
     {
         $lastDispatch = Cache::get(MonitorClaimer::LAST_DISPATCH_KEY);
 
+        $lastDispatch = is_string($lastDispatch) ? $lastDispatch : null;
+
         return new SystemHealthData(
-            last_dispatch_at: is_string($lastDispatch) ? $lastDispatch : null,
+            last_dispatch_at: $lastDispatch,
+            checks_running: $lastDispatch !== null
+                && CarbonImmutable::parse($lastDispatch)->gte(now()->subSeconds(self::DISPATCH_GRACE_SECONDS)),
             stale_monitors: MonitorState::query()
                 ->where('stale_at', '<', now())
                 ->whereHas('monitor', fn (Builder $monitor) => $monitor->where('enabled', true)->whereHasMorph('monitorable', '*'))

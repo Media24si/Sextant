@@ -89,7 +89,9 @@ class Sweep extends Command
             ->where('severity', Status::Error)
             ->whereRaw('COALESCE(last_notified_at, opened_at) <= ?', [$before])
             ->whereHas('monitor', fn ($monitor) => $monitor->where(fn ($query) => $query->whereNull('muted_until')->orWhere('muted_until', '<=', $now)))
-            ->each(function (Incident $incident) use ($incidents, $now, &$count): void {
+            // By id: a reminder moves `last_notified_at` out of the filter, which
+            // would make offset chunks skip incidents.
+            ->eachById(function (Incident $incident) use ($incidents, $now, &$count): void {
                 $incidents->remind($incident, 'Still failing after '.$this->duration($incident->opened_at, $now), $now);
                 $count++;
             });

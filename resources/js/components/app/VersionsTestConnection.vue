@@ -12,18 +12,7 @@ import { formatDateTime } from '@/lib/datetime';
  */
 const props = defineProps<{ serverId: number }>();
 
-type Result =
-    | { ok: false; error: string }
-    | {
-          ok: true;
-          generated_at: string;
-          hostname: string | null;
-          readings: {
-              software: string;
-              version: string;
-              package: string | null;
-          }[];
-      };
+type Result = App.Data.VersionsTestResultData;
 
 const http = useHttp<Record<string, never>, Result>({});
 const result = ref<Result | null>(null);
@@ -36,7 +25,13 @@ async function test(): Promise<void> {
             ServerVersionsController.test(props.serverId).url,
         );
     } catch {
-        result.value = { ok: false, error: 'The request failed.' };
+        result.value = {
+            ok: false,
+            error: 'The request failed.',
+            generated_at: null,
+            hostname: null,
+            readings: [],
+        };
     }
 }
 </script>
@@ -62,7 +57,7 @@ async function test(): Promise<void> {
             {{ result.error }}
         </p>
         <div
-            v-else-if="result && result.ok"
+            v-else-if="result?.ok && result.generated_at"
             class="rounded-lg border bg-muted/40 p-3 text-sm"
             role="status"
         >

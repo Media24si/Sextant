@@ -109,14 +109,20 @@ class EmbedBuilder
         $children = $lead->children()->with('monitorable')->get();
 
         if ($children->isNotEmpty()) {
-            $failing = $children->filter(fn (Incident $child): bool => $child->isOpen());
-            $recovered = $children->count() - $failing->count();
-            $line = "{$recovered} of {$children->count()} sites recovered";
+            // Counted per site: a site with two failing checks is one site, and it
+            // has recovered only when all of its incidents have.
+            $sites = $children->groupBy(fn (Incident $child): string => "{$child->monitorable_type}:{$child->monitorable_id}");
+            $failing = $sites->filter(fn (Collection $incidents): bool => $incidents->contains(fn (Incident $child): bool => $child->isOpen()));
+            $recovered = $sites->count() - $failing->count();
+            $line = "{$recovered} of {$sites->count()} sites recovered";
 
             if ($failing->isNotEmpty()) {
                 $line .= '; still failing: '.$failing
-                    ->map(fn (Incident $child): string => $child->monitorable?->resourceName() ?? $child->title)
-                    ->unique()
+                    ->map(function (Collection $incidents): string {
+                        $child = $incidents->first();
+
+                        return $child->monitorable?->resourceName() ?? $child->title;
+                    })
                     ->join(', ');
             }
 

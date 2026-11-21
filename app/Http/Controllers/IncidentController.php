@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Checks\CheckerRegistry;
+use App\Data\FilterOptionData;
 use App\Data\Incidents\IncidentRowData;
 use App\Data\OptionData;
 use App\Enums\Status;
@@ -60,7 +61,7 @@ class IncidentController extends Controller
             'servers' => array_values(Server::query()->withTrashed()->orderBy('name')->get()
                 ->map(fn (Server $server): OptionData => new OptionData($server->id, $server->name))->all()),
             'checkers' => array_map(
-                fn (string $key): array => ['value' => $key, 'label' => $registry->name($key)],
+                fn (string $key): FilterOptionData => new FilterOptionData($key, $registry->name($key)),
                 array_keys($registry->entries()),
             ),
             'severities' => [Status::Error->value, Status::Warning->value],

@@ -188,6 +188,23 @@ it('summarises the sites when an outage recovers', function () {
         ->and(sentMessages()[1]['allowed_mentions'])->toBe(['parse' => []]);
 });
 
+it('counts sites, not incidents, when an outage recovers', function () {
+    $outage = $this->manager->open($this->tcp, $this->web02, CheckResult::error('Port 443 refused'), now());
+    $http = siteIncident('error', $this->web02, 'a.svet24.si');
+    $ssl = $this->manager->open(Monitor::factory()->on($http->monitorable, 'site.ssl')->create(), $http->monitorable, CheckResult::error('Expired'), now());
+    siteIncident('error', $this->web02, 'b.svet24.si');
+    $this->travel(21)->seconds();
+    flushNotifications();
+
+    $this->manager->resolve($http, IncidentResolution::Recovered, now());
+    $this->manager->resolve($outage, IncidentResolution::Recovered, now());
+    $this->travel(21)->seconds();
+    flushNotifications();
+
+    expect($ssl->fresh()->parent_id)->toBe($outage->id)
+        ->and(sentMessages()[1]['embeds'][0]['description'])->toContain('0 of 2 sites recovered; still failing: a.svet24.si, b.svet24.si');
+});
+
 it('sends acknowledgements and reminders without @here', function () {
     $incident = siteIncident();
     $this->travel(21)->seconds();

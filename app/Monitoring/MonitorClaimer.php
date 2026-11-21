@@ -76,7 +76,9 @@ class MonitorClaimer
             return false;
         }
 
-        RunMonitor::dispatch($monitor->id)->onQueue($this->queue($monitor));
+        // After commit: a claim made inside a transaction (saving a server, say)
+        // must not reach a worker before the monitor it runs exists.
+        RunMonitor::dispatch($monitor->id)->onQueue($this->queue($monitor))->afterCommit();
 
         return true;
     }

@@ -60,7 +60,9 @@ class MonitorRunner
         $start = hrtime(true);
 
         if ($result === null && $checker !== null) {
-            $result = $this->execute($checker, $resource, $settings->arguments);
+            $result = $save
+                ? $this->execute($checker, $resource, $settings->arguments)
+                : $this->withoutWrites(fn (): CheckResult => $this->execute($checker, $resource, $settings->arguments));
         }
 
         $durationMs = (int) round((hrtime(true) - $start) / 1_000_000);
@@ -120,6 +122,23 @@ class MonitorRunner
         }
 
         return new RunOutcome($result, $durationMs, $transition);
+    }
+
+    /**
+     * Run a checker's own writes (stored versions, a domain's expiry date) in
+     * a transaction that's rolled back, for `--no-save`.
+     *
+     * @param  callable(): CheckResult  $run
+     */
+    private function withoutWrites(callable $run): CheckResult
+    {
+        DB::beginTransaction();
+
+        try {
+            return $run();
+        } finally {
+            DB::rollBack();
+        }
     }
 
     /**

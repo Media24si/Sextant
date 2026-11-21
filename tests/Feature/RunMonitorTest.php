@@ -11,6 +11,7 @@ use App\Models\Site;
 use App\Monitoring\MonitorClaimer;
 use App\Net\Fake\FakeTcpProbe;
 use App\Net\TcpProbe;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Queue;
 use Tests\Fakes\FakeChecker;
@@ -157,6 +158,17 @@ it('claims each run once, however many dispatchers try', function () {
         ->and($this->monitor->fresh()->next_run_at->isFuture())->toBeTrue();
     Queue::assertPushedOn('checks', RunMonitor::class);
     Queue::assertPushed(RunMonitor::class, 1);
+});
+
+it('queues a run claimed inside a transaction only once it commits', function () {
+    FakeChecker::then(CheckResult::ok('Fine'));
+
+    DB::transaction(function () {
+        expect(app(MonitorClaimer::class)->claimNow($this->monitor))->toBeTrue()
+            ->and(MonitorRun::query()->count())->toBe(0);
+    });
+
+    expect(MonitorRun::query()->count())->toBe(1);
 });
 
 it('dispatches due monitors of live resources only', function () {

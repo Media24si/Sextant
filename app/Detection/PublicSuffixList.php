@@ -2,7 +2,7 @@
 
 namespace App\Detection;
 
-use Illuminate\Support\Facades\Http;
+use App\Net\WebClient;
 use Illuminate\Support\Facades\Storage;
 use Pdp\Rules;
 use Throwable;
@@ -40,7 +40,7 @@ class PublicSuffixList
      */
     public function refresh(): void
     {
-        $response = Http::withUserAgent((string) config('sextant.user_agent'))->timeout(30)->get(self::URL);
+        $response = app(WebClient::class)->get(self::URL, timeout: 30);
         $content = $response->body();
 
         // Refuse anything that doesn't look like the list, so a bad download never replaces a good copy.

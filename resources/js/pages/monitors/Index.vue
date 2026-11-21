@@ -30,7 +30,7 @@ const props = defineProps<
             disabled: number;
             muted: number;
         };
-        checkers: { value: string; label: string }[];
+        checkers: App.Data.FilterOptionData[];
     }
 >();
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Checks\CheckerRegistry;
+use App\Data\FilterOptionData;
 use App\Data\Monitors\MonitorDetailData;
 use App\Data\Monitors\MonitorRowData;
 use App\Enums\Status;
@@ -64,7 +65,7 @@ class MonitorController extends Controller
                 'muted' => $base()->where('muted_until', '>', now())->count(),
             ],
             'checkers' => array_map(
-                fn (string $key): array => ['value' => $key, 'label' => $registry->name($key)],
+                fn (string $key): FilterOptionData => new FilterOptionData($key, $registry->name($key)),
                 array_keys($registry->entries()),
             ),
         ]);
@@ -101,7 +102,8 @@ class MonitorController extends Controller
     }
 
     /**
-     * §6.4: new settings run now; disabling stops runs; enabling resets the counters.
+     * §6.4: new settings run now; disabling stops runs; enabling resets the
+     * counters. Fields left out of the request keep their current values.
      */
     public function update(MonitorRequest $request, Monitor $monitor, MonitorClaimer $claimer): RedirectResponse
     {
@@ -109,8 +111,8 @@ class MonitorController extends Controller
 
         $monitor->fill([
             ...$request->safe()->only(['label', 'interval_minutes', 'failures_before_incident', 'successes_before_resolve']),
-            'arguments' => $request->arguments(),
-            'enabled' => $request->boolean('enabled'),
+            ...($request->has('arguments') ? ['arguments' => $request->arguments()] : []),
+            'enabled' => $request->boolean('enabled', $monitor->enabled),
         ]);
         $monitor->next_run_at = $monitor->enabled ? now()->startOfSecond() : null;
         $monitor->save();

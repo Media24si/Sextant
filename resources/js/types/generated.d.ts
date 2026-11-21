@@ -72,6 +72,10 @@ ranges_source: App.Enums.RangeSource | null,
 sites_count: number,
 deleted: boolean,
 };
+export type FilterOptionData = {
+value: string,
+label: string,
+};
 export type MinimumVersionRowData = {
 id: number,
 software: string,
@@ -235,6 +239,22 @@ role: App.Enums.UserRole,
 created_at: string | null,
 is_you: boolean,
 };
+export type VersionsTestReadingData = {
+software: string,
+version: string,
+package: string | null,
+};
+export type VersionsTestResultData = {
+ok: boolean,
+error: string | null,
+generated_at: string | null,
+hostname: string | null,
+readings: App.Data.VersionsTestReadingData[],
+};
+export type VersionsTokenData = {
+token: string,
+last4: string,
+};
 namespace Dashboard {
 export type DashboardData = {
 totals: App.Data.Dashboard.TotalsData,
@@ -303,6 +323,7 @@ unknown: number,
 };
 export type SystemHealthData = {
 last_dispatch_at: string | null,
+checks_running: boolean,
 stale_monitors: number,
 network_healthy: boolean | null,
 };

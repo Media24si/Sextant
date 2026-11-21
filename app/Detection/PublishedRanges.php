@@ -3,9 +3,9 @@
 namespace App\Detection;
 
 use App\Enums\RangeSource;
+use App\Net\WebClient;
 use App\Rules\IpOrCidr;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -87,7 +87,7 @@ class PublishedRanges
 
         foreach ((array) config("sextant.range_sources.{$source->value}") as $url) {
             [$address, $fragment] = array_pad(explode('#', (string) $url, 2), 2, null);
-            $response = Http::withUserAgent((string) config('sextant.user_agent'))->timeout(20)->get($address);
+            $response = app(WebClient::class)->get((string) $address, timeout: 20);
 
             if ($response->failed()) {
                 throw new \RuntimeException("HTTP {$response->status()} from {$address}");

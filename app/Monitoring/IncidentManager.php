@@ -13,6 +13,7 @@ use App\Models\Concerns\Monitorable;
 use App\Models\Incident;
 use App\Models\IncidentEvent;
 use App\Models\Monitor;
+use App\Models\MonitorState;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\User;
@@ -138,7 +139,9 @@ class IncidentManager
 
     /**
      * Resolve the open incidents of these monitors, e.g. when they're
-     * disabled or deleted, or their resource is deleted (§6.4).
+     * disabled or deleted, or their resource is deleted (§6.4). Their state
+     * goes back to Unknown with no streaks, so a monitor that's re-enabled
+     * or restored starts afresh instead of showing the incident's severity.
      *
      * @param  iterable<Monitor>  $monitors
      */
@@ -150,6 +153,14 @@ class IncidentManager
             if ($incident !== null) {
                 $this->resolve($incident, $resolution, now());
             }
+
+            MonitorState::query()->whereKey($monitor->id)->update([
+                'status' => Status::Unknown,
+                'status_changed_at' => now(),
+                'consecutive_failures' => 0,
+                'consecutive_successes' => 0,
+                'consecutive_unknowns' => 0,
+            ]);
         }
     }
 

@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Net\WebClient;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\RateLimited;
-use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 /**
@@ -58,9 +58,11 @@ class SendDiscordMessage implements ShouldQueue
             return;
         }
 
-        $response = Http::timeout(15)
-            ->withUserAgent((string) config('sextant.user_agent'))
-            ->post($webhook.(str_contains($webhook, '?') ? '&' : '?').'wait=true', array_filter($this->payload, fn (mixed $value): bool => $value !== null));
+        $response = app(WebClient::class)->postJson(
+            $webhook.(str_contains($webhook, '?') ? '&' : '?').'wait=true',
+            array_filter($this->payload, fn (mixed $value): bool => $value !== null),
+            timeout: 15,
+        );
 
         if ($response->status() === 429) {
             $retryAfter = (float) ($response->json('retry_after') ?? $response->header('Retry-After') ?: 5);

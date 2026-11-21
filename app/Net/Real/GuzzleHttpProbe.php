@@ -27,6 +27,8 @@ class GuzzleHttpProbe implements HttpProbe
 
         for ($hop = 0; $hop <= self::MAX_REDIRECTS; $hop++) {
             $stats = null;
+            // Only the first `$maxBytes` of a body are kept; pages can be large.
+            $sink = new CappedSink(max(0, $maxBytes));
 
             try {
                 $response = Http::withUserAgent((string) config('sextant.user_agent'))
@@ -34,6 +36,7 @@ class GuzzleHttpProbe implements HttpProbe
                     ->timeout((int) ceil($timeout))
                     ->withOptions([
                         'verify' => $verifyTls,
+                        'sink' => $sink,
                         'on_stats' => function (TransferStats $transfer) use (&$stats): void {
                             $stats = $transfer->getHandlerStats();
                         },
@@ -70,7 +73,7 @@ class GuzzleHttpProbe implements HttpProbe
                     headers: $headers,
                     timings: $timings,
                     ip: $ip,
-                    body: $maxBytes > 0 ? substr($response->body(), 0, $maxBytes) : null,
+                    body: $maxBytes > 0 ? $response->body() : null,
                 );
             }
 
