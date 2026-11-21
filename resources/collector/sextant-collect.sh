@@ -17,11 +17,11 @@ set -u
 
 # Bump when this script or versions.php.stub changes; servers that report an
 # older number show "Collector outdated" in Sextant (SPEC §11.8).
-SEXTANT_COLLECTOR_VERSION=2
+SEXTANT_COLLECTOR_VERSION=3
 
-# The group the web server's PHP runs as; it must be able to read the file.
-SEXTANT_GROUP="${SEXTANT_GROUP:-www-data}"
-# Where versions.json goes; versions.php reads it from here.
+# Where versions.json goes; versions.php reads it from here. The file is
+# readable by everyone (0644), so versions.php works whichever user its
+# PHP-FPM pool runs as. It holds only software versions.
 SEXTANT_DIR="${SEXTANT_DIR:-/var/lib/sextant}"
 SEXTANT_FILE="${SEXTANT_DIR}/versions.json"
 
@@ -194,6 +194,7 @@ main() {
     local temp
 
     mkdir -p "$SEXTANT_DIR" || exit 1
+    chmod 0755 "$SEXTANT_DIR"
     temp="$(mktemp "${SEXTANT_DIR}/versions.json.XXXXXX")" || exit 1
 
     {
@@ -211,8 +212,7 @@ main() {
         printf '}\n'
     } >"$temp"
 
-    chmod 0640 "$temp"
-    chgrp "$SEXTANT_GROUP" "$temp" 2>/dev/null || true
+    chmod 0644 "$temp"
 
     # Atomic: readers see the old file or the new one, never half of one.
     mv -f "$temp" "$SEXTANT_FILE"

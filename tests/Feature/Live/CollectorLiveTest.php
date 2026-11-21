@@ -28,7 +28,6 @@ it('writes a valid versions file on', function (string $image) {
         'docker', 'run', '--rm',
         '-v', resource_path('collector/sextant-collect.sh').':/usr/local/bin/sextant-collect:ro',
         '-e', 'SEXTANT_DIR=/tmp/sextant',
-        '-e', 'SEXTANT_GROUP=root',
         $image,
         'bash', '-c', 'apt-get update -qq >/dev/null && apt-get install -y -qq openssl >/dev/null && bash /usr/local/bin/sextant-collect && cat /tmp/sextant/versions.json',
     ]);
@@ -51,9 +50,10 @@ it('installs, then updates, the collector, cron and versions.php on', function (
     $installer = app(CollectorKit::class)->installScript($server);
 
     // Run twice: the second run is an update and must keep a customised cron.
+    // The file must be readable by any PHP-FPM pool user, here `nobody`.
     $process = new Process([
         'docker', 'run', '--rm', '-i', $image,
-        'bash', '-c', 'cat > /tmp/install.sh && groupadd -f www-data && bash /tmp/install.sh && echo "SEXTANT_GROUP=root" > /etc/cron.d/sextant.keep && cat /etc/cron.d/sextant >> /etc/cron.d/sextant.keep && mv /etc/cron.d/sextant.keep /etc/cron.d/sextant && bash /tmp/install.sh && echo "---" && cat /etc/cron.d/sextant && stat -c "%a %G" /var/lib/sextant/versions.json && cat /var/lib/sextant/versions.json && cat /var/www/sextant/versions.php',
+        'bash', '-c', 'cat > /tmp/install.sh && umask 077 && bash /tmp/install.sh && sed -i "s/^17 /33 /" /etc/cron.d/sextant && bash /tmp/install.sh && echo "---" && cat /etc/cron.d/sextant && stat -c "%a" /var/lib/sextant/versions.json && su -s /bin/sh nobody -c "cat /var/lib/sextant/versions.json /var/www/sextant/versions.php"',
     ]);
     $process->setInput($installer)->setTimeout(300)->run();
 
@@ -65,7 +65,7 @@ it('installs, then updates, the collector, cron and versions.php on', function (
     expect($log)->toContain('Installed collector '.app(CollectorKit::class)->version())
         ->and($log)->toContain('location = /.sextant/versions.php {')
         ->and($log)->toContain('fastcgi_param SCRIPT_FILENAME /var/www/sextant/versions.php;')
-        ->and($files)->toStartWith("SEXTANT_GROUP=root\n17 * * * * root /usr/local/bin/sextant-collect\n640 root\n")
+        ->and($files)->toStartWith("33 * * * * root /usr/local/bin/sextant-collect\n644\n")
         ->and($files)->toContain(hash('sha256', 'sxt_'.str_repeat('b', 32)))
         ->and(VersionsFile::fromJson($json)->collectorVersion)->toBe(app(CollectorKit::class)->version());
 })->with(['ubuntu:24.04', 'debian:12'])->group('live');

@@ -9,8 +9,6 @@
 #
 # Run as root, from the link Sextant copies:
 #   curl -fsSL '<link>' | sudo bash
-# The web server's PHP must be able to read the versions file; if it doesn't
-# run as www-data, pass its group: ... | sudo SEXTANT_GROUP=nginx bash
 
 set -euo pipefail
 
@@ -44,44 +42,31 @@ fpm_socket() {
 
 # Everything runs from here, so a cut-off download runs nothing.
 install_sextant() {
-    local group socket note=""
+    local socket note=""
 
     if [ "$(id -u)" -ne 0 ]; then
         echo "Run as root: curl -fsSL '<link>' | sudo bash" >&2
         exit 1
     fi
 
-    # An existing cron keeps its group; SEXTANT_GROUP wins when given.
-    group="${SEXTANT_GROUP:-}"
-
-    if [ -z "$group" ] && [ -r "$CRON" ]; then
-        group="$(sed -n '/^SEXTANT_GROUP=/{s///p;q;}' "$CRON")"
-    fi
-
-    group="${group:-www-data}"
-
     install -d -m 0755 "$(dirname "$COLLECTOR")" "$(dirname "$ENDPOINT")"
     put_file "$COLLECTOR" 0755 '{{collector}}'
     put_file "$ENDPOINT" 0644 '{{endpoint}}'
     echo "Installed collector {{collector_version}} as ${COLLECTOR} and ${ENDPOINT}."
 
-    if [ -n "${SEXTANT_GROUP:-}" ] || [ ! -e "$CRON" ]; then
-        {
-            if [ "$group" != "www-data" ]; then
-                printf 'SEXTANT_GROUP=%s\n' "$group"
-            fi
-            printf '17 * * * * root %s\n' "$COLLECTOR"
-        } >"$CRON"
+    # An existing cron is left as it is.
+    if [ ! -e "$CRON" ]; then
+        printf '17 * * * * root %s\n' "$COLLECTOR" >"$CRON"
         chmod 0644 "$CRON"
         echo "Wrote the hourly cron ${CRON}."
     fi
 
-    if ! SEXTANT_GROUP="$group" "$COLLECTOR"; then
+    if ! "$COLLECTOR"; then
         echo "The collector failed; see the output above." >&2
         exit 1
     fi
 
-    echo "Collected versions (readable by group ${group})."
+    echo "Collected versions into /var/lib/sextant/versions.json (readable by every PHP-FPM user)."
 
     if grep -rqsF -- "$LOCATION" /etc/nginx/; then
         echo "nginx already mentions ${LOCATION}; nothing to change there."

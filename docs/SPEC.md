@@ -1168,7 +1168,7 @@ Monitors start spread out (§5.1). The import summary lists created, needs-revie
 ### 11.1 Overview
 
 ```text
-root cron (hourly) ── sextant-collect.sh ──► /var/lib/sextant/versions.json (0640, group www-data)
+root cron (hourly) ── sextant-collect.sh ──► /var/lib/sextant/versions.json (0644)
                                                         │ read
 Sextant ── HTTPS GET + Authorization: Bearer sxt_… ──► nginx ──► versions.php (checks token hash)
 ```
@@ -1189,7 +1189,7 @@ Requirements:
 
 - bash, no dependencies beyond coreutils; no `jq`. Runs as root from `/etc/cron.d/sextant` (hourly).
 - Never fails because a program is missing: missing software is `null`.
-- Writes atomically (temp file + `mv`) to `/var/lib/sextant/versions.json`, mode `0640`, group from `SEXTANT_GROUP` (default `www-data`) at the top of the script.
+- Writes atomically (temp file + `mv`) to `/var/lib/sextant/versions.json`, mode `0644` in a `0755` directory, so `versions.php` can read it whichever user the PHP-FPM pool runs as. The file holds only software versions, which any local user can read anyway; the token check in `versions.php` guards the HTTP side.
 - Reads:
   - OS: `/etc/os-release` (`ID`, `VERSION_ID`, `PRETTY_NAME`).
   - Kernel: `uname -r` (running).
@@ -1281,7 +1281,7 @@ Setting up or updating a server is one command, run there as root. Sextant still
 - The installer is rendered from `resources/collector/install.sh.stub` at request time with the collector and `versions.php` (token hash only, never the token) inline as base64. It's wrapped in a function called on the last line, so a cut-off download runs nothing. It:
   - refuses to run without root;
   - writes `/usr/local/bin/sextant-collect` (0755) and `sextant.versions.endpoint_file` (`/var/www/sextant/versions.php`, 0644) atomically;
-  - writes `/etc/cron.d/sextant` (hourly, minute 17) only when it's missing or `SEXTANT_GROUP` is passed (`… | sudo SEXTANT_GROUP=nginx bash`), so an existing cron and its group survive updates;
+  - writes `/etc/cron.d/sextant` (hourly, minute 17, as root) only when it's missing, so an edited cron survives updates;
   - runs the collector once;
   - never edits nginx: when `/etc/nginx` doesn't mention the location (the endpoint URL's path, or `default_path`), it prints the location block with the newest `/run/php/php*-fpm.sock`.
 - Running it again is the update: newer collector, new `versions.php` after a token rotation.
@@ -1674,7 +1674,7 @@ No live network in the default suite. All network I/O goes through the `app/Net`
 - Import: created, needs review, skipped.
 - `server.versions`: OK, below minimum (Warning), 401 / timeout / stale file (Unknown, versions kept), minimum change triggering runs.
 - Download endpoints: `versions.php` contains the token hash and never the token; collector served unchanged.
-- Install command: makes a token when there's none; its signed link serves the installer with the hash and the unchanged collector, never the token; 403 without a signature, with a wrong one or after expiry. Outdated collectors on the server page and the list filter. Live group: the installer installs and then updates in Ubuntu 24.04 and Debian 12 containers, keeping a customised cron.
+- Install command: makes a token when there's none; its signed link serves the installer with the hash and the unchanged collector, never the token; 403 without a signature, with a wrong one or after expiry. Outdated collectors on the server page and the list filter. Live group: the installer installs and then updates in Ubuntu 24.04 and Debian 12 containers, keeping a customised cron, with the file readable by `nobody` under `umask 077`.
 - The rendered `versions.php` served with `php -S` against a fixture file: 401 without/with a wrong token, 405 on POST, 200 with the right token.
 - **Authorization matrix**: every route in §13.3 marked admin-only returns 403 for a reader and succeeds for an admin; readers' Inertia props have `can.manage = false`.
 - Inertia pages: `assertInertia` on component name and key props for each page.

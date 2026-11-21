@@ -163,23 +163,18 @@ A checker is a class, a registry entry and tests (SPEC §4).
 
 ## Installing the versions collector on a server
 
-Sextant never logs in to servers. An hourly root cron writes `/var/lib/sextant/versions.json`; a small `versions.php` hands it to Sextant over HTTPS with a token (SPEC §11). It needs Linux with bash; it can't run on Windows.
+Sextant never logs in to servers. An hourly root cron writes `/var/lib/sextant/versions.json` (readable by every user, so any PHP-FPM pool can serve it); a small `versions.php` hands it to Sextant over HTTPS with a token (SPEC §11). It needs Linux with bash; it can't run on Windows.
 
-1. In Sextant: **Servers → the server → Edit → Software versions**. Generate a token and copy it if you need it (it's shown once); enter the endpoint URL, e.g. `https://web02.media24.si/.sextant/versions.php`, and save.
-2. Download **sextant-collect.sh** and **versions.php** from the same section.
-3. On the server, as root:
+1. In Sextant: **Servers → the server → Edit → Software versions**. Enter the endpoint URL, e.g. `https://web02.media24.si/.sextant/versions.php`, and save.
+2. **Copy install command** and paste it on the server (it makes a token if there's none):
 
     ```bash
-    install -m 0755 sextant-collect.sh /usr/local/bin/sextant-collect
-    echo '17 * * * * root /usr/local/bin/sextant-collect' > /etc/cron.d/sextant
-    /usr/local/bin/sextant-collect
-    install -d -m 0755 /var/www/sextant
-    install -m 0644 versions.php /var/www/sextant/versions.php
+    curl -fsSL 'https://sextant…/servers/12/install.sh?expires=…&signature=…' | sudo bash
     ```
 
-    The file is group-readable by `www-data`; set `SEXTANT_GROUP` at the top of the script if PHP runs as another group.
+    The link works for 30 minutes. The installer writes `/usr/local/bin/sextant-collect`, `/etc/cron.d/sextant` (only if missing) and `/var/www/sextant/versions.php`, runs the collector once, and prints the nginx block with the server's PHP-FPM socket. The server must reach Sextant over HTTPS.
 
-4. In the server's HTTPS nginx site, then `nginx -t && systemctl reload nginx`:
+3. Add that block to the server's HTTPS nginx site, then `nginx -t && systemctl reload nginx`:
 
     ```nginx
     location = /.sextant/versions.php {
@@ -189,9 +184,15 @@ Sextant never logs in to servers. An hourly root cron writes `/var/lib/sextant/v
     }
     ```
 
-5. Back in Sextant: **Test connection**. It shows what the file holds, or why it failed: 401 = wrong token or old `versions.php`; 503 = the collector hasn't written the file yet; timeout = nginx or the firewall.
+4. Back in Sextant: **Test connection**. It shows what the file holds, or why it failed: 401 = wrong token or old `versions.php`; 503 = the collector hasn't written the file yet; timeout = nginx or the firewall.
+
+No network path from the server to Sextant? **Install by hand instead** (same section) has both files to download and the commands.
 
 Saving the endpoint URL with a token attaches the `server.versions` monitor (daily). **Refresh now** on the server page reads it immediately.
+
+## Updating the collector
+
+When the collector or `versions.php` changes, `SEXTANT_COLLECTOR_VERSION` in `resources/collector/sextant-collect.sh` goes up. Servers that read versions with an older one show **Collector outdated** on their page, and the Servers list gets a **Collector outdated** filter. Click **Copy update command** and run it on the server: it's the same installer, and it leaves an edited cron alone.
 
 ---
 
@@ -200,7 +201,7 @@ Saving the endpoint URL with a token attaches the `server.versions` monitor (dai
 Do this if the token may have leaked, or when someone with access leaves.
 
 1. **Edit server → Software versions → Rotate token.** The old token stops working at once.
-2. Download **versions.php** again (it holds the new token's hash) and replace `/var/www/sextant/versions.php` on the server.
+2. **Copy install command** and run it on the server: it replaces `versions.php` with one holding the new token's hash.
 3. **Test connection**, then **Refresh now**.
 
 Until step 2, the versions check is Unknown ("Token rejected (401)"). That doesn't open an incident, and the last versions stay on the page. The change feed records the rotation without the token.
