@@ -11,7 +11,9 @@ import { formatDateTime } from '@/lib/datetime';
 /*
  * Software versions on a server page (SPEC §13.6, prototype ServerDetail):
  * installed and package versions against the minimums, when they were read,
- * the endpoint and masked token, downloads, Test connection and Refresh.
+ * and Refresh. Until versions have been read it also shows the endpoint,
+ * masked token, downloads and Test connection; after that those live only on
+ * the edit page.
  */
 const props = defineProps<{
     serverId: number;
@@ -167,7 +169,10 @@ function refresh(): void {
             </tbody>
         </table>
 
-        <div class="flex flex-col gap-3 border-t bg-muted/20 px-5 py-4 text-sm">
+        <div
+            v-if="panel.versions.length === 0"
+            class="flex flex-col gap-3 border-t bg-muted/20 px-5 py-4 text-sm"
+        >
             <template v-if="panel.configured">
                 <p>
                     <span class="text-muted-foreground">Versions endpoint</span
