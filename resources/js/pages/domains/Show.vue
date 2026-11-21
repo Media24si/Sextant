@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage, usePoll } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
+import RunChecksController from '@/actions/App/Http/Controllers/RunChecksController';
 import ActivityList from '@/components/app/ActivityList.vue';
+import MonitorList from '@/components/app/MonitorList.vue';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import EmptyState from '@/components/app/EmptyState.vue';
@@ -24,7 +26,26 @@ const props = defineProps<{
     domain: App.Data.DomainRowData;
     notes: string | null;
     activity: App.Data.ActivityItemData[];
+    monitors: App.Data.Monitors.MonitorRowData[];
+    checker_options: App.Data.Monitors.CheckerOptionData[];
 }>();
+
+// Results arrive while the page is open (SPEC §13.7).
+usePoll(10_000, { only: ['monitors', 'activity', 'domain'] });
+
+const runningChecks = ref(false);
+
+function runChecks(): void {
+    router.post(
+        RunChecksController.domain(props.domain.id).url,
+        {},
+        {
+            preserveScroll: true,
+            onStart: () => (runningChecks.value = true),
+            onFinish: () => (runningChecks.value = false),
+        },
+    );
+}
 
 const page = usePage();
 
@@ -107,6 +128,12 @@ function destroy(): void {
                 v-if="page.props.can.manage && !domain.deleted"
                 class="flex flex-wrap gap-2"
             >
+                <Button
+                    variant="outline"
+                    :disabled="runningChecks || monitors.length === 0"
+                    @click="runChecks"
+                    >Run checks now</Button
+                >
                 <Button variant="outline" @click="confirmingDelete = true"
                     >Delete</Button
                 >
@@ -178,6 +205,12 @@ function destroy(): void {
                 </ul>
                 <EmptyState v-else title="No sites on this domain yet" />
             </section>
+
+            <MonitorList
+                :monitors="monitors"
+                :checker-options="checker_options"
+                :resource="{ type: 'domain', id: domain.id }"
+            />
 
             <section
                 class="rounded-xl border bg-card"

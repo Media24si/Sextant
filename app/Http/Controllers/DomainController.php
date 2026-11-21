@@ -16,6 +16,7 @@ use App\Models\Activity;
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
+use App\Monitoring\MonitorProps;
 use App\Rules\RegistrableDomain;
 use App\Support\Hostname;
 use App\Support\TableQuery;
@@ -79,6 +80,7 @@ class DomainController extends Controller
         $siteIds = $domain->sites()->withTrashed()->pluck('id');
 
         return Inertia::render('domains/Show', [
+            ...MonitorProps::for($domain),
             'domain' => DomainRowData::fromModel($domain),
             'notes' => $domain->notes,
             'activity' => Activity::query()

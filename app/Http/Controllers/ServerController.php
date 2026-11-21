@@ -19,6 +19,7 @@ use App\Models\Choice;
 use App\Models\Server;
 use App\Models\ServerAddress;
 use App\Models\Site;
+use App\Monitoring\MonitorProps;
 use App\Support\ReturnTo;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
@@ -77,6 +78,7 @@ class ServerController extends Controller
         $sites = $server->sites()->with(['frontService', 'server'])->orderBy('hostname')->get();
 
         return Inertia::render('servers/Show', [
+            ...MonitorProps::for($server),
             'server' => ServerData::fromModel($server),
             'traffic' => $this->traffic(array_values($sites->all())),
             'sites' => $sites->take(self::SITES_SHOWN)->map(ServedSiteData::fromModel(...))->values(),

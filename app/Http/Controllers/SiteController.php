@@ -18,6 +18,7 @@ use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
 use App\Models\Site;
+use App\Monitoring\MonitorProps;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -90,6 +91,7 @@ class SiteController extends Controller
         $site->load(['domain' => fn ($query) => $query->withTrashed(), 'frontService', 'server']);
 
         return Inertia::render('sites/Show', [
+            ...MonitorProps::for($site),
             'site' => SiteData::fromModel($site),
             'activity' => Activity::query()
                 ->where('subject_type', 'site')

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage, usePoll } from '@inertiajs/vue3';
 import { ArrowRight } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
+import RunChecksController from '@/actions/App/Http/Controllers/RunChecksController';
 import ActivityList from '@/components/app/ActivityList.vue';
+import MonitorList from '@/components/app/MonitorList.vue';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import EmptyState from '@/components/app/EmptyState.vue';
@@ -19,7 +21,26 @@ const props = defineProps<{
     sites: App.Data.ServedSiteData[];
     sites_total: number;
     activity: App.Data.ActivityItemData[];
+    monitors: App.Data.Monitors.MonitorRowData[];
+    checker_options: App.Data.Monitors.CheckerOptionData[];
 }>();
+
+// Results arrive while the page is open (SPEC §13.7).
+usePoll(10_000, { only: ['monitors', 'activity', 'server'] });
+
+const runningChecks = ref(false);
+
+function runChecks(): void {
+    router.post(
+        RunChecksController.server(props.server.id).url,
+        {},
+        {
+            preserveScroll: true,
+            onStart: () => (runningChecks.value = true),
+            onFinish: () => (runningChecks.value = false),
+        },
+    );
+}
 
 const page = usePage();
 
@@ -139,6 +160,12 @@ function restore(): void {
                 v-if="page.props.can.manage && !server.deleted"
                 class="flex flex-wrap gap-2"
             >
+                <Button
+                    variant="outline"
+                    :disabled="runningChecks || monitors.length === 0"
+                    @click="runChecks"
+                    >Run checks now</Button
+                >
                 <Button variant="outline" @click="confirmingDelete = true">
                     Delete
                 </Button>
@@ -287,6 +314,12 @@ function restore(): void {
                 </div>
                 <EmptyState v-else title="No sites yet" />
             </section>
+
+            <MonitorList
+                :monitors="monitors"
+                :checker-options="checker_options"
+                :resource="{ type: 'server', id: server.id }"
+            />
 
             <section
                 class="rounded-xl border bg-card"

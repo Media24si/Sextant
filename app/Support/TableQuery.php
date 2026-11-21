@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Closure;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\PaginatedDataCollection;
@@ -20,6 +21,7 @@ class TableQuery
      * @param  QueryBuilder<*>  $query  with allowedFilters, allowedSorts and defaultSort applied
      * @param  class-string<Data>  $rowData
      * @param  list<string>  $filterNames  the allowed filter names, echoed back to the page
+     * @param  (Closure(mixed): Data)|null  $map  builds each row when `$rowData::from()` isn't enough
      * @return array{rows: PaginatedDataCollection<array-key, Data>, filters: array<string, string>, sort: string}
      */
     public static function props(
@@ -28,12 +30,16 @@ class TableQuery
         string $rowData,
         array $filterNames,
         string $defaultSort,
+        ?Closure $map = null,
     ): array {
+        $page = $query->paginate(self::PER_PAGE)->withQueryString();
+
+        if ($map !== null) {
+            $page->through($map);
+        }
+
         return [
-            'rows' => $rowData::collect(
-                $query->paginate(self::PER_PAGE)->withQueryString(),
-                PaginatedDataCollection::class,
-            ),
+            'rows' => $rowData::collect($page, PaginatedDataCollection::class),
             'filters' => self::filters($request, $filterNames),
             'sort' => self::sort($request, $defaultSort),
         ];

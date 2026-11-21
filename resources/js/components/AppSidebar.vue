@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import {
     Activity,
+    Gauge,
     Globe,
     LayoutGrid,
     List,
@@ -16,6 +17,7 @@ import ActivityController from '@/actions/App/Http/Controllers/ActivityControlle
 import ChoiceController from '@/actions/App/Http/Controllers/ChoiceController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
+import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
 import UserController from '@/actions/App/Http/Controllers/UserController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import AppLogo from '@/components/AppLogo.vue';
@@ -51,6 +53,7 @@ const mainNavItems = computed<SidebarNavItem[]>(() => [
         icon: Globe,
         count: page.props.nav?.domains,
     },
+    { title: 'Monitors', href: MonitorController.index(), icon: Gauge },
     { title: 'Incidents', icon: TriangleAlert },
     { title: 'Activity', href: ActivityController.index(), icon: Activity },
 ]);

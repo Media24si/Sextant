@@ -4,6 +4,7 @@ use App\Enums\ChoiceList;
 use App\Models\Choice;
 use App\Models\Domain;
 use App\Models\ExternalService;
+use App\Models\Monitor;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\User;
@@ -45,6 +46,13 @@ $adminRoutes = [
     'apply serving path' => ['put', 'sites.path', fn () => ['site' => Site::factory()->create()]],
     'import page' => ['get', 'sites.import', null],
     'import a URL' => ['post', 'sites.import.store', null],
+    'add monitor' => ['post', 'monitors.store', null],
+    'edit monitor' => ['put', 'monitors.update', fn () => ['monitor' => Monitor::factory()->create()]],
+    'delete monitor' => ['delete', 'monitors.destroy', fn () => ['monitor' => Monitor::factory()->create()]],
+    'run monitor' => ['post', 'monitors.run', fn () => ['monitor' => Monitor::factory()->create()]],
+    'run server checks' => ['post', 'servers.run-checks', fn () => ['server' => Server::factory()->create()]],
+    'run domain checks' => ['post', 'domains.run-checks', fn () => ['domain' => Domain::factory()->create()]],
+    'run site checks' => ['post', 'sites.run-checks', fn () => ['site' => Site::factory()->create()]],
     'add list entry' => ['post', 'lists.store', null],
     'rename list entry' => ['put', 'lists.update', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'move list entry' => ['post', 'lists.move', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],

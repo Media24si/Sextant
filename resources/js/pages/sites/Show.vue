@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage, usePoll } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
+import RunChecksController from '@/actions/App/Http/Controllers/RunChecksController';
 import ActivityList from '@/components/app/ActivityList.vue';
+import MonitorList from '@/components/app/MonitorList.vue';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import RedetectSiteDialog from '@/components/app/RedetectSiteDialog.vue';
@@ -22,7 +24,26 @@ const props = defineProps<{
     activity: App.Data.ActivityItemData[];
     front_services: App.Data.OptionData[];
     servers: App.Data.OptionData[];
+    monitors: App.Data.Monitors.MonitorRowData[];
+    checker_options: App.Data.Monitors.CheckerOptionData[];
 }>();
+
+// Results arrive while the page is open (SPEC §13.7).
+usePoll(10_000, { only: ['monitors', 'activity', 'site'] });
+
+const runningChecks = ref(false);
+
+function runChecks(): void {
+    router.post(
+        RunChecksController.site(props.site.id).url,
+        {},
+        {
+            preserveScroll: true,
+            onStart: () => (runningChecks.value = true),
+            onFinish: () => (runningChecks.value = false),
+        },
+    );
+}
 
 const redetecting = ref(false);
 
@@ -115,6 +136,12 @@ function destroy(): void {
                 v-if="page.props.can.manage && !site.deleted"
                 class="flex flex-wrap gap-2"
             >
+                <Button
+                    variant="outline"
+                    :disabled="runningChecks || monitors.length === 0"
+                    @click="runChecks"
+                    >Run checks now</Button
+                >
                 <Button variant="outline" @click="confirmingDelete = true"
                     >Delete</Button
                 >
@@ -148,19 +175,13 @@ function destroy(): void {
         </section>
 
         <div class="grid items-start gap-6 lg:grid-cols-[3fr_2fr]">
+            <MonitorList
+                :monitors="monitors"
+                :checker-options="checker_options"
+                :resource="{ type: 'site', id: site.id }"
+            />
             <section
-                v-if="site.notes"
-                class="rounded-xl border bg-card p-6"
-                aria-labelledby="notes"
-            >
-                <h2 id="notes" class="text-lg font-semibold">Notes</h2>
-                <p class="mt-2 text-sm whitespace-pre-line">{{ site.notes }}</p>
-            </section>
-            <section
-                :class="[
-                    'rounded-xl border bg-card',
-                    site.notes ? '' : 'lg:col-span-2',
-                ]"
+                class="rounded-xl border bg-card"
                 aria-labelledby="changes"
             >
                 <h2 id="changes" class="px-6 pt-5 pb-4 text-lg font-semibold">
@@ -169,6 +190,14 @@ function destroy(): void {
                 <div class="border-t px-6">
                     <ActivityList :items="activity" />
                 </div>
+            </section>
+            <section
+                v-if="site.notes"
+                class="rounded-xl border bg-card p-6 lg:col-span-2"
+                aria-labelledby="notes"
+            >
+                <h2 id="notes" class="text-lg font-semibold">Notes</h2>
+                <p class="mt-2 text-sm whitespace-pre-line">{{ site.notes }}</p>
             </section>
         </div>
 

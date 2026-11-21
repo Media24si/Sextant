@@ -4,6 +4,8 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ChoiceController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\ExternalServiceController;
+use App\Http\Controllers\MonitorController;
+use App\Http\Controllers\RunChecksController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\SiteController;
@@ -20,6 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
     Route::get('settings/lists', [ChoiceController::class, 'index'])->name('lists.index');
     Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
+    Route::get('monitors', [MonitorController::class, 'index'])->name('monitors.index');
     Route::get('search', SearchController::class)->name('search');
 
     Route::middleware('admin')->group(function () {
@@ -57,6 +60,14 @@ Route::middleware('auth')->group(function () {
         Route::post('sites/{site}/detect-again', [SiteController::class, 'detectAgain'])->name('sites.detect-again');
         Route::put('sites/{site}/path', [SiteController::class, 'updatePath'])->name('sites.path');
 
+        Route::post('monitors', [MonitorController::class, 'store'])->name('monitors.store');
+        Route::put('monitors/{monitor}', [MonitorController::class, 'update'])->name('monitors.update');
+        Route::delete('monitors/{monitor}', [MonitorController::class, 'destroy'])->name('monitors.destroy');
+        Route::post('monitors/{monitor}/run', [MonitorController::class, 'run'])->name('monitors.run');
+        Route::post('servers/{server}/run-checks', [RunChecksController::class, 'server'])->name('servers.run-checks');
+        Route::post('domains/{domain}/run-checks', [RunChecksController::class, 'domain'])->name('domains.run-checks');
+        Route::post('sites/{site}/run-checks', [RunChecksController::class, 'site'])->name('sites.run-checks');
+
         Route::post('settings/lists', [ChoiceController::class, 'store'])->name('lists.store');
         Route::put('settings/lists/{choice}', [ChoiceController::class, 'update'])->name('lists.update');
         Route::post('settings/lists/{choice}/move', [ChoiceController::class, 'move'])->name('lists.move');
@@ -71,6 +82,7 @@ Route::middleware('auth')->group(function () {
     Route::get('servers/{server}', [ServerController::class, 'show'])->withTrashed()->name('servers.show');
     Route::get('domains/{domain}', [DomainController::class, 'show'])->withTrashed()->name('domains.show');
     Route::get('sites/{site}', [SiteController::class, 'show'])->withTrashed()->name('sites.show');
+    Route::get('monitors/{monitor}', [MonitorController::class, 'show'])->name('monitors.show');
 });
 
 require __DIR__.'/settings.php';

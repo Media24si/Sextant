@@ -140,8 +140,8 @@
 
 ### Defaults and UI
 - [x] **P3.17** Default monitors on create with `only_if` conditions (`PortIsOpen`, `UsesHttps`); wire Phase 2's hook; spread first runs on import; backfill command for existing resources (§4.4).
-- [ ] **P3.18** Monitors UI: tab on server, domain and site pages; global Monitors list (filters: checker, status, enabled, muted, pending); drawer with effective settings, state and last 100 runs; form with `MonitorArgumentsForm` (empty = inherit, inherited value as placeholder); Run now; §6.4 effects.
-- [ ] **P3.19** Tests: StateMachine table tests (no incidents yet), settings resolution, registry validation, `RunMonitor` end to end with `FakeChecker`, dispatch double-claim prevention, canary, `ChangeDetector`, `site.path` situations.
+- [x] **P3.18** Monitors UI: tab on server, domain and site pages; global Monitors list (filters: checker, status, enabled, muted, pending); drawer with effective settings, state and last 100 runs; form with `MonitorArgumentsForm` (empty = inherit, inherited value as placeholder); Run now; §6.4 effects.
+- [x] **P3.19** Tests: StateMachine table tests (no incidents yet), settings resolution, registry validation, `RunMonitor` end to end with `FakeChecker`, dispatch double-claim prevention, canary, `ChangeDetector`, `site.path` situations.
 - [ ] **P3.20** **[HUMAN]** Before go-live: Sextant's IP in fail2ban `ignoreip` on monitored servers and allowlisted in Cloudflare/WAF (§16).
 
 - [ ] **Exit P3** **[HUMAN]**: all default monitors run for 48 h with no stuck or duplicate jobs in Horizon; 10 results spot-checked by hand.
@@ -273,6 +273,10 @@ Found in Phase 0 (2026-11-20):
 - [x] `.eu` has no RDAP service and EURid's WHOIS publishes no expiry date (`docs/spikes/rdap.md`). Resolved: Media24 uses `.si`, `.com`, `.me`, `.work` and `.dev`, no `.eu` (`docs/spikes/tlds.md`).
 - [ ] The Sextant server has no IPv6 (`docs/spikes/icmp.md`: "Address family not supported by protocol"). SPEC assumes Sextant can reach IPv6 addresses (`server.tcp`/`server.ping` with `-6`, §9.1, §9.2, §9.0). Until the server gets IPv6, any check that has to connect over IPv6 must throw CheckCouldNotRun ("Sextant has no IPv6 connectivity") and stay Unknown, and default monitors should target the server's IPv4 address. Confirm, or enable IPv6 on the Sextant server.
 - [x] SPEC §4.2 puts `Status` in `App\Checks`; it lives in `App\Enums\Status` with the other enums. `CheckResult` and the checkers (P3.2) import it from there.
+- [x] §13.3 has no route for the monitor drawer's data. Added `GET /monitors/{monitor}` (JSON, readable by everyone, like the pages it opens from).
+- [x] §13.4's sidebar has no Monitors item, but §13.6 has a global Monitors page. Added "Monitors" after Domains.
+- [x] §13.3 lists `POST /servers/{server}/run-checks` only; §13.6 gives the site page a "run checks" action too. Added `run-checks` for sites and domains as well.
+- [x] §4.6 maps `select` to shadcn `Select`, which can't hold an empty value. `MonitorArgumentsForm` uses a native select so "Default (…)" (inherit) can be chosen, like the other forms' selects.
 - [x] P1.1's morph map lists `monitor`, `incident` and `minimum_version`, whose models arrive in Phases 3, 4 and 7. `Relation::enforceMorphMap()` needs real classes, so each joins the map with its model.
 - [x] The choices seeds (§3.4) and the Cloudflare row (§3.5) are reference data that production needs, but deploys run `migrate`, not `db:seed`. Decision: the create-table migrations insert them.
 - [x] P1.5's "IP not inside any external service's ranges" can only check admin-entered `ranges` until `proxies:refresh` caches the published ranges (P2.3/P2.4). `IpAddressIsFree` has a `// SPEC:` note; P2.3 extends it.

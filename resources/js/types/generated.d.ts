@@ -301,6 +301,82 @@ message: string,
 site_id: number | null,
 };
 }
+namespace Monitors {
+export type ArgumentSchemaData = {
+type: string,
+name: string,
+label: string,
+help: string | null,
+nullable: boolean,
+options: Record<string, string> | null,
+default: any,
+};
+export type CheckerOptionData = {
+key: string,
+name: string,
+interval: number,
+failures_before_incident: number,
+successes_before_resolve: number,
+arguments: App.Data.Monitors.ArgumentSchemaData[],
+};
+export type MonitorDetailData = {
+monitor: App.Data.Monitors.MonitorRowData,
+settings: App.Data.Monitors.MonitorSettingData[],
+consecutive_failures: number,
+consecutive_successes: number,
+consecutive_unknowns: number,
+last_definitive_at: string | null,
+stale_at: string | null,
+runs: App.Data.Monitors.MonitorRunData[],
+form: App.Data.Monitors.MonitorFormData,
+checker: App.Data.Monitors.CheckerOptionData | null,
+};
+export type MonitorFormData = {
+id: number | null,
+monitorable_type: string,
+monitorable_id: number,
+checker: string,
+label: string | null,
+arguments: Record<string, any>,
+interval_minutes: number | null,
+failures_before_incident: number | null,
+successes_before_resolve: number | null,
+enabled: boolean,
+};
+export type MonitorResourceData = {
+type: string,
+id: number,
+name: string,
+};
+export type MonitorRowData = {
+id: number,
+checker: string,
+name: string,
+resource: App.Data.Monitors.MonitorResourceData,
+enabled: boolean,
+muted_until: string | null,
+status: App.Enums.Status,
+pending: boolean,
+last_result_status: App.Enums.Status | null,
+message: string | null,
+duration_ms: number | null,
+checked_at: string | null,
+next_run_at: string | null,
+interval: number,
+};
+export type MonitorRunData = {
+id: number,
+status: App.Enums.Status,
+duration_ms: number,
+message: string | null,
+checked_at: string,
+};
+export type MonitorSettingData = {
+label: string,
+value: string,
+inherited: boolean,
+};
+}
 }
 namespace Enums {
 export type ActivityCategory = 'status' | 'inventory' | 'detected';
