@@ -111,7 +111,7 @@ test('a site on a new domain creates the domain too', function () {
 
     expect(Site::query()->sole()->domain_id)->toBe($domain->id);
     Event::assertDispatched(DomainAdded::class, fn (DomainAdded $event) => $event->domain->is($domain)
-        && collect($event->monitors)->pluck('checker')->all() === ['domain.expiration']);
+        && collect($event->monitors)->pluck('checker')->all() === ['domain.expiration', 'domain.nameservers']);
 });
 
 test('the www site can be added in the same save', function () {
@@ -129,7 +129,8 @@ test('the www site can be added in the same save', function () {
 
     expect($www->servingPath()->toArray())->toBe(['front' => 'Varnish', 'backend' => 'web02'])
         ->and($www->description)->toBeNull();
-    Event::assertDispatched(SiteAdded::class, fn (SiteAdded $event) => $event->site->hostname === 'svet24.si');
+    Event::assertDispatched(SiteAdded::class, fn (SiteAdded $event) => $event->site->hostname === 'svet24.si'
+        && collect($event->monitors)->firstWhere('checker', 'site.redirect')->arguments === ['expected_target' => 'https://www.svet24.si/']);
     Event::assertDispatchedTimes(SiteAdded::class, 2);
 });
 

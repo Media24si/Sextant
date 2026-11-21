@@ -34,11 +34,11 @@ test('Add site attaches the site and domain defaults and runs them at once', fun
 
     $site = Site::query()->sole();
 
-    expect(monitorsOf($site))->toBe(['site.http', 'site.ssl', 'site.path'])
+    expect(monitorsOf($site))->toBe(['site.http', 'site.ssl', 'site.path', 'site.redirect'])
         ->and($site->monitors()->where('checker', 'site.http')->first()->arguments)->toBe(['path' => '/novice'])
-        ->and(monitorsOf($site->domain))->toBe(['domain.expiration'])
+        ->and(monitorsOf($site->domain))->toBe(['domain.expiration', 'domain.nameservers'])
         ->and($site->monitors()->first()->state)->not->toBeNull();
-    Queue::assertPushed(RunMonitor::class, 4);
+    Queue::assertPushed(RunMonitor::class, 6);
 });
 
 test('an http site gets no certificate check', function () {
@@ -46,7 +46,7 @@ test('an http site gets no certificate check', function () {
 
     $this->actingAs($this->admin)->post(route('sites.store'), ['hostname' => 'svet24.si', 'scheme' => 'http', 'path' => '/']);
 
-    expect(monitorsOf(Site::query()->sole()))->toBe(['site.http', 'site.path']);
+    expect(monitorsOf(Site::query()->sole()))->toBe(['site.http', 'site.path', 'site.redirect']);
 });
 
 test('default monitors do not reach the change feed', function () {
@@ -65,7 +65,7 @@ test('imports spread their first runs instead of running everything at once', fu
 
     $nextRuns = Monitor::query()->pluck('next_run_at');
 
-    expect($nextRuns)->toHaveCount(4)
+    expect($nextRuns)->toHaveCount(6)
         ->and($nextRuns->every(fn ($at) => $at->between(now()->subSecond(), now()->addMinutes(10))))->toBeTrue();
     Queue::assertNothingPushed();
 });

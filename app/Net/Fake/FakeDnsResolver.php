@@ -19,6 +19,9 @@ class FakeDnsResolver implements DnsResolver
     /** @var list<string> */
     public array $resolved = [];
 
+    /** @var array<string, SoaRecord|null> "domain@nameserver" => answer */
+    private array $soa = [];
+
     public static function install(): self
     {
         $fake = new self;
@@ -77,8 +80,18 @@ class FakeDnsResolver implements DnsResolver
         return $this->nameservers[$domain] ?? [];
     }
 
+    /**
+     * The SOA serial a nameserver gives for a zone; null = it doesn't answer.
+     */
+    public function soaAnswer(string $domain, string $nameserver, ?int $serial): self
+    {
+        $this->soa["{$domain}@{$nameserver}"] = $serial === null ? null : new SoaRecord($serial, $nameserver);
+
+        return $this;
+    }
+
     public function soa(string $domain, string $nameserver): ?SoaRecord
     {
-        return null;
+        return $this->soa["{$domain}@{$nameserver}"] ?? null;
     }
 }

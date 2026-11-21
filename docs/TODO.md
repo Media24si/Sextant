@@ -207,11 +207,11 @@
 
 ## Phase 8 — Remaining checkers (§18)
 
-- [ ] **P8.1** `domain.nameservers` (§9.4).
-- [ ] **P8.2** `site.redirect` (§9.8); detection already sets `expected_target`.
-- [ ] **P8.3** `server.ping` (§9.2) with `RespondsToPing`.
-- [ ] **P8.4** Unit tests for each with fakes.
-- [ ] **P8.5** `monitors:sync-defaults --checker=…` for each (dry run first).
+- [x] **P8.1** `domain.nameservers` (§9.4).
+- [x] **P8.2** `site.redirect` (§9.8); detection already sets `expected_target`.
+- [x] **P8.3** `server.ping` (§9.2) with `RespondsToPing`.
+- [x] **P8.4** Unit tests for each with fakes.
+- [x] **P8.5** `monitors:sync-defaults --checker=…` for each (dry run first).
 - [ ] **Exit P8**: every checker in GOAL's table runs on existing resources.
 
 ---
@@ -293,6 +293,10 @@ Found in Phase 0 (2026-11-20):
 - [x] §11.4 "Test connection" and "Generate token" answer with JSON (the token appears once in the browser and is never sent again). Rotating asks for confirmation, since the old versions.php stops working.
 - [x] §11.6 doesn't say how an unparseable version compares. Decision: it's never "below" (it can't be judged); the server page shows it as read.
 - [x] §13.6 "Software vs minimum" lists each software and PHP branch seen on servers or with a minimum; rows without a minimum say "not set", as in the prototype. Minimum versions is in the Admin group of the sidebar, but readers can open the page (CRUD is admin only).
+- [x] §9.2 pings the primary address, but the Sextant server can't ping over IPv6 (docs/spikes/icmp.md). Decision: `server.ping` and `RespondsToPing` use the primary address when it's IPv4, otherwise the server's first IPv4 address; with none, the check is Unknown.
+- [x] §9.4 "Error when the NS lookup fails": an empty NS answer (NXDOMAIN, no records) is an Error; a resolver timeout is Sextant's failure and stays Unknown (§9.0). When the registry's list can't be read (no RDAP, rate limit), the set comparison is skipped instead of failing.
+- [x] §9.8 `max_redirects` is limited to 1–5 because `HttpProbe` follows at most 5 hops; longer chains report "More than N redirects".
+- [x] With `site.redirect` registered (P8.2), detection proposes it again with `expected_target`, so sites added from now on keep their redirect target. Sites added between Phase 3 and now got `site.redirect` through `monitors:sync-defaults` without one (it warns only when the target is on another domain).
 - [x] P1.1's morph map lists `monitor`, `incident` and `minimum_version`, whose models arrive in Phases 3, 4 and 7. `Relation::enforceMorphMap()` needs real classes, so each joins the map with its model.
 - [x] The choices seeds (§3.4) and the Cloudflare row (§3.5) are reference data that production needs, but deploys run `migrate`, not `db:seed`. Decision: the create-table migrations insert them.
 - [x] P1.5's "IP not inside any external service's ranges" can only check admin-entered `ranges` until `proxies:refresh` caches the published ranges (P2.3/P2.4). `IpAddressIsFree` has a `// SPEC:` note; P2.3 extends it.
