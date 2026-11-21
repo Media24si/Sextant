@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Data\AuthUserData;
 use App\Models\Domain;
+use App\Models\Incident;
 use App\Models\Server;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -50,7 +51,11 @@ class HandleInertiaRequests extends Middleware
                 'manage' => $user?->can('manage') ?? false,
             ],
             // Sidebar counts (SPEC §13.4); more join as their pages arrive.
-            'nav' => fn (): ?array => $user ? ['servers' => Server::query()->count(), 'domains' => Domain::query()->count()] : null,
+            'nav' => fn (): ?array => $user ? [
+                'servers' => Server::query()->count(),
+                'domains' => Domain::query()->count(),
+                'incidents' => Incident::query()->open()->roots()->count(),
+            ] : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

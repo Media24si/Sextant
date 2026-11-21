@@ -12,6 +12,9 @@ final readonly class StateTransition
         public Status $status,
         /** Check again in a minute to confirm (§5.1). */
         public bool $recheckSoon,
+        public bool $incidentOpened = false,
+        /** The first failure of a streak (§6.5 dependency check). */
+        public bool $firstFailure = false,
     ) {}
 
     public function statusChanged(): bool

@@ -5,10 +5,13 @@ namespace App\Observers;
 use App\Activity\ActivityRecorder;
 use App\Checks\CheckerRegistry;
 use App\Enums\ActivityCategory;
+use App\Enums\IncidentResolution;
 use App\Models\Monitor;
+use App\Monitoring\IncidentManager;
 
 /**
- * Admin changes to monitors (SPEC §8.2). Entries are about the resource, with
+ * Admin changes to monitors (SPEC §8.2); disabling or deleting one resolves
+ * its open incident (§6.4). Entries are about the resource, with
  * the monitor id, so they show on its page. Default monitors and the runner
  * write quietly and never get here.
  */
@@ -28,6 +31,10 @@ class MonitorObserver extends InventoryObserver
     {
         if ($monitor->wasChanged('enabled')) {
             $this->recordFor($monitor, $monitor->enabled ? 'monitor.enabled' : 'monitor.disabled', $monitor->enabled ? 'enabled' : 'disabled');
+
+            if (! $monitor->enabled) {
+                app(IncidentManager::class)->resolveFor([$monitor], IncidentResolution::MonitorDisabled);
+            }
         }
 
         if ($monitor->wasChanged('muted_until')) {
@@ -44,6 +51,7 @@ class MonitorObserver extends InventoryObserver
     public function deleted(Monitor $monitor): void
     {
         $this->recordFor($monitor, 'monitor.deleted', 'deleted');
+        app(IncidentManager::class)->resolveFor([$monitor], IncidentResolution::MonitorDeleted);
     }
 
     /**

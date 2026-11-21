@@ -21,6 +21,9 @@ class MonitorRowData extends Data
         public ?string $muted_until,
         public Status $status,
         public bool $pending,
+        /** Incident open and passing again (§6.1). */
+        public bool $recovering,
+        public ?int $open_incident_id,
         public ?Status $last_result_status,
         public ?string $message,
         public ?int $duration_ms,

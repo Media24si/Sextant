@@ -55,6 +55,8 @@ class MonitorPresenter
             muted_until: $monitor->isMuted() ? $monitor->muted_until?->toIso8601String() : null,
             status: $state->status ?? Status::Unknown,
             pending: $state?->isPending() === true,
+            recovering: $monitor->openIncident !== null && ($state->consecutive_successes ?? 0) > 0,
+            open_incident_id: $monitor->openIncident?->id,
             last_result_status: $state?->last_result_status,
             message: $state?->message,
             duration_ms: $state?->duration_ms,
@@ -72,7 +74,7 @@ class MonitorPresenter
     public function rowsFor(Model&Monitorable $resource): array
     {
         return array_values($resource->monitors()
-            ->with(['state', 'monitorable'])
+            ->with(['state', 'monitorable', 'openIncident'])
             ->orderByDesc('enabled')
             ->orderBy('checker')
             ->orderBy('label')
@@ -83,7 +85,7 @@ class MonitorPresenter
 
     public function detail(Monitor $monitor): MonitorDetailData
     {
-        $monitor->loadMissing(['state', 'monitorable']);
+        $monitor->loadMissing(['state', 'monitorable', 'openIncident']);
         $state = $monitor->state;
 
         return new MonitorDetailData(

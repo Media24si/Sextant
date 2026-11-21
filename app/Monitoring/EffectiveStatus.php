@@ -7,10 +7,8 @@ use App\Models\MonitorState;
 use Carbon\CarbonInterface;
 
 /**
- * A monitor's effective status (SPEC §6.1).
- *
- * SPEC: until incidents exist (Phase 4) there is never an open incident, so a
- * failing monitor stays OK and shows as Pending (§18 Phase 3).
+ * A monitor's effective status (SPEC §6.1): every non-OK status is backed by
+ * an open incident; a failure that hasn't opened one yet shows as Pending.
  */
 class EffectiveStatus
 {

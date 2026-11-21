@@ -2,7 +2,9 @@
 
 namespace App\Observers;
 
+use App\Enums\IncidentResolution;
 use App\Models\Domain;
+use App\Monitoring\IncidentManager;
 use App\Monitoring\MonitorEffects;
 
 class DomainObserver extends InventoryObserver
@@ -29,6 +31,7 @@ class DomainObserver extends InventoryObserver
     public function deleted(Domain $domain): void
     {
         $this->record('domain.deleted', $domain, "Domain {$domain->display_name} deleted");
+        app(IncidentManager::class)->resolveFor($domain->monitors()->get(), IncidentResolution::ResourceDeleted);
     }
 
     public function restored(Domain $domain): void

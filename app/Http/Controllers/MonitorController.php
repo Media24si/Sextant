@@ -35,7 +35,7 @@ class MonitorController extends Controller
 
     public function index(Request $request, CheckerRegistry $registry): Response
     {
-        $query = QueryBuilder::for(Monitor::query()->whereHasMorph('monitorable', '*')->with(['state', 'monitorable']), $request)
+        $query = QueryBuilder::for(Monitor::query()->whereHasMorph('monitorable', '*')->with(['state', 'monitorable', 'openIncident']), $request)
             ->allowedFilters(
                 AllowedFilter::callback('show', function (Builder $query, mixed $value): void {
                     match ($value) {

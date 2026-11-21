@@ -6,7 +6,10 @@ import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
 import RunChecksController from '@/actions/App/Http/Controllers/RunChecksController';
 import ActivityList from '@/components/app/ActivityList.vue';
+import IncidentList from '@/components/app/IncidentList.vue';
 import MonitorList from '@/components/app/MonitorList.vue';
+import MuteDialog from '@/components/app/MuteDialog.vue';
+import MuteController from '@/actions/App/Http/Controllers/MuteController';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import EmptyState from '@/components/app/EmptyState.vue';
@@ -28,10 +31,22 @@ const props = defineProps<{
     activity: App.Data.ActivityItemData[];
     monitors: App.Data.Monitors.MonitorRowData[];
     checker_options: App.Data.Monitors.CheckerOptionData[];
+    incidents: App.Data.Incidents.IncidentRowData[];
 }>();
 
 // Results arrive while the page is open (SPEC §13.7).
-usePoll(10_000, { only: ['monitors', 'activity', 'domain'] });
+usePoll(10_000, { only: ['monitors', 'incidents', 'activity', 'domain'] });
+
+const muting = ref(false);
+
+/** The earliest mute among this page's monitors, when every one is muted. */
+const mutedUntil = computed(() => {
+    const mutes = props.monitors.map((monitor) => monitor.muted_until);
+
+    return mutes.length > 0 && mutes.every(Boolean)
+        ? (mutes.sort()[0] ?? null)
+        : null;
+});
 
 const runningChecks = ref(false);
 
@@ -134,6 +149,12 @@ function destroy(): void {
                     @click="runChecks"
                     >Run checks now</Button
                 >
+                <Button
+                    variant="outline"
+                    :disabled="monitors.length === 0"
+                    @click="muting = true"
+                    >{{ mutedUntil ? 'Muted' : 'Mute until…' }}</Button
+                >
                 <Button variant="outline" @click="confirmingDelete = true"
                     >Delete</Button
                 >
@@ -206,6 +227,8 @@ function destroy(): void {
                 <EmptyState v-else title="No sites on this domain yet" />
             </section>
 
+            <IncidentList :incidents="incidents" />
+
             <MonitorList
                 :monitors="monitors"
                 :checker-options="checker_options"
@@ -234,5 +257,12 @@ function destroy(): void {
             The domain leaves the lists; its history stays and an admin can
             restore it. A domain that still has sites can't be deleted.
         </ConfirmDialog>
+        <MuteDialog
+            v-model:open="muting"
+            :url="MuteController.domain(domain.id).url"
+            :title="`Mute ${domain.name}`"
+            description="Its checks keep running and incidents still open, but nothing is sent and the status ignores them."
+            :muted-until="mutedUntil"
+        />
     </div>
 </template>

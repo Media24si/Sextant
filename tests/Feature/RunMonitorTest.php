@@ -188,7 +188,7 @@ it('marks stale monitors Unknown and refreshes resource statuses', function () {
     runIt();
 
     $this->travel(16)->minutes();
-    $this->artisan('sextant:sweep')->expectsOutputToContain('1 monitors went stale.')->assertSuccessful();
+    $this->artisan('sextant:sweep')->expectsOutputToContain('1 monitors went stale, 0 reminders.')->assertSuccessful();
 
     expect($this->monitor->state()->first()->status)->toBe(Status::Unknown)
         ->and($this->site->fresh()->status)->toBe(Status::Unknown);

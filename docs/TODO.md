@@ -150,16 +150,16 @@
 
 ## Phase 4 — Incidents (§18)
 
-- [ ] **P4.1** `incidents` (§3.11: `RESTRICT` FK, `server_id` snapshot of the backend, generated unique `open_monitor_id`, scopes) and `incident_events` (§3.12).
-- [ ] **P4.2** `IncidentManager`: open (duplicate-safe), escalate, de-escalate, acknowledge, reminder, resolve; events with `notify` flags (§6.3); `status` activities.
-- [ ] **P4.3** Complete the state machine (§6.2); pending and recovering flags.
-- [ ] **P4.4** Resolution on monitor disable/delete and resource delete. No manual resolve.
-- [ ] **P4.5** Acknowledge (admins only) from incident pages.
-- [ ] **P4.6** Muting (§6.6): monitor, resource, and server plus every site whose backend it is.
-- [ ] **P4.7** Dependency checks, adoption and grouping by backend server (§6.5).
-- [ ] **P4.8** Sweep additions: reminders, mute-ended, detached-child (§6.3, §6.5, §6.6).
-- [ ] **P4.9** Incidents list and page (§13.6); incident tabs on resource pages including the server roll-up via `server_id`.
-- [ ] **P4.10** Tests: full StateMachine tables, unique open incident under two concurrent runs, adoption by backend, detached-child reminders, authorization for acknowledge.
+- [x] **P4.1** `incidents` (§3.11: `RESTRICT` FK, `server_id` snapshot of the backend, generated unique `open_monitor_id`, scopes) and `incident_events` (§3.12).
+- [x] **P4.2** `IncidentManager`: open (duplicate-safe), escalate, de-escalate, acknowledge, reminder, resolve; events with `notify` flags (§6.3); `status` activities.
+- [x] **P4.3** Complete the state machine (§6.2); pending and recovering flags.
+- [x] **P4.4** Resolution on monitor disable/delete and resource delete. No manual resolve.
+- [x] **P4.5** Acknowledge (admins only) from incident pages.
+- [x] **P4.6** Muting (§6.6): monitor, resource, and server plus every site whose backend it is.
+- [x] **P4.7** Dependency checks, adoption and grouping by backend server (§6.5).
+- [x] **P4.8** Sweep additions: reminders, mute-ended, detached-child (§6.3, §6.5, §6.6).
+- [x] **P4.9** Incidents list and page (§13.6); incident tabs on resource pages including the server roll-up via `server_id`.
+- [x] **P4.10** Tests: full StateMachine tables, unique open incident under two concurrent runs, adoption by backend, detached-child reminders, authorization for acknowledge.
 - [ ] **Exit P4** **[HUMAN]**: firewalling a test server's port 443 from Sextant opens exactly one server incident with its sites as children; lifting the block resolves them all.
 
 ---
@@ -277,6 +277,10 @@ Found in Phase 0 (2026-11-20):
 - [x] §13.4's sidebar has no Monitors item, but §13.6 has a global Monitors page. Added "Monitors" after Domains.
 - [x] §13.3 lists `POST /servers/{server}/run-checks` only; §13.6 gives the site page a "run checks" action too. Added `run-checks` for sites and domains as well.
 - [x] §4.6 maps `select` to shadcn `Select`, which can't hold an empty value. `MonitorArgumentsForm` uses a native select so "Default (…)" (inherit) can be chosen, like the other forms' selects.
+- [x] §6.5 keeps `parent_id` on a child after its parent resolves, but §3.11's `roots()` would then hide a child that's still failing. Decision: `roots()` = no parent, or a resolved parent. Such a child shows in root lists and counts, and can be adopted by a new outage.
+- [x] §6.3 lists reminders and acknowledgements among events but §8.4 has no `incident.reminder` activity type. Decision: reminders write an event only, no change-feed entry.
+- [x] §6.6 resource mutes: one `monitor.muted` / `monitor.unmuted` entry for the whole action (e.g. "web02 and 24 sites: all monitors muted until …") instead of one per monitor. Mutes are limited to 30 days.
+- [x] The sweep detects "mute ended" by remembering its last run; a mute that ended while the sweep wasn't running for more than a minute or two still gets its reminder on the next run.
 - [x] P1.1's morph map lists `monitor`, `incident` and `minimum_version`, whose models arrive in Phases 3, 4 and 7. `Relation::enforceMorphMap()` needs real classes, so each joins the map with its model.
 - [x] The choices seeds (§3.4) and the Cloudflare row (§3.5) are reference data that production needs, but deploys run `migrate`, not `db:seed`. Decision: the create-table migrations insert them.
 - [x] P1.5's "IP not inside any external service's ranges" can only check admin-entered `ranges` until `proxies:refresh` caches the published ranges (P2.3/P2.4). `IpAddressIsFree` has a `// SPEC:` note; P2.3 extends it.

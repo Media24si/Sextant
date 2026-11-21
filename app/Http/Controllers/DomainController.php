@@ -16,6 +16,7 @@ use App\Models\Activity;
 use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
+use App\Monitoring\IncidentPresenter;
 use App\Monitoring\MonitorProps;
 use App\Rules\RegistrableDomain;
 use App\Support\Hostname;
@@ -81,6 +82,7 @@ class DomainController extends Controller
 
         return Inertia::render('domains/Show', [
             ...MonitorProps::for($domain),
+            'incidents' => app(IncidentPresenter::class)->latestFor($domain),
             'domain' => DomainRowData::fromModel($domain),
             'notes' => $domain->notes,
             'activity' => Activity::query()

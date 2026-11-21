@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Domain;
 use App\Models\ExternalService;
+use App\Models\Incident;
 use App\Models\Monitor;
 use App\Models\Server;
 use App\Models\Site;
@@ -70,6 +71,7 @@ class AppServiceProvider extends ServiceProvider
             'site' => Site::class,
             'user' => User::class,
             'monitor' => Monitor::class,
+            'incident' => Incident::class,
         ]);
     }
 

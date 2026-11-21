@@ -19,6 +19,7 @@ use App\Models\Choice;
 use App\Models\Server;
 use App\Models\ServerAddress;
 use App\Models\Site;
+use App\Monitoring\IncidentPresenter;
 use App\Monitoring\MonitorProps;
 use App\Support\ReturnTo;
 use App\Support\TableQuery;
@@ -79,6 +80,7 @@ class ServerController extends Controller
 
         return Inertia::render('servers/Show', [
             ...MonitorProps::for($server),
+            'incidents' => app(IncidentPresenter::class)->latestFor($server),
             'server' => ServerData::fromModel($server),
             'traffic' => $this->traffic(array_values($sites->all())),
             'sites' => $sites->take(self::SITES_SHOWN)->map(ServedSiteData::fromModel(...))->values(),

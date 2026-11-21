@@ -18,6 +18,7 @@ use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
 use App\Models\Site;
+use App\Monitoring\IncidentPresenter;
 use App\Monitoring\MonitorProps;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
@@ -92,6 +93,7 @@ class SiteController extends Controller
 
         return Inertia::render('sites/Show', [
             ...MonitorProps::for($site),
+            'incidents' => app(IncidentPresenter::class)->latestFor($site),
             'site' => SiteData::fromModel($site),
             'activity' => Activity::query()
                 ->where('subject_type', 'site')

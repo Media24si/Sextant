@@ -4,6 +4,7 @@ use App\Enums\ChoiceList;
 use App\Models\Choice;
 use App\Models\Domain;
 use App\Models\ExternalService;
+use App\Models\Incident;
 use App\Models\Monitor;
 use App\Models\Server;
 use App\Models\Site;
@@ -53,6 +54,11 @@ $adminRoutes = [
     'run server checks' => ['post', 'servers.run-checks', fn () => ['server' => Server::factory()->create()]],
     'run domain checks' => ['post', 'domains.run-checks', fn () => ['domain' => Domain::factory()->create()]],
     'run site checks' => ['post', 'sites.run-checks', fn () => ['site' => Site::factory()->create()]],
+    'mute monitor' => ['post', 'monitors.mute', fn () => ['monitor' => Monitor::factory()->create()]],
+    'mute server' => ['post', 'servers.mute', fn () => ['server' => Server::factory()->create()]],
+    'mute domain' => ['post', 'domains.mute', fn () => ['domain' => Domain::factory()->create()]],
+    'mute site' => ['post', 'sites.mute', fn () => ['site' => Site::factory()->create()]],
+    'acknowledge incident' => ['post', 'incidents.acknowledge', fn () => ['incident' => Incident::factory()->create()]],
     'add list entry' => ['post', 'lists.store', null],
     'rename list entry' => ['put', 'lists.update', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'move list entry' => ['post', 'lists.move', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],

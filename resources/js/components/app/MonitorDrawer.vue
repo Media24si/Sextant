@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { router, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import MonitorBadges from '@/components/app/MonitorBadges.vue';
 import MonitorFormDialog from '@/components/app/MonitorFormDialog.vue';
+import MuteDialog from '@/components/app/MuteDialog.vue';
+import IncidentController from '@/actions/App/Http/Controllers/IncidentController';
+import MuteController from '@/actions/App/Http/Controllers/MuteController';
 import RelativeTime from '@/components/app/RelativeTime.vue';
 import StatusBadge from '@/components/app/StatusBadge.vue';
 import StatusDot from '@/components/app/StatusDot.vue';
@@ -34,6 +37,7 @@ const detail = ref<App.Data.Monitors.MonitorDetailData | null>(null);
 const loading = ref(false);
 const editing = ref(false);
 const confirmingDelete = ref(false);
+const muting = ref(false);
 
 async function load(): Promise<void> {
     if (props.monitorId === null) {
@@ -284,6 +288,16 @@ function destroy(): void {
         :checker-options="[detail.checker]"
         :monitor="detail.form"
         @saved="refresh"
+    />
+
+    <MuteDialog
+        v-if="detail"
+        v-model:open="muting"
+        :url="MuteController.monitor(detail.monitor.id).url"
+        :title="`Mute ${detail.monitor.name}`"
+        description="It keeps running and incidents still open, but nothing is sent and the status ignores it."
+        :muted-until="detail.monitor.muted_until"
+        @update:open="(isOpen) => !isOpen && refresh()"
     />
 
     <ConfirmDialog

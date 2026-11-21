@@ -2,7 +2,9 @@
 
 namespace App\Observers;
 
+use App\Enums\IncidentResolution;
 use App\Models\Server;
+use App\Monitoring\IncidentManager;
 use App\Monitoring\MonitorEffects;
 
 class ServerObserver extends InventoryObserver
@@ -33,6 +35,7 @@ class ServerObserver extends InventoryObserver
     public function deleted(Server $server): void
     {
         $this->record('server.deleted', $server, "Server {$server->name} deleted");
+        app(IncidentManager::class)->resolveFor($server->monitors()->get(), IncidentResolution::ResourceDeleted);
     }
 
     public function restored(Server $server): void

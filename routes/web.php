@@ -4,7 +4,9 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ChoiceController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\ExternalServiceController;
+use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\MonitorController;
+use App\Http\Controllers\MuteController;
 use App\Http\Controllers\RunChecksController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ServerController;
@@ -23,6 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/lists', [ChoiceController::class, 'index'])->name('lists.index');
     Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
     Route::get('monitors', [MonitorController::class, 'index'])->name('monitors.index');
+    Route::get('incidents', [IncidentController::class, 'index'])->name('incidents.index');
+    Route::get('incidents/{incident}', [IncidentController::class, 'show'])->name('incidents.show');
     Route::get('search', SearchController::class)->name('search');
 
     Route::middleware('admin')->group(function () {
@@ -64,6 +68,11 @@ Route::middleware('auth')->group(function () {
         Route::put('monitors/{monitor}', [MonitorController::class, 'update'])->name('monitors.update');
         Route::delete('monitors/{monitor}', [MonitorController::class, 'destroy'])->name('monitors.destroy');
         Route::post('monitors/{monitor}/run', [MonitorController::class, 'run'])->name('monitors.run');
+        Route::post('monitors/{monitor}/mute', [MuteController::class, 'monitor'])->name('monitors.mute');
+        Route::post('servers/{server}/mute', [MuteController::class, 'server'])->name('servers.mute');
+        Route::post('domains/{domain}/mute', [MuteController::class, 'domain'])->name('domains.mute');
+        Route::post('sites/{site}/mute', [MuteController::class, 'site'])->name('sites.mute');
+        Route::post('incidents/{incident}/acknowledge', [IncidentController::class, 'acknowledge'])->name('incidents.acknowledge');
         Route::post('servers/{server}/run-checks', [RunChecksController::class, 'server'])->name('servers.run-checks');
         Route::post('domains/{domain}/run-checks', [RunChecksController::class, 'domain'])->name('domains.run-checks');
         Route::post('sites/{site}/run-checks', [RunChecksController::class, 'site'])->name('sites.run-checks');

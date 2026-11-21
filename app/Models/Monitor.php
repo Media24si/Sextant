@@ -93,6 +93,22 @@ class Monitor extends Model
         return $this->hasMany(MonitorRun::class);
     }
 
+    /**
+     * @return HasMany<Incident, $this>
+     */
+    public function incidents(): HasMany
+    {
+        return $this->hasMany(Incident::class);
+    }
+
+    /**
+     * @return HasOne<Incident, $this>
+     */
+    public function openIncident(): HasOne
+    {
+        return $this->hasOne(Incident::class)->whereNull('resolved_at');
+    }
+
     public function isMuted(): bool
     {
         return $this->muted_until?->isFuture() === true;

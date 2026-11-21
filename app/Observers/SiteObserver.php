@@ -2,9 +2,11 @@
 
 namespace App\Observers;
 
+use App\Enums\IncidentResolution;
 use App\Models\ExternalService;
 use App\Models\Server;
 use App\Models\Site;
+use App\Monitoring\IncidentManager;
 use App\Monitoring\MonitorEffects;
 
 class SiteObserver extends InventoryObserver
@@ -44,6 +46,7 @@ class SiteObserver extends InventoryObserver
     public function deleted(Site $site): void
     {
         $this->record('site.deleted', $site, "Site {$site->display_hostname} deleted");
+        app(IncidentManager::class)->resolveFor($site->monitors()->get(), IncidentResolution::ResourceDeleted);
     }
 
     public function restored(Site $site): void

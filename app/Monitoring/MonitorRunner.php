@@ -12,6 +12,7 @@ use App\Checks\UnknownChecker;
 use App\Enums\Status;
 use App\Models\Concerns\Monitorable;
 use App\Models\Domain;
+use App\Models\Incident;
 use App\Models\Monitor;
 use App\Models\MonitorRun;
 use App\Models\MonitorState;
@@ -35,6 +36,7 @@ class MonitorRunner
         private NetworkHealth $network,
         private StateMachine $stateMachine,
         private ChangeDetector $changes,
+        private DependencyChecks $dependencies,
     ) {}
 
     /**
@@ -92,13 +94,19 @@ class MonitorRunner
                 'checked_at' => $now,
             ]);
 
-            $transition = $this->stateMachine->apply($state, $result, $settings, $durationMs, $now);
+            $incident = Incident::query()->open()->where('monitor_id', $monitor->id)->lockForUpdate()->first();
+            $transition = $this->stateMachine->apply($monitor, $resource, $state, $incident, $result, $settings, $durationMs, $now);
             $state->save();
 
             ResourceStatus::refresh($resource);
 
             return $transition;
         });
+
+        if ($transition->firstFailure) {
+            // A site's first failure checks its backend server right away (§6.5).
+            $this->dependencies->checkBackendOf($resource);
+        }
 
         if ($transition->recheckSoon) {
             // Confirm a failure a minute later instead of after the full interval (§5.1).

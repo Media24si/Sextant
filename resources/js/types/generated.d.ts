@@ -301,6 +301,57 @@ message: string,
 site_id: number | null,
 };
 }
+namespace Incidents {
+export type IncidentDetailData = {
+incident: App.Data.Incidents.IncidentRowData,
+max_severity: App.Enums.Status,
+occurrences: number,
+last_seen_at: string,
+acknowledged_at: string | null,
+monitor_id: number,
+monitor_name: string,
+monitor_deleted: boolean,
+serving_path: App.Data.ServingPathData | null,
+first_result: App.Data.Incidents.IncidentResultData,
+last_result: App.Data.Incidents.IncidentResultData,
+events: App.Data.Incidents.IncidentEventData[],
+parent: App.Data.Incidents.IncidentRowData | null,
+children: App.Data.Incidents.IncidentRowData[],
+};
+export type IncidentEventData = {
+id: number,
+type: string,
+severity: App.Enums.Status,
+message: string,
+user: string | null,
+notify: boolean,
+notified_at: string | null,
+suppressed_reason: string | null,
+created_at: string,
+};
+export type IncidentResultData = {
+status: App.Enums.Status,
+message: string,
+data: Record<string, any>,
+};
+export type IncidentRowData = {
+id: number,
+title: string,
+severity: App.Enums.Status,
+state: string,
+message: string,
+resource: App.Data.Monitors.MonitorResourceData,
+checker: string,
+opened_at: string,
+resolved_at: string | null,
+resolution: string | null,
+acknowledged_by: string | null,
+parent_id: number | null,
+children_count: number,
+recovering: boolean,
+muted: boolean,
+};
+}
 namespace Monitors {
 export type ArgumentSchemaData = {
 type: string,
@@ -357,6 +408,8 @@ enabled: boolean,
 muted_until: string | null,
 status: App.Enums.Status,
 pending: boolean,
+recovering: boolean,
+open_incident_id: number | null,
 last_result_status: App.Enums.Status | null,
 message: string | null,
 duration_ms: number | null,
@@ -384,6 +437,8 @@ export type ChoiceList = 'os' | 'backup_location';
 export type Confidence = 'detected' | 'suggested' | 'not_found';
 export type ExternalServiceKind = 'cdn' | 'proxy' | 'other';
 export type ImportOutcome = 'created' | 'needs_review' | 'skipped';
+export type IncidentEventType = 'opened' | 'escalated' | 'deescalated' | 'acknowledged' | 'reminder' | 'resolved';
+export type IncidentResolution = 'recovered' | 'monitor_disabled' | 'monitor_deleted' | 'resource_deleted';
 export type RangeSource = 'cloudflare' | 'fastly' | 'cloudfront';
 export type SearchResultType = 'server' | 'external_service' | 'domain' | 'site';
 export type Status = 'ok' | 'warning' | 'error' | 'unknown';

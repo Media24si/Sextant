@@ -5,7 +5,10 @@ import { computed, ref } from 'vue';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import RunChecksController from '@/actions/App/Http/Controllers/RunChecksController';
 import ActivityList from '@/components/app/ActivityList.vue';
+import IncidentList from '@/components/app/IncidentList.vue';
 import MonitorList from '@/components/app/MonitorList.vue';
+import MuteDialog from '@/components/app/MuteDialog.vue';
+import MuteController from '@/actions/App/Http/Controllers/MuteController';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import EmptyState from '@/components/app/EmptyState.vue';
@@ -23,10 +26,22 @@ const props = defineProps<{
     activity: App.Data.ActivityItemData[];
     monitors: App.Data.Monitors.MonitorRowData[];
     checker_options: App.Data.Monitors.CheckerOptionData[];
+    incidents: App.Data.Incidents.IncidentRowData[];
 }>();
 
 // Results arrive while the page is open (SPEC §13.7).
-usePoll(10_000, { only: ['monitors', 'activity', 'server'] });
+usePoll(10_000, { only: ['monitors', 'incidents', 'activity', 'server'] });
+
+const muting = ref(false);
+
+/** The earliest mute among this page's monitors, when every one is muted. */
+const mutedUntil = computed(() => {
+    const mutes = props.monitors.map((monitor) => monitor.muted_until);
+
+    return mutes.length > 0 && mutes.every(Boolean)
+        ? (mutes.sort()[0] ?? null)
+        : null;
+});
 
 const runningChecks = ref(false);
 
@@ -165,6 +180,12 @@ function restore(): void {
                     :disabled="runningChecks || monitors.length === 0"
                     @click="runChecks"
                     >Run checks now</Button
+                >
+                <Button
+                    variant="outline"
+                    :disabled="monitors.length === 0"
+                    @click="muting = true"
+                    >{{ mutedUntil ? 'Muted' : 'Mute until…' }}</Button
                 >
                 <Button variant="outline" @click="confirmingDelete = true">
                     Delete
@@ -315,6 +336,12 @@ function restore(): void {
                 <EmptyState v-else title="No sites yet" />
             </section>
 
+            <IncidentList
+                :incidents="incidents"
+                description="Including the sites server serves as their backend."
+                :all-query="{ 'filter[server]': String(server.id) }"
+            />
+
             <MonitorList
                 :monitors="monitors"
                 :checker-options="checker_options"
@@ -344,5 +371,12 @@ function restore(): void {
             an admin can restore it later. A server that is still the backend of
             sites can't be deleted.
         </ConfirmDialog>
+        <MuteDialog
+            v-model:open="muting"
+            :url="MuteController.server(server.id).url"
+            :title="`Mute ${server.name}`"
+            description="Its checks keep running and incidents still open, but nothing is sent and the status ignores them. Every site whose backend is this server is muted too."
+            :muted-until="mutedUntil"
+        />
     </div>
 </template>

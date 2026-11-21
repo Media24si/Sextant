@@ -17,6 +17,7 @@ import ActivityController from '@/actions/App/Http/Controllers/ActivityControlle
 import ChoiceController from '@/actions/App/Http/Controllers/ChoiceController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
+import IncidentController from '@/actions/App/Http/Controllers/IncidentController';
 import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
 import UserController from '@/actions/App/Http/Controllers/UserController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
@@ -54,7 +55,12 @@ const mainNavItems = computed<SidebarNavItem[]>(() => [
         count: page.props.nav?.domains,
     },
     { title: 'Monitors', href: MonitorController.index(), icon: Gauge },
-    { title: 'Incidents', icon: TriangleAlert },
+    {
+        title: 'Incidents',
+        href: IncidentController.index(),
+        icon: TriangleAlert,
+        count: page.props.nav?.incidents,
+    },
     { title: 'Activity', href: ActivityController.index(), icon: Activity },
 ]);
 
