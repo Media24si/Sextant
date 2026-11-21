@@ -27,6 +27,7 @@ import { statusLabels } from '@/lib/status';
  */
 const props = defineProps<{
     domain: App.Data.DomainRowData;
+    nameservers: App.Data.DomainNameserversData;
     notes: string | null;
     activity: App.Data.ActivityItemData[];
     monitors: App.Data.Monitors.MonitorRowData[];
@@ -35,7 +36,9 @@ const props = defineProps<{
 }>();
 
 // Results arrive while the page is open (SPEC §13.7).
-usePoll(10_000, { only: ['monitors', 'incidents', 'activity', 'domain'] });
+usePoll(10_000, {
+    only: ['monitors', 'incidents', 'activity', 'domain', 'nameservers'],
+});
 
 const muting = ref(false);
 
@@ -132,6 +135,27 @@ function destroy(): void {
                     <div class="flex gap-1.5">
                         <dt class="text-muted-foreground">Registrar</dt>
                         <dd>{{ domain.registrar ?? '—' }}</dd>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <dt class="text-muted-foreground">Nameservers</dt>
+                        <dd
+                            v-if="nameservers.nameservers.length > 0"
+                            class="flex flex-wrap items-baseline gap-x-3"
+                        >
+                            <span
+                                v-for="nameserver in nameservers.nameservers"
+                                :key="nameserver"
+                                class="font-mono text-sm"
+                                >{{ nameserver }}</span
+                            >
+                            <span
+                                v-if="nameservers.source === 'registry'"
+                                class="text-sm text-muted-foreground"
+                                title="From the registry; DNS hasn't been asked yet"
+                                >(registry)</span
+                            >
+                        </dd>
+                        <dd v-else>—</dd>
                     </div>
                 </dl>
                 <p v-if="notes" class="max-w-3xl text-sm whitespace-pre-line">

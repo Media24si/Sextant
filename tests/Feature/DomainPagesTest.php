@@ -3,6 +3,7 @@
 use App\Enums\Status;
 use App\Models\Domain;
 use App\Models\ExternalService;
+use App\Models\Monitor;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\User;
@@ -86,6 +87,26 @@ test('the domain page lists its sites and the changes to it and them', function 
             ->has('domain.sites', 1)
             ->where('activity.0.type', 'site.created')
             ->where('activity.1.type', 'domain.created'));
+});
+
+test('the domain page shows its nameservers: live DNS first, else the registry\'s', function () {
+    $this->actingAs($this->reader);
+    $domain = Domain::factory()->create(['name' => 'svet24.si']);
+    $expiration = Monitor::factory()->on($domain, 'domain.expiration')->create();
+    $nameservers = Monitor::factory()->on($domain, 'domain.nameservers')->create();
+
+    $this->get(route('domains.show', $domain))
+        ->assertInertia(fn (Assert $page) => $page->where('nameservers', ['nameservers' => [], 'source' => null]));
+
+    $expiration->state->update(['data' => ['nameservers' => ['NS2.Example.si.', 'ns1.example.si']], 'checked_at' => now()]);
+
+    $this->get(route('domains.show', $domain))
+        ->assertInertia(fn (Assert $page) => $page->where('nameservers', ['nameservers' => ['ns1.example.si', 'ns2.example.si'], 'source' => 'registry']));
+
+    $nameservers->state->update(['data' => ['nameservers_live' => ['bob.ns.cloudflare.com', 'ada.ns.cloudflare.com']], 'checked_at' => now()]);
+
+    $this->get(route('domains.show', $domain))
+        ->assertInertia(fn (Assert $page) => $page->where('nameservers', ['nameservers' => ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'], 'source' => 'dns']));
 });
 
 test('an admin adds and edits a domain; the name is stored as punycode', function () {

@@ -6,6 +6,7 @@ use App\Actions\Sites\AddSites;
 use App\Data\ActivityItemData;
 use App\Data\Detection\DomainLookupData;
 use App\Data\DomainFormData;
+use App\Data\DomainNameserversData;
 use App\Data\DomainRowData;
 use App\Data\OptionData;
 use App\Detection\SiteDetector;
@@ -84,6 +85,7 @@ class DomainController extends Controller
             ...MonitorProps::for($domain),
             'incidents' => app(IncidentPresenter::class)->latestFor($domain),
             'domain' => DomainRowData::fromModel($domain),
+            'nameservers' => DomainNameserversData::fromModel($domain),
             'notes' => $domain->notes,
             'activity' => Activity::query()
                 ->where(fn ($query) => $query

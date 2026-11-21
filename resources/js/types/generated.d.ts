@@ -49,6 +49,10 @@ id: number | null,
 name: string,
 notes: string | null,
 };
+export type DomainNameserversData = {
+nameservers: string[],
+source: string | null,
+};
 export type DomainRowData = {
 id: number,
 name: string,
