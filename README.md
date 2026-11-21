@@ -45,13 +45,7 @@ Copy `.env.example` to `.env` and set at least:
 
 ### Build and release
 
-```bash
-composer install --no-dev --optimize-autoloader
-npm ci && npm run build          # also generates the TypeScript types
-php artisan migrate --force
-php artisan config:cache && php artisan route:cache && php artisan view:cache
-php artisan horizon:terminate    # Horizon restarts with the new code
-```
+Run `./deploy.sh` on the server as the app user. It pulls `main` (fast-forward only, refuses local changes), runs `composer install --no-dev`, `npm ci && npm run build` (also generates the TypeScript types), `migrate --force` and `optimize`, validates the checker registry, then restarts Horizon and the scheduler with the new code. Set `PHP_FPM_SERVICE=php8.4-fpm` to also reload php-fpm (needs sudo), e.g. when OPcache doesn't revalidate timestamps.
 
 The first time, also:
 
