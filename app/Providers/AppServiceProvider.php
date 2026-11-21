@@ -24,10 +24,12 @@ use App\Net\TcpProbe;
 use App\Net\TlsProbe;
 use App\Net\WhoisClient;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -56,6 +58,16 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureMorphMap();
         $this->configureAuthorization();
+        $this->configureRateLimits();
+    }
+
+    /**
+     * Discord takes at most `notifications.rate_per_minute` messages a minute
+     * from Sextant (SPEC §12.1).
+     */
+    private function configureRateLimits(): void
+    {
+        RateLimiter::for('discord', fn (): Limit => Limit::perMinute((int) config('sextant.notifications.rate_per_minute')));
     }
 
     /**

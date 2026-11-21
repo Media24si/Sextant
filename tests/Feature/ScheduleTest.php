@@ -21,3 +21,12 @@ test('monitoring tasks are scheduled', function (string $command, string $expres
     'sweep every minute' => ['sextant:sweep', '* * * * *'],
     'prune runs nightly' => ['model:prune', '30 3 * * *'],
 ]);
+
+test('notifications flush every thirty seconds and heartbeats every five minutes', function () {
+    $events = collect(app(Schedule::class)->events());
+    $flush = $events->first(fn (Event $event): bool => str_contains((string) $event->command, 'notifications:flush'));
+    $heartbeat = $events->first(fn (Event $event): bool => str_contains((string) $event->command, 'sextant:heartbeat'));
+
+    expect($flush?->repeatSeconds)->toBe(30)
+        ->and($heartbeat?->expression)->toBe('*/5 * * * *');
+});

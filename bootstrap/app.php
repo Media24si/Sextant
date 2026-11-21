@@ -1,5 +1,6 @@
 <?php
 
+use App\Checks\CheckCouldNotRun;
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -31,6 +32,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         Integration::handles($exceptions);
+
+        // Sentry is for Sextant's own errors only: a check that couldn't run isn't one (SPEC §12.2).
+        $exceptions->dontReport(CheckCouldNotRun::class);
 
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),

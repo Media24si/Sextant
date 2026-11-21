@@ -166,11 +166,11 @@
 
 ## Phase 5 — Notifications and self-monitoring (§18)
 
-- [ ] **P5.1** Discord sender job on `notifications` (single worker), `RateLimited('discord')`, `?wait=true`, 429 handling, Sentry after 5 failures (§12.1).
-- [ ] **P5.2** `notifications:flush` every 30 s exactly as §12.1 steps 1–6.
-- [ ] **P5.3** Embed builder per §12.1, including serving paths in server groups and CVE links for `server.versions`.
-- [ ] **P5.4** `sextant:heartbeat` and Sentry Crons (§12.2); only Sextant's own errors go to Sentry.
-- [ ] **P5.5** Tests with `Http::fake`: `@here` rules, 10-embed split, muted suppression, grouped child suppression and folding, resolution summary, 429.
+- [x] **P5.1** Discord sender job on `notifications` (single worker), `RateLimited('discord')`, `?wait=true`, 429 handling, Sentry after 5 failures (§12.1).
+- [x] **P5.2** `notifications:flush` every 30 s exactly as §12.1 steps 1–6.
+- [x] **P5.3** Embed builder per §12.1, including serving paths in server groups and CVE links for `server.versions`.
+- [x] **P5.4** `sextant:heartbeat` and Sentry Crons (§12.2); only Sextant's own errors go to Sentry.
+- [x] **P5.5** Tests with `Http::fake`: `@here` rules, 10-embed split, muted suppression, grouped child suppression and folding, resolution summary, 429.
 - [ ] **P5.6** **[HUMAN]** Create the Discord webhook; Sentry alert rule for missed check-ins routed to the same channel.
 - [ ] **Exit P5** **[HUMAN]**: the Phase 4 outage produces one Discord message for the outage and one for the recovery; stopping Horizon produces a Sentry alert in Discord within 10 minutes.
 
@@ -281,6 +281,10 @@ Found in Phase 0 (2026-11-20):
 - [x] §6.3 lists reminders and acknowledgements among events but §8.4 has no `incident.reminder` activity type. Decision: reminders write an event only, no change-feed entry.
 - [x] §6.6 resource mutes: one `monitor.muted` / `monitor.unmuted` entry for the whole action (e.g. "web02 and 24 sites: all monitors muted until …") instead of one per monitor. Mutes are limited to 30 days.
 - [x] The sweep detects "mute ended" by remembering its last run; a mute that ended while the sweep wasn't running for more than a minute or two still gets its reminder on the next run.
+- [x] §12.1 groups "by event kind (problem or recovery)" but also lists acknowledged and reminder embeds. Decision: four kinds per root resource: problem (opened, escalated), recovery (resolved), acknowledged, reminder. Children folded into a parent's embed are marked sent (no `suppressed_reason`).
+- [x] §12.1 doesn't say what happens without `DISCORD_WEBHOOK_URL`. Decision: events are still marked, with `suppressed_reason = no_webhook`, so the outbox doesn't grow while the webhook isn't set.
+- [x] §12.1 "fails after 5 attempts" with `RateLimited` and 429 releases: the job has `maxExceptions = 5` (only real failures count) and keeps trying for an hour (`retryUntil`), so rate-limit waits never use up attempts.
+- [x] §12.2 Sentry Crons slugs: `sextant-queue-checks`, `sextant-queue-checks-slow`, `sextant-queue-notifications` (heartbeats, every 5 min, 2-minute margin) and the scheduler's `monitors:dispatch` monitor from `->sentryMonitor()`.
 - [x] P1.1's morph map lists `monitor`, `incident` and `minimum_version`, whose models arrive in Phases 3, 4 and 7. `Relation::enforceMorphMap()` needs real classes, so each joins the map with its model.
 - [x] The choices seeds (§3.4) and the Cloudflare row (§3.5) are reference data that production needs, but deploys run `migrate`, not `db:seed`. Decision: the create-table migrations insert them.
 - [x] P1.5's "IP not inside any external service's ranges" can only check admin-entered `ranges` until `proxies:refresh` caches the published ranges (P2.3/P2.4). `IpAddressIsFree` has a `// SPEC:` note; P2.3 extends it.

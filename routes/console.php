@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('monitors:dispatch')->everyMinute()->withoutOverlapping()->sentryMonitor();
 Schedule::command('sextant:sweep')->everyMinute()->withoutOverlapping();
+Schedule::command('notifications:flush')->everyThirtySeconds()->withoutOverlapping();
+Schedule::command('sextant:heartbeat')->everyFiveMinutes();
 Schedule::command('model:prune', ['--model' => [MonitorRun::class]])->dailyAt('03:30');
 Schedule::command('horizon:snapshot')->everyFiveMinutes()->sentryMonitor();
 
