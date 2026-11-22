@@ -831,8 +831,8 @@ Unknown results neither extend nor break a streak: "fail, unknown, fail" counts 
 | Open | Insert the incident; the unique `open_monitor_id` rejects a duplicate | `opened` (yes) |
 | Escalate (warning → error) | `severity = error`, `max_severity = error` | `escalated` (yes) |
 | De-escalate (error → warning) | `severity = warning` | `deescalated` (no) |
-| Acknowledge (admin) | `acknowledged_at`, `acknowledged_by`; stops reminders | `acknowledged` (yes, without `@here`) |
-| Reminder (sweep) | `last_notified_at` updated | `reminder` (yes, without `@here`) |
+| Acknowledge (admin) | `acknowledged_at`, `acknowledged_by`; stops reminders | `acknowledged` (yes) |
+| Reminder (sweep) | `last_notified_at` updated | `reminder` (yes) |
 | Resolve | `resolved_at`, `resolution` | `resolved` (yes) |
 
 Each action also writes a `status` entry to the change feed. Incidents are resolved only by recovery (M passes), monitor disabled or deleted, or resource deleted. There is no manual "resolve" button.
@@ -1301,7 +1301,7 @@ Setting up or updating a server is one command, run there as root. Sextant still
 2. Suppress events of muted monitors (`suppressed_reason = muted`).
 3. Children never notify on their own while their parent is open: if the parent's `opened` event is still pending, they wait and are folded into its embed; if it was already sent, they're suppressed (`grouped`).
 4. Group the remaining events by **root resource** (the incident's own resource, or for children, the parent's server). One embed per group and event kind (problem or recovery).
-5. Up to 10 embeds per message. `@here` only if an embed contains an error-severity `opened` or `escalated` event, with `allowed_mentions: {"parse": ["everyone"]}`; otherwise `{"parse": []}`.
+5. Up to 10 embeds per message. No message mentions anyone (no `@here`, `allowed_mentions: {"parse": []}`); people set their own Discord notifications for the channel.
 6. Mark events `notified_at = now`; set `incidents.last_notified_at`.
 
 **Embeds.**
@@ -1669,7 +1669,7 @@ No live network in the default suite. All network I/O goes through the `app/Net`
 - Dispatch compare-and-set; confirmation re-check; canary.
 - Unique open incident per monitor under two concurrent runs (MySQL 9.7).
 - Grouping by backend server: adoption, child suppression, resolution summary, detached-child reminders.
-- Flush: `@here` rules, 10-embed split, muted suppression, 429 (`Http::fake`).
+- Flush: no mentions, 10-embed split, muted suppression, 429 (`Http::fake`).
 - Detection (§10): direct match, behind Cloudflare with a suggestion, behind Varnish (manual ranges), new domain, unknown IP, duplicate and restore, redirect setting `expected_target` and offering `www.`.
 - Import: created, needs review, skipped.
 - `server.versions`: OK, below minimum (Warning), 401 / timeout / stale file (Unknown, versions kept), minimum change triggering runs.
@@ -1738,7 +1738,7 @@ Each phase ends with something usable and an exit check.
 
 ### Phase 5 — Notifications and self-monitoring
 
-- `notifications:flush`, embeds (with serving paths), grouping, `@here` rules, reminders, rate limiting.
+- `notifications:flush`, embeds (with serving paths), grouping, no mentions, reminders, rate limiting.
 - `sextant:heartbeat`, Sentry Crons, Sentry alert routing to Discord.
 - **Exit**: the Phase 4 outage produces one Discord message for the outage and one for the recovery; stopping Horizon produces a Sentry alert in Discord within 10 minutes.
 
@@ -1754,7 +1754,7 @@ Each phase ends with something usable and an exit check.
 - Collector script, `versions.php` stub, token generation, downloads, install instructions, Test connection, Refresh.
 - `VersionsClient`, `VersionsRecorder`, `server.versions` checker and its default attachment.
 - Minimum versions page; versions columns and filters on Servers; versions panel on the server page; Software vs minimum on the dashboard; search by version; change-feed entries.
-- **Exit**: collector and endpoint installed on two real servers, one with two PHP versions; setting a minimum above a server's version turns it orange within a minute and posts a Discord warning without `@here`; upgrading clears it; stopping the cron shows the reading's age with no alert.
+- **Exit**: collector and endpoint installed on two real servers, one with two PHP versions; setting a minimum above a server's version turns it orange within a minute and posts a Discord warning; upgrading clears it; stopping the cron shows the reading's age with no alert.
 
 ### Phase 8 — Remaining checkers
 

@@ -24,7 +24,7 @@ class SendDiscordMessage implements ShouldQueue
     public int $timeout = 30;
 
     /**
-     * @param  array{content: string|null, embeds: list<array<string, mixed>>, allowed_mentions: array{parse: list<string>}}  $payload
+     * @param  array{embeds: list<array<string, mixed>>, allowed_mentions: array{parse: list<string>}}  $payload
      */
     public function __construct(public array $payload) {}
 

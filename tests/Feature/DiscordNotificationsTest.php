@@ -57,7 +57,7 @@ function sentMessages(): array
     return Http::recorded()->map(fn (array $pair) => $pair[0]->data())->values()->all();
 }
 
-it('sends an error with @here once it has settled', function () {
+it('sends an error once it has settled, mentioning nobody', function () {
     $incident = siteIncident();
 
     flushNotifications();
@@ -69,8 +69,8 @@ it('sends an error with @here once it has settled', function () {
 
     Http::assertSentCount(1);
     Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '?wait=true')
-        && $request['content'] === '@here'
-        && $request['allowed_mentions'] === ['parse' => ['everyone']]
+        && ! isset($request['content'])
+        && $request['allowed_mentions'] === ['parse' => []]
         && $request['embeds'][0]['title'] === "🔴 {$incident->title}"
         && $request['embeds'][0]['color'] === 0xE53935
         && $request['embeds'][0]['url'] === route('incidents.show', $incident)
@@ -155,7 +155,7 @@ it('splits more than ten embeds over several messages', function () {
     expect(array_map(fn (array $message) => count($message['embeds']), sentMessages()))->toBe([10, 2]);
 });
 
-it('mentions only in the message that holds the error', function () {
+it('mentions nobody in any message, even one that holds an error', function () {
     foreach (range(1, 10) as $i) {
         siteIncident('warning');
     }
@@ -164,7 +164,8 @@ it('mentions only in the message that holds the error', function () {
 
     flushNotifications();
 
-    expect(array_map(fn (array $message) => $message['content'] ?? null, sentMessages()))->toBe([null, '@here']);
+    expect(array_map(fn (array $message) => [$message['content'] ?? null, $message['allowed_mentions']], sentMessages()))
+        ->toBe([[null, ['parse' => []]], [null, ['parse' => []]]]);
 });
 
 it('summarises the sites when an outage recovers', function () {
@@ -205,7 +206,7 @@ it('counts sites, not incidents, when an outage recovers', function () {
         ->and(sentMessages()[1]['embeds'][0]['description'])->toContain('0 of 2 sites recovered; still failing: a.svet24.si, b.svet24.si');
 });
 
-it('sends acknowledgements and reminders without @here', function () {
+it('sends acknowledgements and reminders', function () {
     $incident = siteIncident();
     $this->travel(21)->seconds();
     flushNotifications();
@@ -238,7 +239,7 @@ it('waits out a 429 and fails loudly on other errors', function () {
     Http::fake(['https://discord.test/api/webhooks/2/*' => Http::sequence()
         ->push(['retry_after' => 1.5], 429)
         ->push('Bad Request', 400)]);
-    $payload = ['content' => null, 'embeds' => [['title' => 'x']], 'allowed_mentions' => ['parse' => []]];
+    $payload = ['embeds' => [['title' => 'x']], 'allowed_mentions' => ['parse' => []]];
 
     $job = (new SendDiscordMessage($payload))->withFakeQueueInteractions();
     $job->handle();

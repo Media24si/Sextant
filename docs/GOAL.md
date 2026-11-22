@@ -81,7 +81,7 @@ A domain can also be added with several subdomains at once, and a list of URLs c
 - An admin sets the endpoint URL and token on the server's page (Sextant can generate the token) and downloads both files there, the PHP file already carrying a hash of the token.
 - Sextant fetches versions daily and when an admin clicks Refresh. When the file is old, Sextant says the collector may have stopped. Unreadable versions keep their last known values and never alert.
 - Upgrades and downgrades go into the change feed.
-- **Minimum safe versions**: after a CVE, an admin sets the lowest safe version per software (per branch for PHP), with a link to the CVE. Servers below it turn orange (Warning), appear under current issues and are posted to Discord as a warning, without `@here`. Upgrading clears it at the next read.
+- **Minimum safe versions**: after a CVE, an admin sets the lowest safe version per software (per branch for PHP), with a link to the CVE. Servers below it turn orange (Warning), appear under current issues and are posted to Discord as a warning. Upgrading clears it at the next read.
 - Every server we monitor runs PHP. Windows servers can't run the bash collector, so their versions stay empty in v1.
 
 ### 6. Monitoring
@@ -112,7 +112,7 @@ A domain can also be added with several subdomains at once, and a list of URLs c
 
 ### 9. Notifications
 
-- **Discord**: one channel. It gets incidents opened, escalated and resolved. Error-severity openings and escalations mention `@here`; warnings (including versions below minimum) and resolutions don't. When a server outage takes down many sites, they go out as one grouped message.
+- **Discord**: one channel. It gets incidents opened, escalated and resolved. Messages mention nobody (no `@here`); people choose their own Discord notifications for the channel. When a server outage takes down many sites, they go out as one grouped message.
 - **Sentry**: only Sextant's own health: its errors and failed jobs, plus heartbeats (Sentry Crons) so we find out if Sextant itself stops checking. Incidents are not sent to Sentry.
 
 ## Status model
@@ -212,7 +212,7 @@ All thresholds are defaults and can be changed per monitor.
 | 1 | What is an "app"? | A web application behind sites, not a mobile app. Left out of v1; mobile apps come later still | 2026-10-06 |
 | 2 | Send incidents to Sentry? | No. Sentry only covers Sextant's own health | 2026-10-06 |
 | 3 | Where does Sextant run? | On its own separate server | 2026-10-06 |
-| 4 | Discord setup | One channel; `@here` on error-severity notifications | 2026-10-06 |
+| 4 | Discord setup | One channel; no `@here`, people set their own notifications (was `@here` on errors until 2026-11-22) | 2026-11-22 |
 | 5 | Domain expiry source | RDAP first, WHOIS as fallback. `.si` RDAP was tested and works | 2026-10-06 |
 | 6 | Run history retention | 90 days | 2026-10-06 |
 | 7 | What goes in "Recent changes"? | Status changes, admin changes, and changes Sextant detects | 2026-10-06 |

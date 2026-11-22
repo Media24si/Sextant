@@ -203,7 +203,7 @@
 - [x] **P7.11** Tests: validation fixtures, comparison, recorder changes, checker outcomes (OK, Warning, 401/timeout/stale → Unknown with versions kept), rendered `versions.php` via `php -S` (401/405/200), the downloaded file contains the hash and never the token; live-group collector run in Ubuntu 24.04 and Debian 12 containers.
 - [ ] **P7.12** **[HUMAN]** Install the collector and endpoint on two real servers, one with two PHP versions.
 - [x] **P7.13** One-line installer and collector updates (§11.8): "Copy install command" with a 30-minute signed link to a per-server `install.sh` (collector, cron, `versions.php`, first run, printed nginx block); `collector_version` in the file and on `servers`; "Collector outdated" on the server page with "Copy update command", and a Servers filter; shellcheck and live container tests for the installer.
-- [ ] **Exit P7** **[HUMAN]**: setting a minimum above a server's version turns it orange within a minute and posts a Discord warning without `@here`; upgrading clears it; stopping the cron shows the reading's age with no alert.
+- [ ] **Exit P7** **[HUMAN]**: setting a minimum above a server's version turns it orange within a minute and posts a Discord warning; upgrading clears it; stopping the cron shows the reading's age with no alert.
 
 ---
 

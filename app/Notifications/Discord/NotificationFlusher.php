@@ -3,7 +3,6 @@
 namespace App\Notifications\Discord;
 
 use App\Enums\IncidentEventType;
-use App\Enums\Status;
 use App\Jobs\SendDiscordMessage;
 use App\Models\Concerns\Monitorable;
 use App\Models\Incident;
@@ -84,17 +83,13 @@ class NotificationFlusher
 
         $webhook = config('sextant.notifications.discord_webhook_url');
         $embeds = array_map(fn (NotificationGroup $group): array => $this->embeds->build($group, $now), array_values($groups));
-        $mentions = array_map(fn (NotificationGroup $group): bool => $this->mentionsEveryone($group), array_values($groups));
         $perMessage = max(1, (int) config('sextant.notifications.max_embeds_per_message'));
 
         foreach (array_chunk(array_keys($embeds), $perMessage) as $indexes) {
-            $mention = collect($indexes)->contains(fn (int $index): bool => $mentions[$index]);
-
             if (is_string($webhook) && $webhook !== '') {
                 SendDiscordMessage::dispatch([
-                    'content' => $mention ? '@here' : null,
                     'embeds' => array_map(fn (int $index): array => $embeds[$index], $indexes),
-                    'allowed_mentions' => ['parse' => $mention ? ['everyone'] : []],
+                    'allowed_mentions' => ['parse' => []],
                 ])->onQueue('notifications');
                 $report['messages']++;
             }
@@ -157,13 +152,6 @@ class NotificationFlusher
         $key = "{$root->getMorphClass()}:{$root->getKey()}:{$kind}";
 
         return $groups[$key] ??= new NotificationGroup($kind, $root);
-    }
-
-    /** Step 5: `@here` only for an error-severity opened or escalated event. */
-    private function mentionsEveryone(NotificationGroup $group): bool
-    {
-        return collect($group->events)->contains(fn (IncidentEvent $event): bool => $event->severity === Status::Error
-            && in_array($event->type, [IncidentEventType::Opened, IncidentEventType::Escalated], true));
     }
 
     /** Open when the event happened; resolving in the same second still counts as open. */
