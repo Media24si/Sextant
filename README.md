@@ -11,18 +11,18 @@ This README is the runbook: deploying, adding a checker, installing the collecto
 
 Fictional demo data (`database/seeders/DemoSeeder.php`), light and dark.
 
-| Light | Dark |
-| ----- | ---- |
-| **Overview**: current issues, software below minimum, what expires soon | |
-| ![Overview, light](docs/screenshots/overview-light.png) | ![Overview, dark](docs/screenshots/overview-dark.png) |
-| **Domains**: every subdomain and how it's served | |
-| ![Domains, light](docs/screenshots/domains-light.png) | ![Domains, dark](docs/screenshots/domains-dark.png) |
-| **Server**: traffic into it, sites it serves, software versions | |
-| ![Server, light](docs/screenshots/server-light.png) | ![Server, dark](docs/screenshots/server-dark.png) |
-| **Site**: serving path, monitors, incidents | |
-| ![Site, light](docs/screenshots/site-light.png) | ![Site, dark](docs/screenshots/site-dark.png) |
-| **Activity**: status changes, admin edits, what Sextant detects | |
-| ![Activity, light](docs/screenshots/activity-light.png) | ![Activity, dark](docs/screenshots/activity-dark.png) |
+| Light                                                                   | Dark                                                  |
+| ----------------------------------------------------------------------- | ----------------------------------------------------- |
+| **Overview**: current issues, software below minimum, what expires soon |                                                       |
+| ![Overview, light](docs/screenshots/overview-light.png)                 | ![Overview, dark](docs/screenshots/overview-dark.png) |
+| **Domains**: every subdomain and how it's served                        |                                                       |
+| ![Domains, light](docs/screenshots/domains-light.png)                   | ![Domains, dark](docs/screenshots/domains-dark.png)   |
+| **Server**: traffic into it, sites it serves, software versions         |                                                       |
+| ![Server, light](docs/screenshots/server-light.png)                     | ![Server, dark](docs/screenshots/server-dark.png)     |
+| **Site**: serving path, monitors, incidents                             |                                                       |
+| ![Site, light](docs/screenshots/site-light.png)                         | ![Site, dark](docs/screenshots/site-dark.png)         |
+| **Activity**: status changes, admin edits, what Sextant detects         |                                                       |
+| ![Activity, light](docs/screenshots/activity-light.png)                 | ![Activity, dark](docs/screenshots/activity-dark.png) |
 
 To recreate the data, seed an empty database (no network access; it runs three days of checks against fakes and takes about two minutes). Sign in as `admin@example.com` / `password`.
 
