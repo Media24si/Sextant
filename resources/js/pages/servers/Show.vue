@@ -2,7 +2,9 @@
 import { Head, Link, router, usePage, usePoll } from '@inertiajs/vue3';
 import { ArrowRight } from '@lucide/vue';
 import { computed, ref } from 'vue';
+import ApplicationController from '@/actions/App/Http/Controllers/ApplicationController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
+import SiteController from '@/actions/App/Http/Controllers/SiteController';
 import RunChecksController from '@/actions/App/Http/Controllers/RunChecksController';
 import ActivityList from '@/components/app/ActivityList.vue';
 import IncidentList from '@/components/app/IncidentList.vue';
@@ -24,6 +26,7 @@ const props = defineProps<{
     traffic: App.Data.TrafficGroupData[];
     sites: App.Data.ServedSiteData[];
     sites_total: number;
+    applications_total: number;
     activity: App.Data.ActivityItemData[];
     monitors: App.Data.Monitors.MonitorRowData[];
     checker_options: App.Data.Monitors.CheckerOptionData[];
@@ -281,14 +284,23 @@ function restore(): void {
                 class="overflow-hidden rounded-xl border bg-card"
                 aria-labelledby="sites-served"
             >
-                <div class="flex items-baseline justify-between px-6 pt-5 pb-4">
+                <div
+                    class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-6 pt-5 pb-4"
+                >
                     <h2 id="sites-served" class="text-lg font-semibold">
                         Sites served
                     </h2>
                     <span
                         v-if="sites_total > 0"
                         class="text-sm text-muted-foreground"
-                        >{{ sites.length }} of {{ sites_total }}</span
+                        >{{ sites_total }}
+                        {{ sites_total === 1 ? 'site' : 'sites' }} ·
+                        {{ applications_total }}
+                        {{
+                            applications_total === 1
+                                ? 'application'
+                                : 'applications'
+                        }}</span
                     >
                 </div>
                 <div v-if="sites.length > 0" class="overflow-x-auto">
@@ -297,6 +309,9 @@ function restore(): void {
                             <tr>
                                 <th scope="col" class="px-6 py-3 font-medium">
                                     Site
+                                </th>
+                                <th scope="col" class="px-3 py-3 font-medium">
+                                    Application
                                 </th>
                                 <th scope="col" class="px-3 py-3 font-medium">
                                     Serving path
@@ -313,13 +328,30 @@ function restore(): void {
                                 class="border-t"
                             >
                                 <td class="px-6 py-3">
-                                    <span class="font-mono">{{
-                                        site.hostname
-                                    }}</span>
+                                    <Link
+                                        :href="SiteController.show(site.id)"
+                                        class="font-mono font-medium hover:underline"
+                                        >{{ site.hostname }}</Link
+                                    >
                                     <span
                                         v-if="site.description"
                                         class="block text-xs text-muted-foreground"
                                         >{{ site.description }}</span
+                                    >
+                                </td>
+                                <td class="px-3 py-3">
+                                    <Link
+                                        v-if="site.application_id"
+                                        :href="
+                                            ApplicationController.show(
+                                                site.application_id,
+                                            )
+                                        "
+                                        class="hover:underline"
+                                        >{{ site.application }}</Link
+                                    >
+                                    <span v-else class="text-muted-foreground"
+                                        >—</span
                                     >
                                 </td>
                                 <td class="px-3 py-3">
@@ -338,6 +370,23 @@ function restore(): void {
                     </table>
                 </div>
                 <EmptyState v-else title="No sites yet" />
+                <div
+                    v-if="sites_total > 0"
+                    class="flex flex-wrap items-center justify-between gap-3 border-t px-6 py-3 text-sm"
+                >
+                    <span class="text-muted-foreground"
+                        >Showing {{ sites.length }} of {{ sites_total }}</span
+                    >
+                    <Link
+                        :href="
+                            SiteController.index({
+                                query: { 'filter[backend]': String(server.id) },
+                            })
+                        "
+                        class="font-medium hover:underline"
+                        >View all sites on this server</Link
+                    >
+                </div>
             </section>
 
             <ServerVersionsPanel :server-id="server.id" :panel="versions" />

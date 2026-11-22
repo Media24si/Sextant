@@ -86,7 +86,7 @@ class ServerController extends Controller
     {
         $server->load(['addresses', 'os', 'backupLocations']);
 
-        $sites = $server->sites()->with(['frontService', 'server'])->orderBy('hostname')->get();
+        $sites = $server->sites()->with(['frontService', 'server', 'application'])->orderBy('hostname')->get();
 
         return Inertia::render('servers/Show', [
             ...MonitorProps::for($server),
@@ -96,6 +96,7 @@ class ServerController extends Controller
             'traffic' => $this->traffic(array_values($sites->all())),
             'sites' => $sites->take(self::SITES_SHOWN)->map(ServedSiteData::fromModel(...))->values(),
             'sites_total' => $sites->count(),
+            'applications_total' => $sites->pluck('application_id')->filter()->unique()->count(),
             'activity' => Activity::query()
                 ->where('server_id', $server->id)
                 ->with('user')

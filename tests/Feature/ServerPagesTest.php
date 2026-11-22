@@ -3,6 +3,7 @@
 use App\Enums\ChoiceList;
 use App\Enums\Status;
 use App\Models\Activity;
+use App\Models\Application;
 use App\Models\Choice;
 use App\Models\ExternalService;
 use App\Models\Server;
@@ -70,13 +71,14 @@ test('the list filters problems, missing backups and deleted servers, and sorts 
         ->and($names(['sort' => '-sites_count']))->toBe(['web02', 'web01']);
 });
 
-test('the server page shows how traffic reaches it, its sites and its changes', function () {
+test('the server page shows how traffic reaches it, its sites, their applications and its changes', function () {
     $this->actingAs($this->admin);
     $server = Server::factory()->withPrimaryAddress('192.0.2.12')->create(['name' => 'web02']);
     $server->forceFill(['versions_token' => 'sxt_secret'])->save();
     $varnish = ExternalService::factory()->create(['name' => 'Varnish']);
-    Site::factory()->create(['hostname' => 'svet24.si', 'server_id' => $server->id, 'front_service_id' => $varnish->id]);
-    Site::factory()->create(['hostname' => 'podjetje.svet24.si', 'server_id' => $server->id, 'front_service_id' => $varnish->id]);
+    $svet24 = Application::factory()->create(['name' => 'Svet24']);
+    Site::factory()->create(['hostname' => 'svet24.si', 'server_id' => $server->id, 'front_service_id' => $varnish->id, 'application_id' => $svet24->id]);
+    Site::factory()->create(['hostname' => 'podjetje.svet24.si', 'server_id' => $server->id, 'front_service_id' => $varnish->id, 'application_id' => $svet24->id]);
     Site::factory()->create(['hostname' => 'media24.si', 'server_id' => $server->id]);
 
     $response = $this->actingAs($this->reader)->get(route('servers.show', $server));
@@ -92,8 +94,13 @@ test('the server page shows how traffic reaches it, its sites and its changes', 
             ['name' => 'Direct', 'kind' => null, 'sites_count' => 1, 'first_site' => 'media24.si'],
         ])
         ->where('sites_total', 3)
+        ->where('applications_total', 1)
         ->where('sites.0.hostname', 'media24.si')
+        ->where('sites.0.application_id', null)
         ->where('sites.0.serving_path', ['front' => null, 'backend' => 'web02'])
+        ->where('sites.1.hostname', 'podjetje.svet24.si')
+        ->where('sites.1.application_id', $svet24->id)
+        ->where('sites.1.application', 'Svet24')
         ->where('activity', fn ($activity) => collect($activity)->pluck('type')->contains('server.versions_token_rotated')
             && collect($activity)->pluck('type')->contains('site.created')));
 

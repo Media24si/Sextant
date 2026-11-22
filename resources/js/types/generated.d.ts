@@ -132,6 +132,8 @@ export type ServedSiteData = {
 id: number,
 hostname: string,
 description: string | null,
+application_id: number | null,
+application: string | null,
 status: App.Enums.Status,
 serving_path: App.Data.ServingPathData,
 };
