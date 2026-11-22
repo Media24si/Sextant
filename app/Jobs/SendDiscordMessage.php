@@ -60,7 +60,7 @@ class SendDiscordMessage implements ShouldQueue
 
         $response = app(WebClient::class)->postJson(
             $webhook.(str_contains($webhook, '?') ? '&' : '?').'wait=true',
-            array_filter($this->payload, fn (mixed $value): bool => $value !== null),
+            $this->payload,
             timeout: 15,
         );
 
