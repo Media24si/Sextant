@@ -284,13 +284,28 @@ function serveVersionsPhp(Server $server, bool $behindHttps, Closure $requests):
     file_put_contents("{$dir}/versions.php", app(CollectorKit::class)->endpointPhp($server));
     file_put_contents("{$dir}/router.php", '<?php '.($behindHttps ? "\$_SERVER['HTTPS'] = 'on'; " : '')."require __DIR__.'/versions.php';");
 
-    $port = random_int(20000, 40000);
+    $freePort = stream_socket_server('tcp://127.0.0.1:0');
+    $port = (int) substr(strrchr(stream_socket_get_name($freePort, false), ':'), 1);
+    fclose($freePort);
+
     $process = new Process([PHP_BINARY, '-S', "127.0.0.1:{$port}", "{$dir}/router.php"]);
     $process->start();
-    usleep(400_000);
     Http::allowStrayRequests();
 
     try {
+        $deadline = microtime(true) + 10;
+
+        while (! ($connection = @fsockopen('127.0.0.1', $port, timeout: 0.2))) {
+            if (! $process->isRunning() || microtime(true) > $deadline) {
+                throw new RuntimeException("php -S did not start on port {$port}: ".$process->getErrorOutput());
+            }
+
+            usleep(20_000);
+        }
+
+        fclose($connection);
+
+        $requests("http://127.0.0.1:{$port}/");
         $requests("http://127.0.0.1:{$port}/");
     } finally {
         $process->stop();
