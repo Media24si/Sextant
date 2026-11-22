@@ -366,6 +366,7 @@ domains: App.Data.Dashboard.StatusCountsData,
 sites: App.Data.Dashboard.StatusCountsData,
 sites_unassigned: number,
 servers_below_minimum: number,
+servers_collector_outdated: number,
 };
 }
 namespace Detection {

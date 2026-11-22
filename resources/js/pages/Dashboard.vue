@@ -220,6 +220,22 @@ const belowSummary = computed(() => {
                         'Every reading is at or above its minimum.'
                     }}</span
                 >
+                <Link
+                    v-if="props.totals.servers_collector_outdated > 0"
+                    :href="
+                        ServerController.index({
+                            query: { 'filter[show]': 'collector_outdated' },
+                        })
+                    "
+                    class="text-sm text-status-warning-fg hover:underline"
+                    >{{ props.totals.servers_collector_outdated }}
+                    {{
+                        props.totals.servers_collector_outdated === 1
+                            ? 'server needs'
+                            : 'servers need'
+                    }}
+                    a collector update</Link
+                >
             </div>
         </section>
 

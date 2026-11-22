@@ -14,5 +14,7 @@ class TotalsData extends Data
         public int $sites_unassigned,
         /** Filled in by Phase 7 (software versions). */
         public int $servers_below_minimum,
+        /** Servers reading versions with an older collector than Sextant ships (§11.8). */
+        public int $servers_collector_outdated,
     ) {}
 }

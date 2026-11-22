@@ -266,6 +266,8 @@ it('flags servers whose collector is older than the one Sextant ships', function
             ->has('rows.data', 1)
             ->where('rows.data.0.name', 'web02')
             ->where('rows.data.0.collector_outdated', true));
+
+    $this->get(route('dashboard'))->assertInertia(fn (Assert $page) => $page->where('totals.servers_collector_outdated', 1));
 });
 
 /**

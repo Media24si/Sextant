@@ -26,6 +26,7 @@ use App\Models\ServerSoftware;
 use App\Models\Site;
 use App\Monitoring\MonitorClaimer;
 use App\Monitoring\NetworkHealth;
+use App\Versions\CollectorKit;
 use App\Versions\MinimumVersions;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,6 +58,7 @@ class DashboardBuilder
     public function __construct(
         private NetworkHealth $network,
         private MinimumVersions $minimums,
+        private CollectorKit $collector,
     ) {}
 
     /**
@@ -109,6 +111,7 @@ class DashboardBuilder
             sites: $this->counts(Site::query()),
             sites_unassigned: Site::query()->whereNull('server_id')->count(),
             servers_below_minimum: count($this->minimums->serverIdsBelow()),
+            servers_collector_outdated: Server::query()->collectorOutdated($this->collector->version())->count(),
         );
     }
 

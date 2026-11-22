@@ -48,7 +48,7 @@ test('the dashboard props follow the contract', function () {
             ->component('Dashboard')
             ->has('totals', fn (Assert $totals) => $totals
                 ->has('servers', fn (Assert $counts) => $counts->hasAll(['total', 'ok', 'warning', 'error', 'unknown']))
-                ->hasAll(['domains', 'sites', 'sites_unassigned', 'servers_below_minimum']))
+                ->hasAll(['domains', 'sites', 'sites_unassigned', 'servers_below_minimum', 'servers_collector_outdated']))
             ->hasAll(['issues', 'muted', 'pending_count', 'resolved', 'software', 'expiring', 'changes'])
             ->has('system', fn (Assert $system) => $system->hasAll(['last_dispatch_at', 'checks_running', 'stale_monitors', 'network_healthy'])));
 });
