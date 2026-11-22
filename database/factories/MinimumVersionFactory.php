@@ -19,8 +19,7 @@ class MinimumVersionFactory extends Factory
     {
         return [
             'software' => Software::Nginx,
-            'branch' => '',
-            'min_version' => '1.26.2',
+            'min_versions' => ['1.26.2'],
             'set_by' => User::factory()->admin(),
         ];
     }

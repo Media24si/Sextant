@@ -27,7 +27,6 @@ class ServerVersionData extends Data
     public static function fromModel(ServerSoftware $row): self
     {
         $minimums = app(MinimumVersions::class);
-        $minimum = $minimums->for($row->software, $row->branch);
 
         return new self(
             software: $row->software->value,
@@ -35,7 +34,7 @@ class ServerVersionData extends Data
             label: $row->label(),
             version: $row->version,
             package_version: $row->package_version,
-            min_version: $minimum?->min_version,
+            min_version: $minimums->floorFor($row),
             below_minimum: $minimums->isBelow($row),
             read_at: $row->read_at->toIso8601String(),
             details: $row->details,

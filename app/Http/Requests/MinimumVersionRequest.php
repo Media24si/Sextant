@@ -4,13 +4,16 @@ namespace App\Http\Requests;
 
 use App\Enums\Software;
 use App\Models\MinimumVersion;
+use App\Versions\VersionComparator;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * A minimum version (SPEC §3.15, §11.6): a branch only for PHP; the version
- * as an upstream number such as `1.26.2` or a kernel's `6.8.0-49`.
+ * A minimum version (SPEC §3.15, §11.6): one per software, with an upstream
+ * version per branch such as `8.2.36, 8.3.37` (or a kernel's `6.8.0-49`).
+ * Typed as one text field; stored as a sorted list.
  */
 class MinimumVersionRequest extends FormRequest
 {
@@ -21,9 +24,17 @@ class MinimumVersionRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $versions = $this->input('min_versions');
+        $versions = is_array($versions) ? $versions : (preg_split('/[\s,]+/', trim((string) $versions), -1, PREG_SPLIT_NO_EMPTY) ?: []);
+        $versions = array_values(array_unique(array_map(fn (mixed $version): string => trim((string) $version), $versions)));
+        $software = Software::tryFrom((string) $this->input('software'));
+
+        if ($software !== null) {
+            usort($versions, fn (string $a, string $b): int => VersionComparator::compare($software, $a, $b));
+        }
+
         $this->merge([
-            'branch' => $this->input('software') === Software::Php->value ? trim((string) $this->input('branch')) : '',
-            'min_version' => trim((string) $this->input('min_version')),
+            'min_versions' => $versions,
             'cve_url' => $this->filled('cve_url') ? trim((string) $this->input('cve_url')) : null,
             'note' => $this->filled('note') ? trim((string) $this->input('note')) : null,
         ]);
@@ -37,19 +48,46 @@ class MinimumVersionRequest extends FormRequest
         $minimum = $this->route('minimum_version');
 
         return [
-            'software' => ['required', Rule::in(array_map(fn (Software $software): string => $software->value, array_filter(Software::cases(), fn (Software $software): bool => $software->hasMinimum())))],
-            'branch' => [
-                'present', 'string', 'max:20',
-                Rule::requiredIf($this->input('software') === Software::Php->value),
-                'regex:/^(\d+\.\d+)?$/',
-                Rule::unique('minimum_versions', 'branch')
-                    ->where('software', (string) $this->input('software'))
-                    ->ignore($minimum instanceof MinimumVersion ? $minimum : null),
+            'software' => [
+                'required',
+                Rule::in(array_map(fn (Software $software): string => $software->value, array_filter(Software::cases(), fn (Software $software): bool => $software->hasMinimum()))),
+                Rule::unique('minimum_versions', 'software')->ignore($minimum instanceof MinimumVersion ? $minimum : null),
             ],
-            'min_version' => ['required', 'string', 'max:50', 'regex:/^\d+(\.\d+)*(-\d+)?$/'],
+            'min_versions' => ['required', 'array', 'min:1', 'max:20', $this->onePerBranch(...)],
+            'min_versions.*' => ['string', 'max:50', 'regex:/^\d+(\.\d+)*(-\d+)?$/'],
             'cve_url' => ['nullable', 'string', 'max:255', 'url:https,http'],
             'note' => ['nullable', 'string', 'max:255'],
         ];
+    }
+
+    /**
+     * @param  Closure(string): mixed  $fail
+     */
+    private function onePerBranch(string $attribute, mixed $versions, Closure $fail): void
+    {
+        $software = Software::tryFrom((string) $this->input('software'));
+
+        if ($software === null || ! is_array($versions)) {
+            return;
+        }
+
+        $seen = [];
+
+        foreach ($versions as $version) {
+            $branch = VersionComparator::branch($software, (string) $version);
+
+            if ($branch === null) {
+                continue;
+            }
+
+            if (isset($seen[$branch])) {
+                $fail("One version per branch: {$seen[$branch]} and {$version} are both on {$branch}.");
+
+                return;
+            }
+
+            $seen[$branch] = $version;
+        }
     }
 
     /**
@@ -58,10 +96,11 @@ class MinimumVersionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'branch.required' => 'Choose the PHP branch, e.g. 8.2.',
-            'branch.regex' => 'A PHP branch looks like 8.2.',
-            'branch.unique' => 'This software already has a minimum; change that one instead.',
-            'min_version.regex' => 'Enter an upstream version such as 1.26.2 (or 6.8.0-49 for a kernel).',
+            'software.unique' => 'This software already has a minimum; change that one instead.',
+            'min_versions.required' => 'Enter at least one version, e.g. 8.2.36.',
+            'min_versions.max' => 'Enter at most 20 versions.',
+            'min_versions.*.regex' => 'Enter upstream versions such as 1.26.2 (or 6.8.0-49 for a kernel), separated by commas.',
+            'min_versions.*.max' => 'A version is at most 50 characters.',
         ];
     }
 }

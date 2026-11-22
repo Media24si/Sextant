@@ -15,20 +15,20 @@ class MinimumVersionObserver extends InventoryObserver
 {
     public function created(MinimumVersion $minimum): void
     {
-        $this->record('minimum_version.set', $minimum, "Minimum {$minimum->label()} set to {$minimum->min_version}", ['min_version' => ['old' => null, 'new' => $minimum->min_version]]);
+        $this->record('minimum_version.set', $minimum, "Minimum {$minimum->label()} set to {$minimum->versionsList()}", ['min_versions' => ['old' => null, 'new' => $minimum->min_versions]]);
         $this->runVersionChecks();
     }
 
     public function updated(MinimumVersion $minimum): void
     {
-        $changes = $this->changes($minimum, ['min_version', 'cve_url', 'note']);
+        $changes = $this->changes($minimum, ['min_versions', 'cve_url', 'note']);
 
         if ($changes === []) {
             return;
         }
 
-        $summary = isset($changes['min_version'])
-            ? "Minimum {$minimum->label()} changed to {$minimum->min_version} (was {$changes['min_version']['old']})"
+        $summary = isset($changes['min_versions'])
+            ? "Minimum {$minimum->label()} changed to {$minimum->versionsList()} (was ".implode(', ', (array) $changes['min_versions']['old']).')'
             : "Minimum {$minimum->label()} changed: ".implode(', ', array_keys($changes));
 
         $this->record('minimum_version.changed', $minimum, $summary, $changes);
@@ -37,7 +37,7 @@ class MinimumVersionObserver extends InventoryObserver
 
     public function deleted(MinimumVersion $minimum): void
     {
-        $this->record('minimum_version.removed', $minimum, "Minimum {$minimum->label()} removed (was {$minimum->min_version})", ['min_version' => ['old' => $minimum->min_version, 'new' => null]]);
+        $this->record('minimum_version.removed', $minimum, "Minimum {$minimum->label()} removed (was {$minimum->versionsList()})", ['min_versions' => ['old' => $minimum->min_versions, 'new' => null]]);
         $this->runVersionChecks();
     }
 

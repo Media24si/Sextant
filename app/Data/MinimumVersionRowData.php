@@ -12,10 +12,10 @@ class MinimumVersionRowData extends Data
         public int $id,
         /** kernel, nginx, php, mysql or openssl */
         public string $software,
-        public string $branch,
-        /** e.g. "PHP 8.2" */
+        /** e.g. "PHP" */
         public string $label,
-        public string $min_version,
+        /** @var list<string> one per branch, e.g. ["8.2.36", "8.3.37"] */
+        public array $min_versions,
         public ?string $cve_url,
         public ?string $note,
         /** @var list<array{id: int, name: string, version: string}> */
@@ -32,9 +32,8 @@ class MinimumVersionRowData extends Data
         return new self(
             id: $minimum->id,
             software: $minimum->software->value,
-            branch: $minimum->branch,
             label: $minimum->label(),
-            min_version: $minimum->min_version,
+            min_versions: $minimum->min_versions,
             cve_url: $minimum->cve_url,
             note: $minimum->note,
             servers_below: $serversBelow,

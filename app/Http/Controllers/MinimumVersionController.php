@@ -7,7 +7,7 @@ use App\Enums\Software;
 use App\Http\Requests\MinimumVersionRequest;
 use App\Models\MinimumVersion;
 use App\Models\ServerSoftware;
-use App\Versions\VersionComparator;
+use App\Versions\MinimumVersions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,24 +19,20 @@ use Inertia\Response;
  */
 class MinimumVersionController extends Controller
 {
-    public function index(): Response
+    public function index(MinimumVersions $minimums): Response
     {
         $readings = ServerSoftware::query()->with('server')->whereHas('server')->get();
 
         return Inertia::render('minimum-versions/Index', [
-            'minimums' => MinimumVersion::query()->with('setBy')->orderBy('software')->orderBy('branch')->get()
+            'minimums' => MinimumVersion::query()->with('setBy')->orderBy('software')->get()
                 ->map(fn (MinimumVersion $minimum): MinimumVersionRowData => MinimumVersionRowData::fromModel($minimum, array_values($readings
-                    ->filter(fn (ServerSoftware $row): bool => $row->software === $minimum->software
-                        && ($minimum->software !== Software::Php || $row->branch === $minimum->branch)
-                        && VersionComparator::isBelow($row->software, $row->version, $minimum->min_version))
+                    ->filter(fn (ServerSoftware $row): bool => $row->software === $minimum->software && $minimums->isBelow($row))
                     ->map(fn (ServerSoftware $row): array => ['id' => $row->server_id, 'name' => $row->server->name, 'version' => $row->version])
                     ->all()))),
             'software' => array_values(array_map(
                 fn (Software $software): array => ['value' => $software->value, 'label' => $software->label()],
                 array_filter(Software::cases(), fn (Software $software): bool => $software->hasMinimum()),
             )),
-            // PHP branches seen on servers, to pick from.
-            'php_branches' => $readings->where('software', Software::Php)->pluck('branch')->unique()->sort()->values()->all(),
         ]);
     }
 

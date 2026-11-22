@@ -100,9 +100,8 @@ label: string,
 export type MinimumVersionRowData = {
 id: number,
 software: string,
-branch: string,
 label: string,
-min_version: string,
+min_versions: string[],
 cve_url: string | null,
 note: string | null,
 servers_below: {

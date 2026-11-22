@@ -20,15 +20,16 @@ import { Input } from '@/components/ui/input';
 import { formatDate } from '@/lib/datetime';
 
 /*
- * Minimum versions (SPEC §13.6, §11.6): the lowest safe upstream version per
- * software (per branch for PHP). Below it, a server's versions check warns.
+ * Minimum versions (SPEC §13.6, §11.6): the lowest safe upstream versions of
+ * each software, one per branch. A reading is compared with the version of
+ * the nearest listed branch at or below its own; a branch older than every
+ * listed one is below. Below it, a server's versions check warns.
  */
 type Row = App.Data.MinimumVersionRowData;
 
 const props = defineProps<{
     minimums: Row[];
     software: { value: string; label: string }[];
-    php_branches: string[];
 }>();
 
 const page = usePage();
@@ -39,8 +40,7 @@ const deleting = ref<Row | null>(null);
 
 const form = useForm({
     software: 'nginx',
-    branch: '',
-    min_version: '',
+    min_versions: '',
     cve_url: '',
     note: '',
 });
@@ -49,8 +49,7 @@ function add(): void {
     editing.value = null;
     form.defaults({
         software: 'nginx',
-        branch: '',
-        min_version: '',
+        min_versions: '',
         cve_url: '',
         note: '',
     });
@@ -63,8 +62,7 @@ function edit(row: Row): void {
     editing.value = row;
     form.defaults({
         software: row.software,
-        branch: row.branch,
-        min_version: row.min_version,
+        min_versions: row.min_versions.join(', '),
         cve_url: row.cve_url ?? '',
         note: row.note ?? '',
     });
@@ -98,7 +96,14 @@ function destroy(): void {
     }
 }
 
-const isPhp = computed(() => form.software === 'php');
+// Errors for one listed version come back as `min_versions.0`, `min_versions.1`, ….
+const versionsError = computed(
+    () =>
+        form.errors.min_versions ??
+        Object.entries(form.errors as Record<string, string>).find(([key]) =>
+            key.startsWith('min_versions.'),
+        )?.[1],
+);
 
 const fieldClasses =
     'border-input w-full rounded-md border bg-card px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30';
@@ -123,7 +128,7 @@ const fieldClasses =
             <EmptyState
                 v-if="minimums.length === 0"
                 title="No minimums set"
-                description="Set one after a security advisory, e.g. nginx 1.26.2."
+                description="Set one after a security advisory, e.g. nginx 1.30.7, 1.31.9."
             />
             <table v-else class="w-full text-sm">
                 <thead class="text-left text-muted-foreground">
@@ -154,7 +159,7 @@ const fieldClasses =
                             </p>
                         </td>
                         <td class="px-5 py-3 font-mono">
-                            {{ row.min_version }}
+                            {{ row.min_versions.join(', ') }}
                         </td>
                         <td class="px-5 py-3">
                             <span
@@ -228,62 +233,38 @@ const fieldClasses =
                     novalidate
                     @submit.prevent="submit"
                 >
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <FormField
-                            label="Software"
-                            for="software"
-                            :error="form.errors.software"
-                        >
-                            <select
-                                id="software"
-                                v-model="form.software"
-                                :class="fieldClasses"
-                                :disabled="editing !== null"
-                            >
-                                <option
-                                    v-for="item in software"
-                                    :key="item.value"
-                                    :value="item.value"
-                                >
-                                    {{ item.label }}
-                                </option>
-                            </select>
-                        </FormField>
-                        <FormField
-                            v-if="isPhp"
-                            label="PHP branch"
-                            for="branch"
-                            :error="form.errors.branch"
-                            required
-                        >
-                            <Input
-                                id="branch"
-                                v-model="form.branch"
-                                class="font-mono"
-                                placeholder="8.2"
-                                list="php-branches"
-                                :disabled="editing !== null"
-                            />
-                            <datalist id="php-branches">
-                                <option
-                                    v-for="branch in php_branches"
-                                    :key="branch"
-                                    :value="branch"
-                                />
-                            </datalist>
-                        </FormField>
-                    </div>
                     <FormField
-                        label="Minimum version"
-                        for="min_version"
-                        :error="form.errors.min_version"
+                        label="Software"
+                        for="software"
+                        :error="form.errors.software"
+                    >
+                        <select
+                            id="software"
+                            v-model="form.software"
+                            :class="fieldClasses"
+                            :disabled="editing !== null"
+                        >
+                            <option
+                                v-for="item in software"
+                                :key="item.value"
+                                :value="item.value"
+                            >
+                                {{ item.label }}
+                            </option>
+                        </select>
+                    </FormField>
+                    <FormField
+                        label="Minimum versions"
+                        for="min_versions"
+                        :error="versionsError"
+                        description="One per branch, separated by commas, e.g. 8.2.36, 8.3.37. A branch older than the oldest listed is always below."
                         required
                     >
                         <Input
-                            id="min_version"
-                            v-model="form.min_version"
+                            id="min_versions"
+                            v-model="form.min_versions"
                             class="font-mono"
-                            placeholder="1.26.2"
+                            placeholder="8.2.36, 8.3.37, 8.4.28"
                         />
                     </FormField>
                     <FormField

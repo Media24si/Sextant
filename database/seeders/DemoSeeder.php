@@ -149,11 +149,10 @@ class DemoSeeder extends Seeder
         $this->travel(CarbonImmutable::now()->addMinutes(5));
 
         foreach ([
-            [Software::Nginx, '', '1.26.2', 'https://nginx.org/en/security_advisories.html', 'HTTP/3 and mp4 module fixes'],
-            [Software::Php, '8.3', '8.3.14', 'https://www.php.net/ChangeLog-8.php#8.3.14', null],
-            [Software::Php, '8.2', '8.2.26', 'https://www.php.net/ChangeLog-8.php#8.2.26', null],
-        ] as [$software, $branch, $minimum, $cve, $note]) {
-            $version = new MinimumVersion(['software' => $software, 'branch' => $branch, 'min_version' => $minimum, 'cve_url' => $cve, 'note' => $note]);
+            [Software::Nginx, ['1.26.2'], 'https://nginx.org/en/security_advisories.html', 'HTTP/3 and mp4 module fixes'],
+            [Software::Php, ['8.2.26', '8.3.14'], 'https://www.php.net/ChangeLog-8.php#8.3.14', 'Older branches are below'],
+        ] as [$software, $minimums, $cve, $note]) {
+            $version = new MinimumVersion(['software' => $software, 'min_versions' => $minimums, 'cve_url' => $cve, 'note' => $note]);
             $version->forceFill(['set_by' => $this->admin->id])->save();
         }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Software;
+use App\Models\MinimumVersion;
 use App\Versions\InvalidVersionsFile;
 use App\Versions\VersionComparator;
 use App\Versions\VersionsFile;
@@ -43,6 +44,22 @@ it('knows when a version is below the minimum', function (Software $software, st
     [Software::Kernel, '6.8.0-51-generic', '6.8.0-49', false],
     [Software::Openssl, '3.0.13', '3.0.2', false],
     'unparseable is never below' => [Software::Mysql, 'unknown', '8.0.40', false],
+]);
+
+it('compares a reading with the nearest listed branch at or below its own', function (Software $software, array $minimums, string $version, string $floor, bool $below) {
+    $minimum = new MinimumVersion(['software' => $software, 'min_versions' => $minimums]);
+
+    expect($minimum->floorFor($version))->toBe($floor)
+        ->and(VersionComparator::isBelow($software, $version, $floor))->toBe($below);
+})->with([
+    'older than every listed branch' => [Software::Php, ['8.2.36', '8.3.37', '8.4.28', '8.5.13'], '8.1.30', '8.2.36', true],
+    'below on its branch' => [Software::Php, ['8.2.36', '8.3.37', '8.4.28', '8.5.13'], '8.2.35', '8.2.36', true],
+    'at its branch' => [Software::Php, ['8.2.36', '8.3.37', '8.4.28', '8.5.13'], '8.3.37', '8.3.37', false],
+    'newer than every listed branch' => [Software::Php, ['8.2.36', '8.3.37', '8.4.28', '8.5.13'], '8.6.0', '8.5.13', false],
+    'between listed branches' => [Software::Php, ['8.2.36', '8.4.28'], '8.3.1', '8.2.36', false],
+    'nginx on a later branch' => [Software::Nginx, ['1.31.9', '1.30.7'], '1.31.2', '1.31.9', true],
+    'single version' => [Software::Nginx, ['1.26.2'], '1.27.0', '1.26.2', false],
+    'kernel' => [Software::Kernel, ['6.8.0-51'], '6.8.0-49-generic', '6.8.0-51', true],
 ]);
 
 it('reads a schema 1 file, ignoring fields it does not know', function () {

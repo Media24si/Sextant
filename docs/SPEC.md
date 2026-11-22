@@ -358,14 +358,13 @@ Unique `(server_id, software, branch)`. Software missing from a new reading is d
 | Column | Type | Notes |
 |---|---|---|
 | `software` | varchar(20) | `kernel`, `nginx`, `php`, `mysql`, `openssl` |
-| `branch` | varchar(20) | `''`, or a PHP branch such as `8.2` |
-| `min_version` | varchar(50) | Lowest safe upstream version |
+| `min_versions` | json | Lowest safe upstream version per branch, sorted, e.g. `["8.2.36", "8.3.37", "8.4.28"]` |
 | `cve_url` | varchar(255) null | Link to the CVE or advisory |
 | `note` | varchar(255) null | |
 | `set_by` | FK → users | |
 | timestamps | | |
 
-Unique `(software, branch)`. A PHP minimum applies to that branch only; servers without the branch are not affected.
+Unique `software`. A branch is a version's first two parts (`8.2`, `1.30`, a kernel's `6.8`); the list has at most one version per branch. How a reading is compared with the list is in §11.6.
 
 ### 3.16 Remaining tables
 
@@ -1261,7 +1260,8 @@ When `os_reported` doesn't correspond to the admin's OS choice, both are shown o
 
 ### 11.6 Minimum versions and comparison
 
-- Admins manage minimums on the Minimum versions page: software, branch (PHP only), minimum, CVE link, note.
+- Admins manage minimums on the Minimum versions page: software, its versions (one per branch, e.g. `8.2.36, 8.3.37, 8.4.28, 8.5.13`), CVE link, note.
+- A reading is compared with the listed version on the nearest listed branch at or below its own branch. A branch older than every listed branch is compared with the lowest listed version, so it is always below (PHP 8.1.30 < 8.2.36). A branch newer than the listed ones, or between two of them, is compared with the listed branch below it, so it is never below (PHP 8.6.0 against 8.5.13). A single version behaves as one minimum for all branches.
 - Normalisation before `version_compare`:
   - Kernel: drop the flavour suffix (`-generic`, `-cloud-amd64`, …) and replace `-` with `.` (`6.8.0-49-generic` → `6.8.0.49`).
   - Others: take the leading `\d+(\.\d+)*` (`3.0.13`, `8.0.40`, `1.26.2`).

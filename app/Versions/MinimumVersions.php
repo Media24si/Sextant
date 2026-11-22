@@ -8,27 +8,34 @@ use App\Models\ServerSoftware;
 use Illuminate\Support\Collection;
 
 /**
- * Which readings are below the minimum an admin set (SPEC §11.6). A PHP
- * minimum applies to its branch only; the others have no branch.
+ * Which readings are below the minimum an admin set (SPEC §11.6). Each
+ * software has one minimum with a version per branch; a reading is compared
+ * with the version of the nearest listed branch at or below its own.
  */
 class MinimumVersions
 {
     /** @var Collection<string, MinimumVersion>|null */
     private ?Collection $minimums = null;
 
-    public function for(Software $software, string $branch): ?MinimumVersion
+    public function for(Software $software): ?MinimumVersion
     {
         $this->minimums ??= MinimumVersion::query()->get()
-            ->keyBy(fn (MinimumVersion $minimum): string => "{$minimum->software->value}:{$minimum->branch}");
+            ->keyBy(fn (MinimumVersion $minimum): string => $minimum->software->value);
 
-        return $this->minimums->get("{$software->value}:".($software === Software::Php ? $branch : ''));
+        return $this->minimums->get($software->value);
+    }
+
+    /** The listed version this reading is compared with, or null without a minimum. */
+    public function floorFor(ServerSoftware $row): ?string
+    {
+        return $this->for($row->software)?->floorFor($row->version);
     }
 
     public function isBelow(ServerSoftware $row): bool
     {
-        $minimum = $this->for($row->software, $row->branch);
+        $floor = $this->floorFor($row);
 
-        return $minimum !== null && VersionComparator::isBelow($row->software, $row->version, $minimum->min_version);
+        return $floor !== null && VersionComparator::isBelow($row->software, $row->version, $floor);
     }
 
     /**
@@ -40,15 +47,15 @@ class MinimumVersions
         $below = [];
 
         foreach ($rows as $row) {
-            $minimum = $this->for($row->software, $row->branch);
+            $floor = $this->floorFor($row);
 
-            if ($minimum !== null && VersionComparator::isBelow($row->software, $row->version, $minimum->min_version)) {
+            if ($floor !== null && VersionComparator::isBelow($row->software, $row->version, $floor)) {
                 $below[] = [
                     'software' => $row->label(),
                     'branch' => $row->branch,
                     'version' => $row->version,
-                    'min_version' => $minimum->min_version,
-                    'cve_url' => $minimum->cve_url,
+                    'min_version' => $floor,
+                    'cve_url' => $this->for($row->software)?->cve_url,
                 ];
             }
         }

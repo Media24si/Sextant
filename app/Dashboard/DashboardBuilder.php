@@ -75,7 +75,9 @@ class DashboardBuilder
         }
 
         foreach (MinimumVersion::query()->get() as $minimum) {
-            $rows["{$minimum->software->value}:{$minimum->branch}"] ??= ['software' => $minimum->software, 'branch' => $minimum->branch];
+            if ($readings->doesntContain('software', $minimum->software)) {
+                $rows["{$minimum->software->value}:"] = ['software' => $minimum->software, 'branch' => ''];
+            }
         }
 
         $order = array_flip(array_map(fn (Software $software): string => $software->value, Software::cases()));
@@ -84,14 +86,18 @@ class DashboardBuilder
         return array_values(array_map(function (array $row) use ($readings): SoftwareMinimumRowData {
             /** @var Software $software */
             $software = $row['software'];
-            $minimum = $this->minimums->for($software, $row['branch']);
+            $minimum = $this->minimums->for($software);
             $below = $readings
                 ->filter(fn (ServerSoftware $reading): bool => $reading->software === $software && $reading->branch === $row['branch'] && $this->minimums->isBelow($reading))
                 ->map(fn (ServerSoftware $reading): array => ['server' => $reading->server->name, 'version' => $reading->version])
                 ->values()
                 ->all();
 
-            return new SoftwareMinimumRowData($software->labelWithBranch($row['branch']), $row['branch'], $minimum?->min_version, array_values($below));
+            // A branch row shows the version it's compared with; a row without
+            // a branch shows every listed version.
+            $minVersion = $row['branch'] === '' ? $minimum?->versionsList() : $minimum?->floorFor($row['branch']);
+
+            return new SoftwareMinimumRowData($software->labelWithBranch($row['branch']), $row['branch'], $minVersion, array_values($below));
         }, $rows));
     }
 

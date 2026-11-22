@@ -30,6 +30,14 @@ class VersionComparator
         return preg_match('/^\d+(?:\.\d+)*/', $version, $match) === 1 ? $match[0] : null;
     }
 
+    /** The first two parts of the normalised version: `8.2`, `1.30`, a kernel's `6.8`. */
+    public static function branch(Software $software, string $version): ?string
+    {
+        $normalised = self::normalise($software, $version);
+
+        return $normalised === null ? null : implode('.', array_slice(explode('.', $normalised), 0, 2));
+    }
+
     /**
      * Below the minimum? Unparseable versions are never below (they can't be
      * judged; the admin sees them on the server page).

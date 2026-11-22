@@ -80,7 +80,7 @@ it('records nothing in the feed on the first reading, then every change', functi
 });
 
 it('is OK when everything is at or above the minimum', function () {
-    MinimumVersion::factory()->create(['software' => Software::Nginx, 'min_version' => '1.26.2']);
+    MinimumVersion::factory()->create(['software' => Software::Nginx, 'min_versions' => ['1.26.2']]);
     $this->client->respond(VERSIONS_URL, versionsFile());
     $monitor = versionsMonitor();
 
@@ -91,10 +91,9 @@ it('is OK when everything is at or above the minimum', function () {
         ->and($this->client->fetched[0]['token'])->toBe('sxt_'.str_repeat('a', 32));
 });
 
-it('warns about every reading below its minimum, PHP per branch', function () {
-    MinimumVersion::factory()->create(['software' => Software::Php, 'branch' => '8.2', 'min_version' => '8.2.26', 'cve_url' => 'https://cve.example/2024-1']);
-    MinimumVersion::factory()->create(['software' => Software::Php, 'branch' => '7.4', 'min_version' => '7.4.33']);
-    MinimumVersion::factory()->create(['software' => Software::Nginx, 'min_version' => '1.27.0']);
+it('warns about every reading below its minimum, per branch', function () {
+    MinimumVersion::factory()->create(['software' => Software::Php, 'min_versions' => ['7.4.33', '8.2.26'], 'cve_url' => 'https://cve.example/2024-1']);
+    MinimumVersion::factory()->create(['software' => Software::Nginx, 'min_versions' => ['1.27.0']]);
     $this->client->respond(VERSIONS_URL, versionsFile());
 
     RunMonitor::dispatchSync(versionsMonitor()->id);
@@ -104,6 +103,16 @@ it('warns about every reading below its minimum, PHP per branch', function () {
     expect($incident->severity)->toBe(Status::Warning)
         ->and($incident->message)->toBe('nginx 1.26.2 < 1.27.0; PHP 8.2 8.2.20 < 8.2.26')
         ->and($incident->last_result['data']['below'][1]['cve_url'])->toBe('https://cve.example/2024-1');
+});
+
+it('treats a branch older than every listed branch as below', function () {
+    MinimumVersion::factory()->create(['software' => Software::Php, 'min_versions' => ['8.3.15', '8.4.10']]);
+    MinimumVersion::factory()->create(['software' => Software::Nginx, 'min_versions' => ['1.24.5', '1.26.3']]);
+    $this->client->respond(VERSIONS_URL, versionsFile());
+
+    RunMonitor::dispatchSync(versionsMonitor()->id);
+
+    expect(Incident::query()->sole()->message)->toBe('nginx 1.26.2 < 1.26.3; PHP 8.2 8.2.20 < 8.3.15; PHP 8.3 8.3.14 < 8.3.15');
 });
 
 it('is Unknown and keeps the stored versions when the file can\'t be read', function (Closure $setUp, string $message) {
@@ -126,28 +135,30 @@ it('re-runs every versions check when a minimum is set, changed or removed', fun
     $monitor = versionsMonitor();
     $monitor->forceFill(['next_run_at' => now()->addDay()])->saveQuietly();
 
-    $this->actingAs($this->admin)->post(route('minimum-versions.store'), ['software' => 'nginx', 'min_version' => '1.26.2'])->assertSessionHasNoErrors();
+    $this->actingAs($this->admin)->post(route('minimum-versions.store'), ['software' => 'nginx', 'min_versions' => '1.26.2'])->assertSessionHasNoErrors();
     $minimum = MinimumVersion::query()->sole();
-    $this->put(route('minimum-versions.update', $minimum), ['software' => 'nginx', 'min_version' => '1.27.0'])->assertSessionHasNoErrors();
+    $this->put(route('minimum-versions.update', $minimum), ['software' => 'nginx', 'min_versions' => '1.31.9, 1.30.7'])->assertSessionHasNoErrors();
+    expect($minimum->fresh()->min_versions)->toBe(['1.30.7', '1.31.9']);
     $this->delete(route('minimum-versions.destroy', $minimum));
 
     Queue::assertPushed(RunMonitor::class, 3);
     expect(Activity::query()->where('type', 'like', 'minimum_version.%')->orderBy('id')->pluck('summary')->all())->toBe([
         'Minimum nginx set to 1.26.2',
-        'Minimum nginx changed to 1.27.0 (was 1.26.2)',
-        'Minimum nginx removed (was 1.27.0)',
+        'Minimum nginx changed to 1.30.7, 1.31.9 (was 1.26.2)',
+        'Minimum nginx removed (was 1.30.7, 1.31.9)',
     ]);
 });
 
 it('validates minimums', function (array $input, string $error) {
-    MinimumVersion::factory()->create(['software' => Software::Php, 'branch' => '8.2']);
+    MinimumVersion::factory()->create(['software' => Software::Php, 'min_versions' => ['8.2.26']]);
 
     $this->actingAs($this->admin)->post(route('minimum-versions.store'), $input)->assertSessionHasErrors($error);
 })->with([
-    'os has no minimum' => [['software' => 'os', 'min_version' => '24.04'], 'software'],
-    'php needs a branch' => [['software' => 'php', 'min_version' => '8.3.14'], 'branch'],
-    'one per branch' => [['software' => 'php', 'branch' => '8.2', 'min_version' => '8.2.30'], 'branch'],
-    'not a version' => [['software' => 'nginx', 'min_version' => 'latest'], 'min_version'],
+    'os has no minimum' => [['software' => 'os', 'min_versions' => '24.04'], 'software'],
+    'one per software' => [['software' => 'php', 'min_versions' => '8.3.14'], 'software'],
+    'one per branch' => [['software' => 'nginx', 'min_versions' => '1.30.7, 1.30.9'], 'min_versions'],
+    'no versions' => [['software' => 'nginx', 'min_versions' => ' , '], 'min_versions'],
+    'not a version' => [['software' => 'nginx', 'min_versions' => 'latest'], 'min_versions.0'],
 ]);
 
 it('shows a token once and keeps only its last four characters', function () {
@@ -350,7 +361,7 @@ it('tests the connection without storing anything', function () {
 it('shows versions on the servers list, filters servers below a minimum, and finds them by version', function () {
     record(versionsFile());
     Server::factory()->create(['name' => 'web09']);
-    MinimumVersion::factory()->create(['software' => Software::Php, 'branch' => '8.2', 'min_version' => '8.2.26']);
+    MinimumVersion::factory()->create(['software' => Software::Php, 'min_versions' => ['8.2.26']]);
 
     $this->actingAs(User::factory()->reader()->create())->get(route('servers.index', ['filter' => ['show' => 'below_minimum']]))
         ->assertInertia(fn (Assert $page) => $page
@@ -366,17 +377,21 @@ it('shows versions on the servers list, filters servers below a minimum, and fin
 
 it('puts software against minimums on the dashboard and the server page', function () {
     record(versionsFile());
-    MinimumVersion::factory()->create(['software' => Software::Nginx, 'min_version' => '1.27.0']);
+    MinimumVersion::factory()->create(['software' => Software::Nginx, 'min_versions' => ['1.26.2', '1.27.0']]);
+    MinimumVersion::factory()->create(['software' => Software::Php, 'min_versions' => ['8.3.15']]);
 
     $this->actingAs(User::factory()->reader()->create())->get(route('dashboard'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('totals.servers_below_minimum', 1)
-            ->where('software.1', ['software' => 'nginx', 'branch' => '', 'min_version' => '1.27.0', 'below' => [['server' => 'web02', 'version' => '1.26.2']]]));
+            ->where('software.1', ['software' => 'nginx', 'branch' => '', 'min_version' => '1.26.2, 1.27.0', 'below' => []])
+            ->where('software.2', ['software' => 'PHP 8.2', 'branch' => '8.2', 'min_version' => '8.3.15', 'below' => [['server' => 'web02', 'version' => '8.2.20']]]));
 
     $this->get(route('servers.show', $this->web02))
         ->assertInertia(fn (Assert $page) => $page
             ->where('versions.configured', true)
             ->where('versions.token_masked', 'sxt_••••aaaa')
             ->where('versions.os_reported', 'Ubuntu 24.04.1 LTS')
-            ->has('versions.versions', 6));
+            ->has('versions.versions', 6)
+            ->where('versions.versions', fn ($versions) => collect($versions)->firstWhere('label', 'PHP 8.2')['min_version'] === '8.3.15'
+                && collect($versions)->firstWhere('label', 'nginx')['min_version'] === '1.26.2'));
 });
