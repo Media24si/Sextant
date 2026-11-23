@@ -8,6 +8,7 @@ use App\Data\Dashboard\SystemHealthData;
 use App\Models\Domain;
 use App\Models\Incident;
 use App\Models\Server;
+use App\Models\Site;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -56,6 +57,7 @@ class HandleInertiaRequests extends Middleware
             'nav' => fn (): ?array => $user ? [
                 'servers' => Server::query()->count(),
                 'domains' => Domain::query()->count(),
+                'sites' => Site::query()->count(),
                 'incidents' => Incident::query()->open()->roots()->count(),
             ] : null,
             // The header's health pill on every page (SPEC §13.4); the dashboard also polls it.

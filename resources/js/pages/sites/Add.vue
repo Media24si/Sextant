@@ -138,7 +138,7 @@ function toggleCheck(checker: string, attached: boolean): void {
 }
 
 const breadcrumbs = [
-    { title: 'Domains', href: DomainController.index() },
+    { title: 'Sites', href: SiteController.index() },
     { title: 'Add site', href: SiteController.create() },
 ];
 

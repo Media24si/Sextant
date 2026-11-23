@@ -148,9 +148,6 @@ const selected = (event: Event) => {
             :description="`${counts.all} ${counts.all === 1 ? 'site' : 'sites'} · Needs review = no backend server assigned yet`"
         >
             <template #actions>
-                <Button variant="outline" as-child>
-                    <Link :href="DomainController.index()">By domain</Link>
-                </Button>
                 <template v-if="page.props.can.manage">
                     <Button variant="outline" as-child>
                         <Link :href="SiteImportController.create()"

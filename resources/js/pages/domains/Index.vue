@@ -132,9 +132,6 @@ function problems(row: Row): string {
             :description="`${counts.all} ${counts.all === 1 ? 'domain' : 'domains'} · ${counts.sites} ${counts.sites === 1 ? 'subdomain' : 'subdomains'} · open a domain to see how each subdomain is served`"
         >
             <template #actions>
-                <Button variant="outline" as-child>
-                    <Link :href="SiteController.index()">All sites</Link>
-                </Button>
                 <template v-if="page.props.can.manage">
                     <Button variant="outline" as-child>
                         <Link :href="DomainController.create()"
@@ -296,9 +293,13 @@ function problems(row: Row): string {
                                         <span
                                             class="inline-flex items-center gap-2"
                                         >
-                                            <span class="font-mono">{{
-                                                site.hostname
-                                            }}</span>
+                                            <Link
+                                                :href="
+                                                    SiteController.show(site.id)
+                                                "
+                                                class="font-mono hover:underline"
+                                                >{{ site.hostname }}</Link
+                                            >
                                             <RepoLink
                                                 v-if="site.github_url"
                                                 :url="site.github_url"

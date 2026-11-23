@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Trash2 } from '@lucide/vue';
 import { Head, Link, router, usePage, usePoll } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ApplicationController from '@/actions/App/Http/Controllers/ApplicationController';
@@ -163,6 +164,16 @@ function destroy(): void {
                 class="flex flex-wrap gap-2"
             >
                 <Button
+                    variant="ghost"
+                    class="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    @click="confirmingDelete = true"
+                    ><Trash2 aria-hidden="true" /> Delete</Button
+                >
+                <span
+                    class="mx-1 hidden w-px self-stretch bg-border sm:block"
+                    aria-hidden="true"
+                ></span>
+                <Button
                     variant="outline"
                     :disabled="runningChecks || monitors.length === 0"
                     @click="runChecks"
@@ -173,9 +184,6 @@ function destroy(): void {
                     :disabled="monitors.length === 0"
                     @click="muting = true"
                     >{{ mutedUntil ? 'Muted' : 'Mute until…' }}</Button
-                >
-                <Button variant="outline" @click="confirmingDelete = true"
-                    >Delete</Button
                 >
                 <Button variant="outline" @click="redetecting = true"
                     >Re-run detection</Button

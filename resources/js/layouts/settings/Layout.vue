@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import Heading from '@/components/Heading.vue';
+import PageHeader from '@/components/app/PageHeader.vue';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
@@ -29,16 +28,18 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
 </script>
 
 <template>
-    <div class="px-4 py-6">
-        <Heading
+    <div
+        class="flex w-full max-w-[1280px] flex-col gap-6 px-4 pt-7 pb-12 md:px-8"
+    >
+        <PageHeader
             title="Settings"
-            description="Manage your profile and account settings"
+            description="Your profile, how you sign in, and how Sextant looks."
         />
 
-        <div class="flex flex-col lg:flex-row lg:space-x-12">
-            <aside class="w-full max-w-xl lg:w-48">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+            <aside class="w-full lg:w-52 lg:shrink-0">
                 <nav
-                    class="flex flex-col space-y-1 space-x-0"
+                    class="flex flex-row flex-wrap gap-1 lg:flex-col"
                     aria-label="Settings"
                 >
                     <Button
@@ -46,26 +47,26 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                         :key="toUrl(item.href)"
                         variant="ghost"
                         :class="[
-                            'w-full justify-start',
+                            'justify-start lg:w-full',
                             { 'bg-muted': isCurrentOrParentUrl(item.href) },
                         ]"
+                        :aria-current="
+                            isCurrentOrParentUrl(item.href) ? 'page' : undefined
+                        "
                         as-child
                     >
                         <Link :href="item.href">
-                            <component :is="item.icon" class="h-4 w-4" />
                             {{ item.title }}
                         </Link>
                     </Button>
                 </nav>
             </aside>
 
-            <Separator class="my-6 lg:hidden" />
-
-            <div class="flex-1 md:max-w-2xl">
-                <section class="max-w-xl space-y-12">
-                    <slot />
-                </section>
-            </div>
+            <section
+                class="min-w-0 flex-1 space-y-10 rounded-xl border bg-card p-6 lg:max-w-3xl"
+            >
+                <slot />
+            </section>
         </div>
     </div>
 </template>

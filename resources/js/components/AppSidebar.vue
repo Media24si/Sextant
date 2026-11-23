@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import {
     Activity,
+    AppWindow,
     Boxes,
     Gauge,
     Globe,
@@ -24,6 +25,7 @@ import MinimumVersionController from '@/actions/App/Http/Controllers/MinimumVers
 import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
 import UserController from '@/actions/App/Http/Controllers/UserController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
+import SiteController from '@/actions/App/Http/Controllers/SiteController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import {
@@ -40,11 +42,15 @@ import type { SidebarNavItem } from '@/types';
 const page = usePage();
 
 /*
- * SPEC §13.4. Items without an href are pages from later phases; they show
- * disabled until their route exists.
+ * SPEC §13.4, grouped: the inventory first (what we have and how it
+ * connects), then monitoring, then settings. Readers see every page they can
+ * open; only Users is for admins.
  */
-const mainNavItems = computed<SidebarNavItem[]>(() => [
+const overviewItems: SidebarNavItem[] = [
     { title: 'Overview', href: dashboard(), icon: LayoutGrid },
+];
+
+const inventoryItems = computed<SidebarNavItem[]>(() => [
     {
         title: 'Servers',
         href: ServerController.index(),
@@ -58,10 +64,24 @@ const mainNavItems = computed<SidebarNavItem[]>(() => [
         count: page.props.nav?.domains,
     },
     {
+        title: 'Sites',
+        href: SiteController.index(),
+        icon: AppWindow,
+        count: page.props.nav?.sites,
+    },
+    {
         title: 'Applications',
         href: ApplicationController.index(),
         icon: Boxes,
     },
+    {
+        title: 'External services',
+        href: ExternalServiceController.index(),
+        icon: SquareDashed,
+    },
+]);
+
+const monitoringItems = computed<SidebarNavItem[]>(() => [
     { title: 'Monitors', href: MonitorController.index(), icon: Gauge },
     {
         title: 'Incidents',
@@ -70,22 +90,19 @@ const mainNavItems = computed<SidebarNavItem[]>(() => [
         count: page.props.nav?.incidents,
     },
     { title: 'Activity', href: ActivityController.index(), icon: Activity },
-]);
-
-const adminNavItems: SidebarNavItem[] = [
     {
         title: 'Minimum versions',
         href: MinimumVersionController.index(),
         icon: ShieldCheck,
     },
-    {
-        title: 'External services',
-        href: ExternalServiceController.index(),
-        icon: SquareDashed,
-    },
+]);
+
+const settingsItems = computed<SidebarNavItem[]>(() => [
     { title: 'Lists', href: ChoiceController.index(), icon: List },
-    { title: 'Users', href: UserController.index(), icon: Users },
-];
+    ...(page.props.can.manage
+        ? [{ title: 'Users', href: UserController.index(), icon: Users }]
+        : []),
+]);
 </script>
 
 <template>
@@ -107,12 +124,10 @@ const adminNavItems: SidebarNavItem[] = [
         </SidebarHeader>
 
         <SidebarContent class="gap-4">
-            <NavMain :items="mainNavItems" />
-            <NavMain
-                v-if="page.props.can.manage"
-                label="Admin"
-                :items="adminNavItems"
-            />
+            <NavMain :items="overviewItems" />
+            <NavMain label="Inventory" :items="inventoryItems" />
+            <NavMain label="Monitoring" :items="monitoringItems" />
+            <NavMain label="Settings" :items="settingsItems" />
         </SidebarContent>
     </Sidebar>
     <slot />

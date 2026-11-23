@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, usePage, usePoll } from '@inertiajs/vue3';
-import { ArrowRight } from '@lucide/vue';
+import { ArrowRight, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ApplicationController from '@/actions/App/Http/Controllers/ApplicationController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
@@ -185,6 +185,16 @@ function restore(): void {
                 class="flex flex-wrap gap-2"
             >
                 <Button
+                    variant="ghost"
+                    class="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    @click="confirmingDelete = true"
+                    ><Trash2 aria-hidden="true" /> Delete</Button
+                >
+                <span
+                    class="mx-1 hidden w-px self-stretch bg-border sm:block"
+                    aria-hidden="true"
+                ></span>
+                <Button
                     variant="outline"
                     :disabled="runningChecks || monitors.length === 0"
                     @click="runChecks"
@@ -196,9 +206,6 @@ function restore(): void {
                     @click="muting = true"
                     >{{ mutedUntil ? 'Muted' : 'Mute until…' }}</Button
                 >
-                <Button variant="outline" @click="confirmingDelete = true">
-                    Delete
-                </Button>
                 <Button as-child>
                     <Link :href="ServerController.edit(server.id)"
                         >Edit server</Link

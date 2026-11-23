@@ -20,7 +20,12 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             can: Can;
-            nav: { servers: number; domains: number; incidents: number } | null;
+            nav: {
+                servers: number;
+                domains: number;
+                sites: number;
+                incidents: number;
+            } | null;
             system: App.Data.Dashboard.SystemHealthData | null;
             sidebarOpen: boolean;
             [key: string]: unknown;
