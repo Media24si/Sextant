@@ -15,9 +15,14 @@
 
 set -u
 
+# Cron runs /etc/cron.d jobs with PATH=/usr/bin:/bin, and nginx and mysqld
+# live in /usr/sbin: without this, every hourly run after the installer's
+# first one reported them as not installed.
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 # Bump when this script or versions.php.stub changes; servers that report an
 # older number show "Collector outdated" in Sextant (SPEC §11.8).
-SEXTANT_COLLECTOR_VERSION=4
+SEXTANT_COLLECTOR_VERSION=5
 
 # Where versions.json goes; versions.php reads it from here. The file is
 # readable by everyone (0644), so versions.php works whichever user its

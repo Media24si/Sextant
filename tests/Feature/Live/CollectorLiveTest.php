@@ -42,6 +42,24 @@ it('writes a valid versions file on', function (string $image) {
         ->and($file->generatedAt->diffInMinutes(now(), true))->toBeLessThan(10);
 })->with(['ubuntu:24.04', 'debian:12'])->group('live');
 
+it('finds nginx in /usr/sbin under cron\'s minimal PATH on', function (string $image) {
+    skipWithoutDocker();
+
+    $process = new Process([
+        'docker', 'run', '--rm',
+        '-v', resource_path('collector/sextant-collect.sh').':/usr/local/bin/sextant-collect:ro',
+        $image,
+        'bash', '-c', 'apt-get update -qq >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq nginx >/dev/null && env -i PATH=/usr/bin:/bin SEXTANT_DIR=/tmp/sextant /usr/bin/bash /usr/local/bin/sextant-collect && cat /tmp/sextant/versions.json',
+    ]);
+    $process->setTimeout(300)->run();
+
+    expect($process->isSuccessful())->toBeTrue($process->getErrorOutput());
+
+    $software = array_map(fn ($reading) => $reading->software, VersionsFile::fromJson($process->getOutput())->readings);
+
+    expect($software)->toContain(Software::Nginx);
+})->with(['ubuntu:24.04', 'debian:12'])->group('live');
+
 it('installs, then updates, the collector, cron and versions.php on', function (string $image) {
     skipWithoutDocker();
 
