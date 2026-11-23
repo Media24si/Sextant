@@ -22,6 +22,7 @@ use App\Monitoring\IncidentPresenter;
 use App\Monitoring\MonitorProps;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -45,7 +46,13 @@ class SiteController extends Controller
 
     public function index(Request $request): Response
     {
-        $query = QueryBuilder::for(Site::query()->with(['domain', 'application', 'frontService', 'server']), $request)
+        // Deleted domains and applications too: the Deleted filter lists sites whose domain was deleted after them.
+        $query = QueryBuilder::for(Site::query()->with([
+            'domain' => fn (BelongsTo $relation) => $relation->withTrashed(),
+            'application' => fn (BelongsTo $relation) => $relation->withTrashed(),
+            'frontService',
+            'server',
+        ]), $request)
             ->allowedFilters(
                 AllowedFilter::callback('show', function (Builder $query, mixed $value): void {
                     match ($value) {

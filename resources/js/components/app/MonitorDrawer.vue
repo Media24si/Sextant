@@ -149,6 +149,16 @@ function destroy(): void {
                         <Button
                             size="sm"
                             variant="outline"
+                            @click="muting = true"
+                            >{{
+                                detail.monitor.muted_until
+                                    ? 'Muted…'
+                                    : 'Mute until…'
+                            }}</Button
+                        >
+                        <Button
+                            size="sm"
+                            variant="outline"
                             class="text-destructive"
                             @click="confirmingDelete = true"
                             >Delete</Button

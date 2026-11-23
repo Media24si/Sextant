@@ -48,6 +48,7 @@ export type DomainFormData = {
 id: number | null,
 name: string,
 notes: string | null,
+sites: number,
 };
 export type DomainNameserversData = {
 nameservers: string[],

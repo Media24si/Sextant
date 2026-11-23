@@ -133,6 +133,24 @@ test('domain names are validated', function (string $name) {
         ->assertSessionHasErrors('name');
 })->with(['SVET24.si', 'svet24', 'not a domain', 'https://svet24.si', 'news.svet24.si', 'co.uk']);
 
+test('a renamed domain must be one you renew, and a domain with sites keeps its name', function () {
+    $empty = Domain::factory()->create(['name' => 'svet24.si']);
+    $withSites = Domain::factory()->create(['name' => 'reporter.si']);
+    Site::factory()->for($withSites)->create(['hostname' => 'reporter.si']);
+
+    $this->actingAs($this->admin);
+
+    $this->put(route('domains.update', $empty), ['name' => 'news.svet24.si'])->assertSessionHasErrors('name');
+    $this->put(route('domains.update', $empty), ['name' => 'co.uk'])->assertSessionHasErrors('name');
+    $this->put(route('domains.update', $withSites), ['name' => 'reporter.com'])
+        ->assertSessionHasErrors(['name' => "reporter.si has 1 site, so its name can't change. Add the new domain instead."]);
+    $this->put(route('domains.update', $withSites), ['name' => 'reporter.si', 'notes' => 'Kept'])->assertSessionHasNoErrors();
+    $this->put(route('domains.update', $empty), ['name' => 'svet24.com'])->assertSessionHasNoErrors();
+
+    expect($empty->fresh()->name)->toBe('svet24.com')
+        ->and($withSites->fresh()->only(['name', 'notes']))->toBe(['name' => 'reporter.si', 'notes' => 'Kept']);
+});
+
 test('a domain with sites is not deleted; an empty one is, and comes back', function () {
     $domain = Domain::factory()->create(['name' => 'svet24.si']);
     $site = Site::factory()->for($domain)->create();

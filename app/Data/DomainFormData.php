@@ -6,8 +6,8 @@ use App\Models\Domain;
 use Spatie\LaravelData\Data;
 
 /**
- * The simple domain form of Phase 1. Phase 2's Add domain (SPEC §10.5) adds
- * the registry lookup and subdomains.
+ * Edit domain. Adding one is Add domain (SPEC §10.5). `sites` counts live
+ * sites: a domain with sites keeps its name (DomainRequest).
  */
 class DomainFormData extends Data
 {
@@ -15,10 +15,11 @@ class DomainFormData extends Data
         public ?int $id,
         public string $name,
         public ?string $notes,
+        public int $sites = 0,
     ) {}
 
     public static function fromModel(Domain $domain): self
     {
-        return new self($domain->id, $domain->display_name, $domain->notes);
+        return new self($domain->id, $domain->display_name, $domain->notes, $domain->sites()->count());
     }
 }

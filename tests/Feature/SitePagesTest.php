@@ -149,6 +149,20 @@ test('the site page shows its path and changes; delete and restore', function ()
     expect($site->fresh()->trashed())->toBeFalse();
 });
 
+test('the deleted filter lists sites whose domain was deleted after them', function () {
+    $site = Site::factory()->for($this->domain)->create(['hostname' => 'kviz.svet24.si']);
+    $site->delete();
+    $this->domain->delete();
+
+    $this->actingAs($this->reader)
+        ->get(route('sites.index', ['filter' => ['show' => 'deleted']]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rows.data.0.hostname', 'kviz.svet24.si')
+            ->where('rows.data.0.domain', 'svet24.si')
+            ->where('rows.data.0.deleted', true));
+});
+
 test('a site is not restored when its hostname is taken again', function () {
     $site = Site::factory()->for($this->domain)->create(['hostname' => 'svet24.si']);
     $site->delete();

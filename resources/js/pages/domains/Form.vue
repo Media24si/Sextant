@@ -62,6 +62,11 @@ function submit(): void {
                 label="Domain"
                 for="name"
                 :error="form.errors.name"
+                :description="
+                    props.form.sites > 0
+                        ? `Its ${props.form.sites === 1 ? 'site is' : `${props.form.sites} sites are`} under this name, so it can't change. Add the new domain instead.`
+                        : undefined
+                "
                 required
             >
                 <Input
@@ -70,6 +75,7 @@ function submit(): void {
                     class="font-mono"
                     placeholder="svet24.si"
                     autocomplete="off"
+                    :readonly="props.form.sites > 0"
                     :aria-invalid="!!form.errors.name"
                 />
             </FormField>
