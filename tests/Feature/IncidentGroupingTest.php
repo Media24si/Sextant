@@ -73,6 +73,30 @@ it('uses the earliest server.tcp outage as the parent', function () {
     expect(openOn($this->http)->parent_id)->toBe($first->id);
 });
 
+it('does not group a site under an SSH outage', function () {
+    $ssh = Monitor::factory()->on($this->web02, 'server.tcp')->create(['label' => 'SSH', 'arguments' => ['port' => 22]]);
+    openOn($ssh);
+
+    expect(openOn($this->http)->parent_id)->toBeNull();
+});
+
+it('groups a site on its own port under that port\'s outage', function () {
+    $admin = Monitor::factory()->on($this->web02, 'server.tcp')->create(['label' => 'Admin', 'arguments' => ['port' => 8443]]);
+    $this->site->update(['port' => 8443]);
+    $outage = openOn($admin);
+
+    expect(openOn($this->http)->parent_id)->toBe($outage->id)
+        ->and(openOn(Monitor::factory()->on(Site::factory()->create(['server_id' => $this->web02->id]), 'site.fake')->create())->parent_id)->toBeNull();
+});
+
+it('does not adopt site incidents when an SSH outage opens', function () {
+    $recent = openOn($this->http);
+
+    openOn(Monitor::factory()->on($this->web02, 'server.tcp')->create(['label' => 'SSH', 'arguments' => ['port' => 22]]));
+
+    expect($recent->fresh()->parent_id)->toBeNull();
+});
+
 it('checks the backend server at a site\'s first failure', function () {
     Queue::fake();
     FakeChecker::then(CheckResult::error('Down'));

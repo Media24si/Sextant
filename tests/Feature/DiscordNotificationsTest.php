@@ -134,6 +134,20 @@ it('suppresses a child that joins an outage already sent', function () {
     expect($child->events()->sole()->suppressed_reason)->toBe('grouped');
 });
 
+it('lets a child notify on its own when its parent outage is muted', function () {
+    $this->tcp->update(['muted_until' => now()->addHour()]);
+    $this->manager->open($this->tcp, $this->web02, CheckResult::error('Port 443 refused'), now());
+    $child = siteIncident('error', $this->web02, 'vestnik.svet24.si');
+    $this->travel(21)->seconds();
+
+    flushNotifications();
+
+    Http::assertSentCount(1);
+    expect($child->parent_id)->not->toBeNull()
+        ->and(sentMessages()[0]['embeds'][0]['title'])->toContain('vestnik.svet24.si')
+        ->and($child->events()->sole()->suppressed_reason)->toBeNull();
+});
+
 it('lets a child wait while its parent\'s opened event settles', function () {
     $this->manager->open($this->tcp, $this->web02, CheckResult::error('Port 443 refused'), now());
     $this->travel(15)->seconds();

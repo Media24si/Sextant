@@ -50,10 +50,11 @@ class NotificationFlusher
                 continue;
             }
 
-            // Step 3: children never notify on their own while their parent is open.
+            // Step 3: children never notify on their own while their parent is
+            // open, unless the parent was muted and so never reached Discord.
             $parent = $incident->parent;
 
-            if ($parent !== null && $this->wasOpenAt($parent, $event->created_at)) {
+            if ($parent !== null && $this->wasOpenAt($parent, $event->created_at) && ! $this->wasMuted($parent)) {
                 $parentOpened = $parent->events->firstWhere('type', IncidentEventType::Opened);
 
                 if ($parentOpened !== null && $parentOpened->notified_at === null) {
@@ -127,6 +128,7 @@ class NotificationFlusher
                 'incident.monitor',
                 'incident.monitorable',
                 'incident.parent.events',
+                'incident.parent.monitor',
                 'incident.parent.monitorable',
             ])
             ->orderBy('id')
@@ -158,6 +160,14 @@ class NotificationFlusher
     private function wasOpenAt(Incident $incident, CarbonInterface $at): bool
     {
         return $incident->resolved_at === null || $incident->resolved_at->gte($at);
+    }
+
+    /** A muted parent's outage was never sent, so its children must speak for themselves. */
+    private function wasMuted(Incident $parent): bool
+    {
+        $opened = $parent->events->firstWhere('type', IncidentEventType::Opened);
+
+        return $parent->monitor->isMuted() || $opened?->suppressed_reason === self::SUPPRESSED_MUTED;
     }
 
     private function mark(IncidentEvent $event, CarbonInterface $now, ?string $suppressed): void

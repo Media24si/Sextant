@@ -182,7 +182,7 @@ class IncidentManager
     private function group(Incident $incident, Model&Monitorable $resource, CarbonInterface $now): void
     {
         if ($resource instanceof Site && $resource->server_id !== null) {
-            $parent = $this->outageOf($resource->server_id);
+            $parent = $this->outageOf($resource->server_id, $resource);
 
             if ($parent !== null) {
                 $incident->forceFill(['parent_id' => $parent->id])->save();
@@ -196,17 +196,12 @@ class IncidentManager
 
     /**
      * A server's error-severity `server.tcp` incident adopts open root
-     * incidents of its sites that opened in the last 15 minutes.
+     * incidents of its sites that opened in the last 15 minutes, when the
+     * port that failed serves them (see outageOf()).
      */
     private function adoptChildren(Incident $incident, CarbonInterface $now): void
     {
         if ($incident->checker !== 'server.tcp' || $incident->severity !== Status::Error || $incident->monitorable_type !== 'server') {
-            return;
-        }
-
-        $parent = $this->outageOf($incident->monitorable_id);
-
-        if ($parent === null) {
             return;
         }
 
@@ -218,24 +213,41 @@ class IncidentManager
             ->where('monitorable_type', 'site')
             ->whereIn('monitorable_id', Site::query()->where('server_id', $incident->monitorable_id)->select('id'))
             ->where('opened_at', '>=', $now->copy()->subMinutes($window))
-            ->pluck('id');
+            ->with('monitorable')
+            ->get();
 
-        // Two steps: MySQL can't update a table it's reading in a subquery.
-        Incident::query()->whereKey($orphans)->update(['parent_id' => $parent->id]);
+        foreach ($orphans as $orphan) {
+            $site = $orphan->monitorable;
+            $parent = $site instanceof Site ? $this->outageOf($incident->monitorable_id, $site) : null;
+
+            if ($parent !== null) {
+                $orphan->forceFill(['parent_id' => $parent->id])->save();
+            }
+        }
     }
 
-    /** The earliest open error-severity `server.tcp` incident on a server (§6.5). */
-    private function outageOf(int $serverId): ?Incident
+    /**
+     * The earliest open error-severity `server.tcp` incident on a server
+     * that takes the site down with it (§6.5): one on port 80, 443 or the
+     * site's own port. A closed SSH port says nothing about the sites, so
+     * grouping under it would hide a real site outage from Discord.
+     */
+    private function outageOf(int $serverId, Site $site): ?Incident
     {
+        $webPorts = array_values(array_filter([80, 443, $site->port]));
+
         return Incident::query()
             ->open()
             ->where('monitorable_type', 'server')
             ->where('monitorable_id', $serverId)
             ->where('checker', 'server.tcp')
             ->where('severity', Status::Error)
+            ->with('monitor')
             ->orderBy('opened_at')
             ->orderBy('id')
-            ->first();
+            ->get()
+            ->first(fn (Incident $outage): bool => $outage->monitor !== null
+                && in_array($this->registry->settings($outage->monitor)->arguments->int('port'), $webPorts, true));
     }
 
     private function event(Incident $incident, IncidentEventType $type, string $message, bool $notify, ?int $userId = null, ?CarbonInterface $at = null): void
