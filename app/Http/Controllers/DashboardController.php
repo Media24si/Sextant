@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Dashboard\DashboardBuilder;
+use App\Packages\RepositoryPresenter;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -12,7 +13,7 @@ use Inertia\Response;
  */
 class DashboardController extends Controller
 {
-    public function __invoke(DashboardBuilder $dashboard): Response
+    public function __invoke(DashboardBuilder $dashboard, RepositoryPresenter $repositories): Response
     {
         return Inertia::render('Dashboard', [
             'totals' => fn () => $dashboard->totals(),
@@ -22,6 +23,7 @@ class DashboardController extends Controller
             'pending_count' => fn () => $dashboard->pendingCount(),
             'resolved' => fn () => $dashboard->resolved(),
             'software' => fn () => $dashboard->software(),
+            'packages' => fn () => $repositories->minimumRows(),
             'expiring' => fn () => $dashboard->expiring(),
             'changes' => fn () => $dashboard->changes(),
             'system' => fn () => $dashboard->system(),

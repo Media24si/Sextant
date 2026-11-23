@@ -8,6 +8,7 @@ use App\Checks\CheckerRegistry;
 use App\Models\Concerns\Monitorable;
 use App\Models\Domain;
 use App\Models\Monitor;
+use App\Models\Repository;
 use App\Models\Server;
 use App\Models\Site;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -24,7 +25,7 @@ use Illuminate\Validation\Validator;
  */
 class MonitorRequest extends FormRequest
 {
-    private const RESOURCES = ['server' => Server::class, 'domain' => Domain::class, 'site' => Site::class];
+    private const RESOURCES = ['server' => Server::class, 'domain' => Domain::class, 'site' => Site::class, 'repository' => Repository::class];
 
     public function authorize(): bool
     {

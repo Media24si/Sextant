@@ -43,6 +43,7 @@ use Illuminate\Support\Carbon;
  * @property-read Application|null $application
  * @property-read ExternalService|null $frontService
  * @property-read Server|null $server
+ * @property-read Repository|null $repository
  */
 #[ObservedBy(SiteObserver::class)]
 #[Fillable(['domain_id', 'application_id', 'hostname', 'scheme', 'port', 'front_service_id', 'server_id', 'description', 'github_url', 'notes'])]
@@ -123,6 +124,22 @@ class Site extends Model implements Monitorable
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
+    }
+
+    /**
+     * The repository of this site's own GitHub link (SPEC §3.21).
+     *
+     * @return BelongsTo<Repository, $this>
+     */
+    public function repository(): BelongsTo
+    {
+        return $this->belongsTo(Repository::class, 'github_url', 'url');
+    }
+
+    /** Its own repository, or else its application's. */
+    public function effectiveRepository(): ?Repository
+    {
+        return $this->github_url !== null ? $this->repository : $this->application?->repository;
     }
 
     /**

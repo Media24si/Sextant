@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Checks\CheckerRegistry;
 use App\Models\Domain;
+use App\Models\Repository;
 use App\Models\Server;
 use App\Models\Site;
 use App\Monitoring\DefaultMonitors;
@@ -31,11 +32,11 @@ class SyncDefaultMonitors extends Command
         }
 
         $type = explode('.', $checker)[0];
-        $model = ['server' => Server::class, 'domain' => Domain::class, 'site' => Site::class][$type];
+        $model = ['server' => Server::class, 'domain' => Domain::class, 'site' => Site::class, 'repository' => Repository::class][$type];
         $dryRun = (bool) $this->option('dry-run');
         $added = 0;
 
-        $model::query()->eachById(function (Server|Domain|Site $resource) use ($defaults, $checker, $dryRun, &$added): void {
+        $model::query()->eachById(function (Server|Domain|Site|Repository $resource) use ($defaults, $checker, $dryRun, &$added): void {
             foreach ($defaults->attach($resource, spread: true, onlyChecker: $checker, dryRun: $dryRun) as $monitor) {
                 $added++;
                 $this->components->twoColumnDetail($resource->resourceName(), $monitor->label ?? $checker);

@@ -9,6 +9,8 @@ use App\Models\GithubToken;
 use App\Models\Incident;
 use App\Models\MinimumVersion;
 use App\Models\Monitor;
+use App\Models\PackageMinimum;
+use App\Models\Repository;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\User;
@@ -30,6 +32,7 @@ use App\Net\TcpProbe;
 use App\Net\TlsProbe;
 use App\Net\VersionsClient;
 use App\Net\WhoisClient;
+use App\Packages\PackageMinimums;
 use App\Versions\MinimumVersions;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -60,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(GithubClient::class, HttpGithubClient::class);
         // Minimums are cached per request or job.
         $this->app->scoped(MinimumVersions::class);
+        $this->app->scoped(PackageMinimums::class);
     }
 
     /**
@@ -99,6 +103,8 @@ class AppServiceProvider extends ServiceProvider
             'incident' => Incident::class,
             'minimum_version' => MinimumVersion::class,
             'github_token' => GithubToken::class,
+            'repository' => Repository::class,
+            'package_minimum' => PackageMinimum::class,
         ]);
     }
 

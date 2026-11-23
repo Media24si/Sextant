@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Data\MinimumVersionRowData;
+use App\Enums\Ecosystem;
 use App\Enums\Software;
 use App\Http\Requests\MinimumVersionRequest;
 use App\Models\MinimumVersion;
+use App\Models\RepositoryPackage;
 use App\Models\ServerSoftware;
+use App\Packages\RepositoryPresenter;
 use App\Versions\MinimumVersions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +22,7 @@ use Inertia\Response;
  */
 class MinimumVersionController extends Controller
 {
-    public function index(MinimumVersions $minimums): Response
+    public function index(MinimumVersions $minimums, RepositoryPresenter $repositories): Response
     {
         $readings = ServerSoftware::query()->with('server')->whereHas('server')->get();
 
@@ -33,6 +36,10 @@ class MinimumVersionController extends Controller
                 fn (Software $software): array => ['value' => $software->value, 'label' => $software->label()],
                 array_filter(Software::cases(), fn (Software $software): bool => $software->hasMinimum()),
             )),
+            'package_minimums' => $repositories->minimumRows(),
+            'ecosystems' => array_map(fn (Ecosystem $ecosystem): array => ['value' => $ecosystem->value, 'label' => $ecosystem->label()], Ecosystem::cases()),
+            // Package names seen in repositories, for the name field's suggestions.
+            'package_names' => RepositoryPackage::query()->where('direct', true)->distinct()->orderBy('name')->limit(2000)->pluck('name'),
         ]);
     }
 

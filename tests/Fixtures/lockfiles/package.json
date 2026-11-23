@@ -1,0 +1,5 @@
+{
+  "name": "old-site",
+  "dependencies": {"jquery": "^3.4.1", "old-lodash": "npm:lodash@4.17.15"},
+  "devDependencies": {"laravel-mix": "^5.0.9"}
+}

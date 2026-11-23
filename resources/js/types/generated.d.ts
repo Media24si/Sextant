@@ -170,6 +170,21 @@ export type OptionData = {
 id: number,
 label: string,
 };
+export type PackageMinimumRowData = {
+id: number,
+ecosystem: App.Enums.Ecosystem,
+name: string,
+min_versions: string[],
+cve_url: string | null,
+note: string | null,
+repositories_below: {
+id: number,
+name: string,
+version: string,
+}[],
+set_by: string,
+updated_at: string,
+};
 export type ProfileData = {
 name: string,
 email: string,
@@ -353,6 +368,7 @@ muted: App.Data.Dashboard.IssueGroupData[],
 pending_count: number,
 resolved: App.Data.Dashboard.ResolvedItemData[],
 software: App.Data.Dashboard.SoftwareMinimumRowData[],
+packages: App.Data.PackageMinimumRowData[],
 expiring: App.Data.Dashboard.ExpiringItemData[],
 changes: App.Data.ActivityItemData[],
 system: App.Data.Dashboard.SystemHealthData,
@@ -670,11 +686,57 @@ value: string,
 inherited: boolean,
 };
 }
+namespace Repositories {
+export type RepositoryPackageData = {
+ecosystem: App.Enums.Ecosystem,
+name: string,
+version: string,
+dev: boolean,
+direct: boolean,
+min_version: string | null,
+below_minimum: boolean,
+cve_url: string | null,
+};
+export type RepositoryRowData = {
+id: number,
+owner: string,
+name: string,
+full_name: string,
+url: string,
+status: App.Enums.Status,
+default_branch: string | null,
+lock_files: string[],
+read_at: string | null,
+packages_count: number,
+below_count: number,
+used_by: App.Data.Repositories.RepositoryUserData[],
+has_token: boolean,
+token_expires_at: string | null,
+deleted: boolean,
+};
+export type RepositorySummaryData = {
+id: number,
+full_name: string,
+status: App.Enums.Status,
+read_at: string | null,
+lock_files: string[],
+packages_count: number,
+watched: App.Data.Repositories.RepositoryPackageData[],
+via: string | null,
+};
+export type RepositoryUserData = {
+type: string,
+id: number,
+name: string,
+via: string | null,
+};
+}
 }
 namespace Enums {
 export type ActivityCategory = 'status' | 'inventory' | 'detected';
 export type ChoiceList = 'os' | 'backup_location';
 export type Confidence = 'detected' | 'suggested' | 'not_found';
+export type Ecosystem = 'composer' | 'npm';
 export type ExternalServiceKind = 'cdn' | 'proxy' | 'other';
 export type ImportOutcome = 'created' | 'needs_review' | 'skipped';
 export type IncidentEventType = 'opened' | 'escalated' | 'deescalated' | 'acknowledged' | 'reminder' | 'resolved';

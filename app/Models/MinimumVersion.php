@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Software;
 use App\Observers\MinimumVersionObserver;
+use App\Versions\Floor;
 use App\Versions\VersionComparator;
 use Carbon\CarbonInterface;
 use Database\Factories\MinimumVersionFactory;
@@ -68,28 +69,11 @@ class MinimumVersion extends Model
      */
     public function floorFor(string $version): ?string
     {
-        $versions = $this->min_versions;
-        usort($versions, fn (string $a, string $b): int => VersionComparator::compare($this->software, $a, $b));
-
-        if ($versions === []) {
-            return null;
-        }
-
-        $branch = VersionComparator::branch($this->software, $version);
-        $floor = $versions[0];
-
-        if ($branch === null) {
-            return $floor;
-        }
-
-        foreach ($versions as $candidate) {
-            $candidateBranch = VersionComparator::branch($this->software, $candidate);
-
-            if ($candidateBranch !== null && version_compare($candidateBranch, $branch, '<=')) {
-                $floor = $candidate;
-            }
-        }
-
-        return $floor;
+        return Floor::pick(
+            $this->min_versions,
+            $version,
+            fn (string $version): ?string => VersionComparator::branch($this->software, $version),
+            fn (string $a, string $b): int => VersionComparator::compare($this->software, $a, $b),
+        );
     }
 }

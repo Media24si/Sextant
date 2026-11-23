@@ -1,0 +1,52 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  axios:
+    specifier: ^1.6.0
+    version: 1.6.2
+  vue:
+    specifier: ^3.3.4
+    version: 3.3.4
+
+devDependencies:
+  vite:
+    specifier: ^4.4.9
+    version: 4.4.9(@types/node@20.10.0)
+
+packages:
+
+  /@babel/parser@7.23.5:
+    resolution: {integrity: sha512-aaa==}
+    engines: {node: '>=6.0.0'}
+    hasBin: true
+    dev: false
+
+  /axios@1.6.2:
+    resolution: {integrity: sha512-bbb==}
+    dependencies:
+      follow-redirects: 1.15.3
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /follow-redirects@1.15.3:
+    resolution: {integrity: sha512-ccc==}
+    dev: false
+
+  /vite@4.4.9(@types/node@20.10.0):
+    resolution: {integrity: sha512-ddd==}
+    dev: true
+
+  /vue@3.3.4:
+    resolution: {integrity: sha512-eee==}
+    dev: false
+
+  github.com/media24/widgets/0a1b2c3d:
+    resolution: {tarball: https://codeload.github.com/media24/widgets/tar.gz/0a1b2c3d}
+    name: widgets
+    version: 0.0.0
+    dev: false

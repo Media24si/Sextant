@@ -57,7 +57,7 @@ class EmbedBuilder
             $lines = [...$lines, ...$this->affectedSites($group->root, $lead, $children)];
         }
 
-        if ($lead->checker === 'server.versions') {
+        if (in_array($lead->checker, ['server.versions', 'repository.packages'], true)) {
             $lines = [...$lines, ...$this->belowMinimum($lead)];
         }
 
@@ -196,7 +196,7 @@ class EmbedBuilder
     }
 
     /**
-     * `server.versions`: each item below minimum with its CVE link (§12.1).
+     * `server.versions` and `repository.packages`: each item below minimum with its CVE link (§12.1).
      *
      * @return list<string>
      */

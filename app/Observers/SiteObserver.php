@@ -8,6 +8,7 @@ use App\Models\Server;
 use App\Models\Site;
 use App\Monitoring\IncidentManager;
 use App\Monitoring\MonitorEffects;
+use App\Packages\RepositorySync;
 
 class SiteObserver extends InventoryObserver
 {
@@ -16,6 +17,7 @@ class SiteObserver extends InventoryObserver
     public function created(Site $site): void
     {
         $this->record('site.created', $site, "Site {$site->display_hostname} added");
+        RepositorySync::afterChange($site, wholeRecord: true);
     }
 
     public function updated(Site $site): void
@@ -41,18 +43,22 @@ class SiteObserver extends InventoryObserver
         if ($other !== []) {
             $this->record('site.updated', $site, "Site {$site->display_hostname} changed: ".implode(', ', array_keys($other)), $other);
         }
+
+        RepositorySync::afterChange($site);
     }
 
     public function deleted(Site $site): void
     {
         $this->record('site.deleted', $site, "Site {$site->display_hostname} deleted");
         app(IncidentManager::class)->resolveFor($site->monitors()->get(), IncidentResolution::ResourceDeleted);
+        RepositorySync::afterChange($site, wholeRecord: true);
     }
 
     public function restored(Site $site): void
     {
         $this->record('site.restored', $site, "Site {$site->display_hostname} restored");
         MonitorEffects::runSoon($site);
+        RepositorySync::afterChange($site, wholeRecord: true);
     }
 
     /**

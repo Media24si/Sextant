@@ -6,6 +6,7 @@ use App\Checks\Conditions\RespondsToPing;
 use App\Checks\Conditions\UsesHttps;
 use App\Checks\Domain\DomainExpirationChecker;
 use App\Checks\Domain\NameserversChecker;
+use App\Checks\Repository\PackagesChecker;
 use App\Checks\Server\PingChecker;
 use App\Checks\Server\TcpChecker;
 use App\Checks\Server\VersionsChecker;
@@ -100,6 +101,16 @@ return [
             'arguments' => [],
         ],
 
+        'repository.packages' => [
+            'class' => PackagesChecker::class,
+            'queue' => 'checks-slow',
+            'interval' => 1440,
+            'failures_before_incident' => 1,   // deterministic: a package is below the minimum or it isn't
+            'successes_before_resolve' => 1,
+            'max_severity' => 'warning',
+            'arguments' => [],
+        ],
+
         'site.redirect' => [
             'class' => RedirectChecker::class,
             'queue' => 'checks',
@@ -133,6 +144,10 @@ return [
             ['checker' => 'site.ssl', 'only_if' => UsesHttps::class],
             ['checker' => 'site.path'],
             ['checker' => 'site.redirect'],
+        ],
+
+        'repository' => [
+            ['checker' => 'repository.packages'],
         ],
 
     ],

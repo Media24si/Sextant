@@ -38,7 +38,7 @@ class DefaultMonitors
     {
         $type = $resource->getMorphClass();
 
-        if (! in_array($type, ['server', 'domain', 'site'], true)) {
+        if (! in_array($type, ['server', 'domain', 'site', 'repository'], true)) {
             return [];
         }
         $created = [];

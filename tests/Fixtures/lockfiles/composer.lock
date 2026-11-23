@@ -1,0 +1,16 @@
+{
+    "_readme": ["This file locks the dependencies of your project to a known state"],
+    "content-hash": "0123456789abcdef",
+    "packages": [
+        {"name": "guzzlehttp/guzzle", "version": "7.9.2", "type": "library"},
+        {"name": "Laravel/Framework", "version": "v12.9.1", "type": "library"},
+        {"name": "media24/internal", "version": "dev-main", "type": "library"}
+    ],
+    "packages-dev": [
+        {"name": "pestphp/pest", "version": "v3.7.4", "type": "library"},
+        {"name": "phpunit/phpunit", "version": "11.5.3", "type": "library"}
+    ],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "plugin-api-version": "2.6.0"
+}

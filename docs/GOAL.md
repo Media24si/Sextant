@@ -83,6 +83,7 @@ A domain can also be added with several subdomains at once, and a list of URLs c
 - Upgrades and downgrades go into the change feed.
 - **Minimum safe versions**: after a CVE, an admin sets the lowest safe version per software (per branch for PHP), with a link to the CVE. Servers below it turn orange (Warning), appear under current issues and are posted to Discord as a warning. Upgrading clears it at the next read.
 - Every server we monitor runs PHP. Windows servers can't run the bash collector, so their versions stay empty in v1.
+- **Application packages** (added 2026-11-23): Sextant reads `composer.lock`, `package-lock.json` and `pnpm-lock.yaml` from the GitHub repositories that sites and applications link to, with one read-only token per GitHub owner (fine-grained, Contents: Read-only, only the linked repositories). After a CVE, an admin sets the lowest safe version of a package per major version (e.g. `laravel/framework` 12.13, 13.39); repositories below it, and the applications and sites using them, show it, and Discord gets a warning, exactly as for server software.
 
 ### 6. Monitoring
 
@@ -153,18 +154,18 @@ All thresholds are defaults and can be changed per monitor.
 - **Detection proposes; the admin confirms.**
 - **Checker = code, monitor = configuration.** A new kind of check is a new class plus a config entry, with no schema change.
 - **Keep the watcher honest.** Canary checks stop incidents from opening when Sextant's own network is down, and a Sentry heartbeat reports if Sextant stops running.
-- **Nothing to log in to.** Sextant never holds SSH or other credentials to our servers; servers publish what Sextant needs.
+- **Nothing to log in to.** Sextant never holds SSH or other credentials to our servers; servers publish what Sextant needs. The only credentials it holds are read-only GitHub tokens for reading lock files.
 - **Grow without re-architecture.** Agent metrics, app checks, push heartbeats, CVE matching and CDN-bypass origin checks will all fit in later as new checkers or data.
 
 ## Not in v1
 
 - Server metrics: CPU, disk, memory, services, containers (v1 reads only software versions)
 - Checking that backups actually run (v1 records only where they are stored)
-- Automatic matching of software versions against CVE databases (v1 has manual minimum versions)
+- Automatic matching of software or package versions against CVE databases (v1 has manual minimum versions)
 - Checking from more than one location
 - A public status page
 - Multiple teams or per-resource permissions (v1 has two roles: admin and reader)
-- Application checks (health endpoints, deployed versions) and mobile apps (see "After v1")
+- Application checks (health endpoints, deployed versions) and mobile apps (see "After v1"); v1 reads the packages locked on a repository's default branch, not what is deployed
 - Origin checks that bypass the CDN, and checks of external services themselves
 - Serving paths longer than one external service plus one backend
 - On-call rotations and escalation policies

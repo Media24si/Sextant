@@ -16,6 +16,7 @@ import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import RedetectSiteDialog from '@/components/app/RedetectSiteDialog.vue';
 import RepoLink from '@/components/app/RepoLink.vue';
+import RepositoryPackagesCard from '@/components/app/RepositoryPackagesCard.vue';
 import ServingPath from '@/components/app/ServingPath.vue';
 import StatusBadge from '@/components/app/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ const props = defineProps<{
     monitors: App.Data.Monitors.MonitorRowData[];
     checker_options: App.Data.Monitors.CheckerOptionData[];
     incidents: App.Data.Incidents.IncidentRowData[];
+    repository: App.Data.Repositories.RepositorySummaryData | null;
 }>();
 
 // Results arrive while the page is open (SPEC §13.7).
@@ -238,6 +240,10 @@ function destroy(): void {
                     :monitors="monitors"
                     :checker-options="checker_options"
                     :resource="{ type: 'site', id: site.id }"
+                />
+                <RepositoryPackagesCard
+                    v-if="repository"
+                    :repository="repository"
                 />
             </div>
         </div>

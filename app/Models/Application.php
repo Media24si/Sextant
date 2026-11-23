@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -26,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ * @property-read Repository|null $repository
  */
 #[ObservedBy(ApplicationObserver::class)]
 #[Fillable(['name', 'description', 'github_url', 'notes'])]
@@ -40,6 +42,16 @@ class Application extends Model
     public function sites(): HasMany
     {
         return $this->hasMany(Site::class);
+    }
+
+    /**
+     * The repository of the GitHub link (SPEC §3.21).
+     *
+     * @return BelongsTo<Repository, $this>
+     */
+    public function repository(): BelongsTo
+    {
+        return $this->belongsTo(Repository::class, 'github_url', 'url');
     }
 
     /**

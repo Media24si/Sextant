@@ -164,10 +164,11 @@ const selected = (event: Event) => {
                     :value="filters.type ?? ''"
                     @change="setFilter('type', selected($event))"
                 >
-                    <option value="">Servers, domains and sites</option>
+                    <option value="">All resources</option>
                     <option value="server">Servers</option>
                     <option value="domain">Domains</option>
                     <option value="site">Sites</option>
+                    <option value="repository">Repositories</option>
                 </select>
                 <select
                     :class="selectClasses"

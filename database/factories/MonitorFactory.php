@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Domain;
 use App\Models\Monitor;
+use App\Models\Repository;
 use App\Models\Server;
 use App\Models\Site;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -31,7 +32,7 @@ class MonitorFactory extends Factory
         ];
     }
 
-    public function on(Server|Domain|Site $resource, string $checker): static
+    public function on(Server|Domain|Site|Repository $resource, string $checker): static
     {
         return $this->state([
             'monitorable_type' => $resource->getMorphClass(),

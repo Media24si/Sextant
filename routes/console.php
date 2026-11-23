@@ -18,3 +18,4 @@ Schedule::command('horizon:snapshot')->everyFiveMinutes()->sentryMonitor();
 
 Schedule::command('proxies:refresh')->daily()->withoutOverlapping();
 Schedule::command('rdap:refresh-bootstrap')->weekly()->withoutOverlapping();
+Schedule::command('repositories:sync')->daily()->withoutOverlapping();

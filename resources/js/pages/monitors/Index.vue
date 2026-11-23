@@ -5,6 +5,7 @@ import { computed, h, ref } from 'vue';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
+import RepositoryController from '@/actions/App/Http/Controllers/RepositoryController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
 import DataTable from '@/components/app/DataTable.vue';
 import MonitorBadges from '@/components/app/MonitorBadges.vue';
@@ -47,7 +48,10 @@ const resourceHref = (resource: App.Data.Monitors.MonitorResourceData) =>
         server: ServerController.show,
         domain: DomainController.show,
         site: SiteController.show,
-    })[resource.type as 'server' | 'domain' | 'site']?.(resource.id);
+        repository: RepositoryController.show,
+    })[resource.type as 'server' | 'domain' | 'site' | 'repository']?.(
+        resource.id,
+    );
 
 const columns: ColumnDef<Row, unknown>[] = [
     {
@@ -188,10 +192,11 @@ const selectedValue = (event: Event) => {
                     :value="filters.type ?? ''"
                     @change="setFilter('type', selectedValue($event))"
                 >
-                    <option value="">Servers, domains and sites</option>
+                    <option value="">All resources</option>
                     <option value="server">Servers</option>
                     <option value="domain">Domains</option>
                     <option value="site">Sites</option>
+                    <option value="repository">Repositories</option>
                 </select>
             </template>
         </DataTable>

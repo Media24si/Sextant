@@ -10,6 +10,7 @@ use App\Data\SiteRowData;
 use App\Http\Requests\ApplicationRequest;
 use App\Models\Activity;
 use App\Models\Application;
+use App\Packages\RepositoryPresenter;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -67,6 +68,7 @@ class ApplicationController extends Controller
         return Inertia::render('applications/Show', [
             'application' => ApplicationRowData::fromModel($application),
             'notes' => $application->notes,
+            'repository' => app(RepositoryPresenter::class)->summary($application->repository),
             'sites' => $application->sites->map(fn ($site) => SiteRowData::fromModel($site->setRelation('application', $application)))->values(),
             'activity' => Activity::query()
                 ->where(fn ($query) => $query

@@ -6,6 +6,7 @@ import {
     AppWindow,
     Boxes,
     Gauge,
+    FolderGit2,
     Globe,
     KeyRound,
     LayoutGrid,
@@ -25,6 +26,7 @@ import GithubAccessController from '@/actions/App/Http/Controllers/GithubAccessC
 import IncidentController from '@/actions/App/Http/Controllers/IncidentController';
 import MinimumVersionController from '@/actions/App/Http/Controllers/MinimumVersionController';
 import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
+import RepositoryController from '@/actions/App/Http/Controllers/RepositoryController';
 import UserController from '@/actions/App/Http/Controllers/UserController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
@@ -75,6 +77,11 @@ const inventoryItems = computed<SidebarNavItem[]>(() => [
         title: 'Applications',
         href: ApplicationController.index(),
         icon: Boxes,
+    },
+    {
+        title: 'Repositories',
+        href: RepositoryController.index(),
+        icon: FolderGit2,
     },
     {
         title: 'External services',

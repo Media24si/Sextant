@@ -11,6 +11,8 @@ use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\MinimumVersionController;
 use App\Http\Controllers\MonitorController;
 use App\Http\Controllers\MuteController;
+use App\Http\Controllers\PackageMinimumController;
+use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\RunChecksController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ServerController;
@@ -33,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::get('domains', [DomainController::class, 'index'])->name('domains.index');
     Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
     Route::get('applications', [ApplicationController::class, 'index'])->name('applications.index');
+    Route::get('repositories', [RepositoryController::class, 'index'])->name('repositories.index');
     Route::get('settings/lists', [ChoiceController::class, 'index'])->name('lists.index');
     Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
     Route::get('monitors', [MonitorController::class, 'index'])->name('monitors.index');
@@ -86,6 +89,9 @@ Route::middleware('auth')->group(function () {
         Route::post('minimum-versions', [MinimumVersionController::class, 'store'])->name('minimum-versions.store');
         Route::put('minimum-versions/{minimum_version}', [MinimumVersionController::class, 'update'])->name('minimum-versions.update');
         Route::delete('minimum-versions/{minimum_version}', [MinimumVersionController::class, 'destroy'])->name('minimum-versions.destroy');
+        Route::post('package-minimums', [PackageMinimumController::class, 'store'])->name('package-minimums.store');
+        Route::put('package-minimums/{package_minimum}', [PackageMinimumController::class, 'update'])->name('package-minimums.update');
+        Route::delete('package-minimums/{package_minimum}', [PackageMinimumController::class, 'destroy'])->name('package-minimums.destroy');
 
         Route::post('monitors', [MonitorController::class, 'store'])->name('monitors.store');
         Route::put('monitors/{monitor}', [MonitorController::class, 'update'])->name('monitors.update');
@@ -105,6 +111,7 @@ Route::middleware('auth')->group(function () {
         Route::post('servers/{server}/run-checks', [RunChecksController::class, 'server'])->name('servers.run-checks');
         Route::post('domains/{domain}/run-checks', [RunChecksController::class, 'domain'])->name('domains.run-checks');
         Route::post('sites/{site}/run-checks', [RunChecksController::class, 'site'])->name('sites.run-checks');
+        Route::post('repositories/{repository}/run-checks', [RunChecksController::class, 'repository'])->name('repositories.run-checks');
 
         Route::post('settings/lists', [ChoiceController::class, 'store'])->name('lists.store');
         Route::put('settings/lists/{choice}', [ChoiceController::class, 'update'])->name('lists.update');
@@ -127,6 +134,7 @@ Route::middleware('auth')->group(function () {
     Route::get('sites/{site}', [SiteController::class, 'show'])->withTrashed()->name('sites.show');
     Route::get('applications/{application}', [ApplicationController::class, 'show'])->withTrashed()->name('applications.show');
     Route::get('external-services/{external_service}', [ExternalServiceController::class, 'show'])->withTrashed()->name('external-services.show');
+    Route::get('repositories/{repository}', [RepositoryController::class, 'show'])->withTrashed()->name('repositories.show');
     Route::get('monitors/{monitor}', [MonitorController::class, 'show'])->name('monitors.show');
 });
 

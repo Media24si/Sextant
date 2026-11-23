@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Concerns\Monitorable;
 use App\Models\Domain;
 use App\Models\Monitor;
+use App\Models\Repository;
 use App\Models\Server;
 use App\Models\Site;
 use App\Monitoring\MonitorClaimer;
@@ -36,6 +37,12 @@ class RunChecksController extends Controller
     public function site(Site $site): RedirectResponse
     {
         return $this->runAll($site);
+    }
+
+    /** "Read now" on a repository page (SPEC §11.9). */
+    public function repository(Repository $repository): RedirectResponse
+    {
+        return $this->runAll($repository);
     }
 
     private function runAll(Model&Monitorable $resource): RedirectResponse

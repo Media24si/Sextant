@@ -3,6 +3,7 @@
 namespace App\Data\Dashboard;
 
 use App\Data\ActivityItemData;
+use App\Data\PackageMinimumRowData;
 use Spatie\LaravelData\Data;
 
 /** Everything the dashboard shows (SPEC §13.7 `DashboardProps`). */
@@ -21,6 +22,8 @@ class DashboardData extends Data
         public array $resolved,
         /** @var list<SoftwareMinimumRowData> */
         public array $software,
+        /** @var list<PackageMinimumRowData> */
+        public array $packages,
         /** @var list<ExpiringItemData> */
         public array $expiring,
         /** @var list<ActivityItemData> */

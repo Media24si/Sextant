@@ -5,6 +5,7 @@ import ActivityController from '@/actions/App/Http/Controllers/ActivityControlle
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import IncidentController from '@/actions/App/Http/Controllers/IncidentController';
 import MinimumVersionController from '@/actions/App/Http/Controllers/MinimumVersionController';
+import RepositoryController from '@/actions/App/Http/Controllers/RepositoryController';
 import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
@@ -35,6 +36,7 @@ const props = defineProps<{
     pending_count: number;
     resolved: App.Data.Dashboard.ResolvedItemData[];
     software: App.Data.Dashboard.SoftwareMinimumRowData[];
+    packages: App.Data.PackageMinimumRowData[];
     expiring: App.Data.Dashboard.ExpiringItemData[];
     changes: App.Data.ActivityItemData[];
     system: App.Data.Dashboard.SystemHealthData;
@@ -52,6 +54,7 @@ usePoll(10_000, {
         'pending_count',
         'resolved',
         'software',
+        'packages',
         'expiring',
         'changes',
     ],
@@ -623,6 +626,65 @@ const belowMinimumHref = ServerController.index({
                                         {{
                                             row.below
                                                 .map((below) => below.server)
+                                                .join(', ')
+                                        }}</span
+                                    >
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section
+                    v-if="packages.length > 0"
+                    class="overflow-hidden rounded-xl border bg-card"
+                    aria-labelledby="packages"
+                >
+                    <div
+                        class="flex items-center justify-between border-b px-5 py-4"
+                    >
+                        <h2 id="packages" class="text-lg font-semibold">
+                            Packages vs minimum
+                        </h2>
+                        <Link
+                            :href="RepositoryController.index()"
+                            class="text-sm text-primary hover:underline"
+                            >Repositories</Link
+                        >
+                    </div>
+                    <table class="w-full text-sm">
+                        <thead class="text-left text-muted-foreground">
+                            <tr class="border-b">
+                                <th class="px-5 py-2 font-medium">Package</th>
+                                <th class="px-5 py-2 font-medium">Minimum</th>
+                                <th class="px-5 py-2 text-right font-medium">
+                                    Below
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr v-for="row in packages" :key="row.id">
+                                <td class="px-5 py-2 font-mono">
+                                    {{ row.name }}
+                                </td>
+                                <td class="px-5 py-2 font-mono">
+                                    {{ row.min_versions.join(', ') }}
+                                </td>
+                                <td class="px-5 py-2 text-right">
+                                    <span
+                                        v-if="
+                                            row.repositories_below.length === 0
+                                        "
+                                        class="text-status-ok-fg"
+                                        >0</span
+                                    >
+                                    <span
+                                        v-else
+                                        class="font-semibold text-status-warning-fg"
+                                        >{{ row.repositories_below.length }} ·
+                                        {{
+                                            row.repositories_below
+                                                .map((below) => below.name)
                                                 .join(', ')
                                         }}</span
                                     >

@@ -411,7 +411,61 @@ One web application answering on several hostnames, e.g. one backend behind `bac
 | `github_url` | varchar(255) null | Validated as `https://github.com/{owner}/{repo}` |
 | `notes` | text null | |
 
-Applications have no monitors and no stored status; the list and page show the worst status of their sites. An application with live sites can't be deleted. Checks of the application itself (health endpoints, deployed versions) are after v1 (GOAL).
+Applications have no monitors and no stored status; the list and page show the worst status of their sites. An application with live sites can't be deleted. Checks of the application itself (health endpoints, deployed versions) are after v1 (GOAL). The packages locked in its repository are read from GitHub (§11.9).
+
+### 3.20 `github_tokens`
+
+One read-only fine-grained GitHub token per repository owner (organisation or user), used only to read lock files (§11.9).
+
+| Column | Type | Notes |
+|---|---|---|
+| `owner` | varchar(39) unique | As in `github.com/{owner}`; case-insensitive |
+| `token` | text | Encrypted cast, hidden from serialisation, never sent to the browser |
+| `token_last4` | char(4) | Shown as `github_pat_••••a91f` |
+| `expires_at` | timestamp null | From GitHub's `github-authentication-token-expiration` header |
+| `checked_at` | timestamp null | Last Test |
+| `last_error` | varchar(255) null | First error of the last Test |
+| `set_by` | FK → users | |
+
+### 3.21 `repositories` (soft deletes)
+
+One row per GitHub link of a live site or application (`sites.github_url`, `applications.github_url`), kept in step by `RepositorySync`: created with its default monitor when a link appears, soft-deleted (open incidents resolved) when nothing links it, restored when a link comes back. Never edited by hand; no change-feed entries. Monitorable (morph type `repository`).
+
+| Column | Type | Notes |
+|---|---|---|
+| `owner`, `name` | varchar(39), varchar(100) | From the link |
+| `url` | varchar(255) unique | The link itself; sites and applications join on it |
+| `default_branch` | varchar(255) null | From the last read |
+| `lock_files` | json null | Lock files found at the last read |
+| `read_at` | timestamp null | |
+| `status`, `status_changed_at` | | As other monitorable resources (§7) |
+
+A site without its own link uses its application's repository.
+
+### 3.22 `repository_packages`
+
+The packages of a repository's last read, replaced on every read by `PackagesRecorder`.
+
+| Column | Type | Notes |
+|---|---|---|
+| `repository_id` | FK, cascade | |
+| `ecosystem` | varchar(10) | `composer` or `npm` |
+| `name` | varchar(214) | Composer names lowercase |
+| `version` | varchar(50) | As locked: `v12.9.1`, `1.7.9`, `dev-main` |
+| `dev` | bool | Only for development (`packages-dev`, npm `dev: true`; pnpm 9 knows it only for direct packages) |
+| `direct` | bool | Required by the project itself |
+
+Unique `(repository_id, ecosystem, name, version)`: npm can lock several versions of one package.
+
+### 3.23 `package_minimums`
+
+| Column | Type | Notes |
+|---|---|---|
+| `ecosystem`, `name` | | Unique together |
+| `min_versions` | json | One per major, sorted, e.g. `["12.13", "13.39"]` |
+| `cve_url` | varchar(255) null | |
+| `note` | varchar(255) null | |
+| `set_by` | FK → users | |
 
 ---
 
@@ -922,7 +976,7 @@ Software versions are compared per row by `VersionsRecorder` (§11.5), not throu
 | Category | Types |
 |---|---|
 | `status` | `incident.opened`, `incident.escalated`, `incident.deescalated`, `incident.acknowledged`, `incident.resolved` |
-| `inventory` | `{server,external_service,domain,site,application}.{created,updated,deleted,restored}`, `server.address_added`, `server.address_removed`, `server.backup_locations_changed`, `server.versions_token_rotated`, `site.path_changed`, `monitor.{created,updated,deleted,enabled,disabled,muted,unmuted}`, `minimum_version.{set,changed,removed}`, `user.{created,deleted,role_changed}` |
+| `inventory` | `{server,external_service,domain,site,application}.{created,updated,deleted,restored}`, `server.address_added`, `server.address_removed`, `server.backup_locations_changed`, `server.versions_token_rotated`, `site.path_changed`, `monitor.{created,updated,deleted,enabled,disabled,muted,unmuted}`, `minimum_version.{set,changed,removed}`, `package_minimum.{set,changed,removed}`, `github_token.{set,replaced,removed}`, `user.{created,deleted,role_changed}` |
 | `detected` | `site.dns_changed`, `site.front_detected_changed`, `certificate.renewed`, `certificate.issuer_changed`, `domain.renewed`, `domain.registrar_changed`, `domain.nameservers_changed`, `redirect.target_changed`, `software.upgraded`, `software.downgraded`, `software.installed`, `software.removed`, `server.os_changed` |
 
 ---
@@ -943,6 +997,7 @@ All network I/O goes through small services in `app/Net` so checkers and detecti
 | `WhoisClient` | `query(domain)`. Server via `whois.iana.org` (`.si` → `whois.register.si`); port 43; 10-second timeout |
 | `PingProbe` | `ping -c {count} -w {timeout}` (`-6` for IPv6); parses loss and average RTT |
 | `VersionsClient` | `fetch(url, token): VersionsFile` (§11.4) |
+| `GithubClient` | `repository(owner, name, token)`, `rootFiles(owner, name, token)`, `file(owner, name, path, token)`; raw contents, 15-second timeout, 20 MB cap (§11.9) |
 
 Matching services (no network):
 
@@ -1049,6 +1104,21 @@ See §11 for the collector and endpoint.
 - **Results**: Warning listing every item below its minimum, e.g. `PHP 8.2.20 < 8.2.26; nginx 1.24.0 < 1.26.2`; OK `6 readings, all at or above minimum`.
 - **Data**: `read_at`, `below` (list of `{software, branch, version, min_version, cve_url}`), `counts`.
 - Unknown results keep the last stored versions, so the UI shows them with their age (GOAL §5).
+
+### 9.10 `repository.packages` — Packages
+
+See §11.9.
+
+- **Arguments**: none. `max_severity: warning`, `failures_before_incident: 1`, interval 1440, queue `checks-slow`. Default monitor of every repository.
+- **Logic**:
+  1. The owner's token (`github_tokens`); none → `CheckCouldNotRun("No GitHub token for media24: add one under Settings → GitHub access")`.
+  2. `GithubClient::repository()` (default branch, token expiry), then `rootFiles()`.
+  3. Each supported lock file in the root (`sextant.github.lock_files`: `composer.lock`, `package-lock.json`, `pnpm-lock.yaml`) is downloaded and parsed, with its manifest (`composer.json`, `package.json`) when present. 401, 403, 404, rate limits, timeouts, oversized or invalid files → `CheckCouldNotRun` with a precise message.
+  4. `PackagesRecorder` replaces the repository's `repository_packages`.
+  5. Compare with `package_minimums` (§11.9).
+- **Results**: Warning listing every package below its minimum, e.g. `laravel/framework v12.9.1 < 12.13; axios 1.7.9 < 1.8.2`, and `GitHub token for media24 expires in 5 d` within `sextant.github.expiry_warning_days` (14) of expiry, because an expired token would leave every repository of the owner Unknown, which never notifies. OK `312 packages from composer.lock, package-lock.json, all at or above minimum`, or `No lock file in the root of main`.
+- **Data**: `read_at`, `lock_files`, `below` (same shape as §9.9), `counts`.
+- Unknown results keep the last stored packages.
 
 ---
 
@@ -1291,6 +1361,16 @@ Setting up or updating a server is one command, run there as root. Sextant still
 
 ---
 
+### 11.9 Application packages from GitHub
+
+Sextant reads the lock files of the repositories that sites and applications link to and compares the locked packages with minimums per major, the same way it treats server software.
+
+- **Access.** One fine-grained personal access token per owner (a fine-grained token targets one resource owner), entered by an admin on Settings → GitHub access. Only fine-grained tokens are accepted (`github_pat_…`): a classic token can't be limited to chosen repositories or to reading. Recommended set-up: a dedicated account that only reads; Resource owner = the organisation; Repository access = only the linked repositories; Repository permissions = **Contents: Read-only** (Metadata: Read-only comes with it); nothing else. Sextant calls only `GET /repos/{owner}/{repo}` and `GET /repos/{owner}/{repo}/contents[/{path}]`. **Test** reads every linked repository of the owner and lists the lock files found, and stores the token's expiry and the first error.
+- **What is read.** The root of the default branch: `composer.lock` (with `composer.json` for direct packages), `package-lock.json` v1–v3 (v1 with `package.json`), `pnpm-lock.yaml` v5, v6 and v9 (read line by line, no YAML parser). Git, tarball, link and workspace entries are skipped. Monorepo subfolders and `yarn.lock` are not read.
+- **Comparison.** A package's branch is its major version. Normalisation: drop a leading `v`, keep the leading `\d+(\.\d+)*` (`v12.9.1` → `12.9.1`, `4.0.0-beta.1` → `4.0.0`); a branch such as `dev-main` is never below. The listed minimum is chosen as in §11.6: with `12.13, 13.39`, 12.9.1 is below, 13.40 isn't, 11.x is below (older than every listed major) and 14.x never is.
+- **Package minimums** live on the Minimum versions page under Packages: ecosystem, package name (suggestions from direct packages seen), versions one per major, CVE link, note. Setting, changing or removing one claims an immediate run of every enabled `repository.packages` monitor (§6.4).
+- **Pages.** Repositories list and repository page (§13.6); a Packages card on application and site pages with the repository's status, read time and every package that has a minimum, below first; Packages vs minimum on the dashboard; packages below minimum in Discord with the CVE link (§12.1).
+
 ## 12. Notifications and self-monitoring
 
 ### 12.1 Discord
@@ -1450,7 +1530,10 @@ Shared components in `resources/js/components/app`:
 | **Monitors** | Global list (filters: checker, status, enabled, muted, pending); monitor drawer with effective settings, state, last 100 runs; form with `MonitorArgumentsForm` |
 | **Incidents** | List (filters: open / acknowledged / resolved, severity, resource type, server, checker) and incident page (timeline, children, first/last result, links) |
 | **Activity** | Feed with filters: category, type, resource, server, user |
-| **Minimum versions** | Software, branch, minimum, CVE link, note, servers below (count + names), set by, date |
+| **Minimum versions** | Software, branch, minimum, CVE link, note, servers below (count + names), set by, date; then Packages: package, ecosystem, minimum per major, CVE link, note, repositories below (§11.9) |
+| **Repositories** | Repository with status, used by (applications and sites), package count with lock files, packages below minimum, read time; "No GitHub token" when the owner has none |
+| **Repository page** | Name, GitHub link, default branch, read time, token expiry; packages (find, Direct / All / Below minimum) with locked version, minimum and kind; used by; monitors; incidents; action: Read now (admins) |
+| **GitHub access** (admins) | How to create a read-only token; each owner of a linked repository with its repositories and token (masked, expiry, last Test); add, replace, remove, Test |
 | **Lists** | OS and backup location lists: add, rename, reorder; delete when unused |
 | **Users** | Name, email, role, created; invite/create, change role, delete. An admin can't demote or delete themselves if they are the last admin |
 
@@ -1520,6 +1603,7 @@ Prefix and `LIKE '%q%'` queries are fast at this size; no search engine. Each re
 | `sextant:heartbeat` | every 5 minutes | Queue heartbeats to Sentry Crons (§12.2) |
 | `model:prune --model=MonitorRun` | daily 03:30 | 90-day retention |
 | `proxies:refresh` | daily | Refresh published ranges of external services with a `ranges_source` |
+| `repositories:sync` | daily, `withoutOverlapping`; once after deploying | Match `repositories` to the GitHub links of sites and applications (§3.21) |
 | `rdap:refresh-bootstrap` | weekly | Refresh the IANA RDAP bootstrap and the Public Suffix List |
 | `horizon:snapshot` | every 5 minutes | Horizon metrics |
 | `typescript:transform` | build step | Generate TypeScript types from laravel-data classes |

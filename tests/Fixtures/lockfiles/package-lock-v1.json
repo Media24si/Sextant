@@ -1,0 +1,16 @@
+{
+  "name": "old-site",
+  "version": "1.0.0",
+  "lockfileVersion": 1,
+  "requires": true,
+  "dependencies": {
+    "jquery": {"version": "3.4.1"},
+    "laravel-mix": {
+      "version": "5.0.9",
+      "dev": true,
+      "dependencies": {"webpack": {"version": "4.46.0", "dev": true}}
+    },
+    "webpack": {"version": "5.97.1", "dev": true},
+    "old-lodash": {"version": "npm:lodash@4.17.15"}
+  }
+}

@@ -237,6 +237,18 @@
 
 ---
 
+## Phase 10 — Application packages (§11.9)
+
+- [x] **P10.1** `github_tokens` (§3.20), `GithubClient` with fake, GitHub access page with token instructions and Test (admins).
+- [x] **P10.2** `repositories` and `repository_packages` (§3.21, §3.22); `RepositorySync` on link changes and `repositories:sync` daily.
+- [x] **P10.3** Lock file parsers: `composer.lock`, `package-lock.json` v1–v3, `pnpm-lock.yaml` v5/v6/v9.
+- [x] **P10.4** `repository.packages` checker (§9.10), `package_minimums` (§3.23) per major, Minimum versions page, Discord lines.
+- [x] **P10.5** Repositories list and page, Packages card on application and site pages, Packages vs minimum on the dashboard.
+- [ ] **P10.6** **[HUMAN]** Create one fine-grained read-only token per GitHub owner (Contents: Read-only, only the linked repositories), add each under Settings → GitHub access, press Test; run `php artisan repositories:sync` once after deploying.
+- [ ] **Exit P10** **[HUMAN]**: setting `laravel/framework` to a version above a repository's lock turns the repository and its application and sites orange within a minute and posts a Discord warning with the CVE link.
+
+---
+
 ## Open questions (from GOAL; use the default until decided)
 
 - Readers acknowledging incidents → default: admins only.
@@ -329,6 +341,7 @@ Carried over from the previous version of this list (still open in SPEC v0.2):
 
 Found 2026-11-23:
 
+- [x] Package minimums (2026-11-23, asked for by the team) go against GOAL's "Not in v1: application checks". Decision: v1 reads packages locked on a repository's default branch (not deployed versions) and compares them with manual minimums per major; automatic CVE matching stays out. GOAL updated.
 - [x] §11.5 kept two OS values (the admin's choice and `os_reported`) and showed both when they differed. Decision: a reporting server has one OS — the recorder sets `os_choice_id` to the matching `os` entry (adding one when none matches), and the form locks the choice while the endpoint reports.
 
 ## Out of scope for v1 (don't build)

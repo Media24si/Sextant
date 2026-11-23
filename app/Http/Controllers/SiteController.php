@@ -20,6 +20,7 @@ use App\Models\Server;
 use App\Models\Site;
 use App\Monitoring\IncidentPresenter;
 use App\Monitoring\MonitorProps;
+use App\Packages\RepositoryPresenter;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -118,6 +119,10 @@ class SiteController extends Controller
                 ->map(ActivityItemData::fromModel(...)),
             'front_services' => $this->frontServiceOptions(),
             'servers' => $this->serverOptions(),
+            'repository' => app(RepositoryPresenter::class)->summary(
+                $site->effectiveRepository(),
+                $site->github_url === null ? $site->application?->name : null,
+            ),
         ]);
     }
 

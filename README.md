@@ -71,7 +71,7 @@ Copy `.env.example` to `.env` and set at least:
 
 ### Build and release
 
-Run `./deploy.sh` on the server as the app user. It pulls `main` (fast-forward only, refuses local changes), runs `composer install --no-dev`, `npm ci && npm run build` (also generates the TypeScript types), `migrate --force` and `optimize`, validates the checker registry, then restarts Horizon and the scheduler with the new code. Set `PHP_FPM_SERVICE=php8.4-fpm` to also reload php-fpm (needs sudo), e.g. when OPcache doesn't revalidate timestamps.
+Run `./deploy.sh` on the server as the app user. It pulls `main` (fast-forward only, refuses local changes), runs `composer install --no-dev`, `npm ci && npm run build` (also generates the TypeScript types), `migrate --force` and `optimize`, validates the checker registry, matches repositories to the GitHub links (`repositories:sync`), then restarts Horizon and the scheduler with the new code. Set `PHP_FPM_SERVICE=php8.4-fpm` to also reload php-fpm (needs sudo), e.g. when OPcache doesn't revalidate timestamps.
 
 The first time, also:
 
@@ -234,6 +234,20 @@ Do this if the token may have leaked, or when someone with access leaves.
 3. **Test connection**, then **Refresh now**.
 
 Until step 2, the versions check is Unknown ("Token rejected (401)"). That doesn't open an incident, and the last versions stay on the page. The change feed records the rotation without the token.
+
+---
+
+## Reading lock files from GitHub
+
+Sextant reads `composer.lock`, `package-lock.json` and `pnpm-lock.yaml` from the repositories that sites and applications link to, with one read-only token per GitHub owner. For each organisation (or user) listed under **Settings → GitHub access**:
+
+1. Sign in to GitHub as a member of the organisation, ideally a dedicated account that only reads.
+2. **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.**
+3. **Resource owner**: the organisation. **Repository access**: Only select repositories, then the linked ones. **Repository permissions**: Contents: Read-only (Metadata: Read-only is added). Nothing else. Pick an expiry; Sextant warns 14 days before it.
+4. If the organisation approves fine-grained tokens, an owner approves it under **Organisation settings → Personal access tokens**.
+5. Paste it into **Settings → GitHub access** for that owner and press **Test**: every linked repository should say "readable" with its lock files.
+
+To rotate: create the new token, **Replace** it in Sextant, Test, then revoke the old one on GitHub. A repository whose owner has no working token is Unknown ("No GitHub token for …" or "GitHub token rejected (401)"); its last packages stay. When a site or application links a new repository, add that repository to the token's repository access on GitHub; until then its check is Unknown ("… not found, or the GitHub token can't read it (404)").
 
 ---
 

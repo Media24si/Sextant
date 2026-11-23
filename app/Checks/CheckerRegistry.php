@@ -22,6 +22,7 @@ class CheckerRegistry
         ServerChecker::PREFIX => ServerChecker::class,
         DomainChecker::PREFIX => DomainChecker::class,
         SiteChecker::PREFIX => SiteChecker::class,
+        RepositoryChecker::PREFIX => RepositoryChecker::class,
     ];
 
     /**
@@ -106,7 +107,7 @@ class CheckerRegistry
     /**
      * Default monitors for a resource type (§4.4), registered checkers only.
      *
-     * @param  'server'|'domain'|'site'  $type
+     * @param  'server'|'domain'|'site'|'repository'  $type
      * @return list<DefaultEntry>
      */
     public function defaults(string $type): array
@@ -164,7 +165,7 @@ class CheckerRegistry
             }
 
             if (! isset(self::BASES[$prefix])) {
-                $errors[] = "{$key}: the key must start with server., domain. or site.";
+                $errors[] = "{$key}: the key must start with server., domain., site. or repository.";
             } elseif (! is_subclass_of($class, self::BASES[$prefix])) {
                 $errors[] = "{$key}: {$class} must extend ".class_basename(self::BASES[$prefix]);
             }

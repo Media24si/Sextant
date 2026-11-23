@@ -10,6 +10,7 @@ use App\Models\ExternalService;
 use App\Models\Incident;
 use App\Models\IncidentEvent;
 use App\Models\Monitor;
+use App\Models\Repository;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\User;
@@ -329,4 +330,22 @@ it('queues a heartbeat on each watched queue', function () {
 it('never reports checks that could not run to Sentry', function () {
     expect(app(ExceptionHandler::class)->shouldReport(new CheckCouldNotRun('Resolver timed out')))->toBeFalse()
         ->and(app(ExceptionHandler::class)->shouldReport(new RuntimeException('Bug')))->toBeTrue();
+});
+
+it('lists each package below its minimum with its CVE link', function () {
+    $repository = Repository::factory()->create(['owner' => 'media24', 'name' => 'svet24']);
+    $this->manager->open(
+        Monitor::factory()->on($repository, 'repository.packages')->create(),
+        $repository,
+        new CheckResult(Status::Warning, 'laravel/framework v12.9.1 < 12.13', ['below' => [
+            ['software' => 'laravel/framework', 'branch' => '12', 'version' => 'v12.9.1', 'min_version' => '12.13', 'cve_url' => 'https://github.com/advisories/GHSA-1'],
+        ]]),
+        now(),
+    );
+    $this->travel(21)->seconds();
+
+    flushNotifications();
+
+    expect(sentMessages()[0]['embeds'][0]['title'])->toBe('🟠 media24/svet24 — Packages')
+        ->and(sentMessages()[0]['embeds'][0]['description'])->toContain('• laravel/framework v12.9.1 < 12.13 ([CVE](https://github.com/advisories/GHSA-1))');
 });

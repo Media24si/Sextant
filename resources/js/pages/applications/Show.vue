@@ -12,6 +12,7 @@ import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
 import EmptyState from '@/components/app/EmptyState.vue';
 import RepoLink from '@/components/app/RepoLink.vue';
+import RepositoryPackagesCard from '@/components/app/RepositoryPackagesCard.vue';
 import ServingPath from '@/components/app/ServingPath.vue';
 import StatusBadge from '@/components/app/StatusBadge.vue';
 import StatusDot from '@/components/app/StatusDot.vue';
@@ -25,6 +26,7 @@ import { statusLabels } from '@/lib/status';
 const props = defineProps<{
     application: App.Data.ApplicationRowData;
     notes: string | null;
+    repository: App.Data.Repositories.RepositorySummaryData | null;
     sites: App.Data.SiteRowData[];
     activity: App.Data.ActivityItemData[];
 }>();
@@ -191,17 +193,26 @@ function destroy(): void {
                 />
             </section>
 
-            <section
-                class="rounded-xl border bg-card"
-                aria-labelledby="changes"
-            >
-                <h2 id="changes" class="px-6 pt-5 pb-4 text-lg font-semibold">
-                    Changes
-                </h2>
-                <div class="border-t px-6">
-                    <ActivityList :items="activity" />
-                </div>
-            </section>
+            <div class="flex min-w-0 flex-col gap-6">
+                <RepositoryPackagesCard
+                    v-if="repository"
+                    :repository="repository"
+                />
+                <section
+                    class="rounded-xl border bg-card"
+                    aria-labelledby="changes"
+                >
+                    <h2
+                        id="changes"
+                        class="px-6 pt-5 pb-4 text-lg font-semibold"
+                    >
+                        Changes
+                    </h2>
+                    <div class="border-t px-6">
+                        <ActivityList :items="activity" />
+                    </div>
+                </section>
+            </div>
         </div>
 
         <ConfirmDialog

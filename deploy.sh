@@ -64,6 +64,9 @@ main() {
     step "Validating the checker registry"
     php artisan sextant:checkers
 
+    step "Matching repositories to GitHub links"
+    php artisan repositories:sync
+
     step "Restarting Horizon and the scheduler"
     php artisan horizon:terminate
     php artisan schedule:interrupt

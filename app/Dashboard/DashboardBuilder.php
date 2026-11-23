@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 /**
  * Builds the dashboard props (SPEC §13.7) from materialised statuses with a
@@ -365,7 +366,7 @@ class DashboardBuilder
         /** @var Status $status */
         $status = $resource->getAttribute('status');
 
-        return new ResourceRefData($type, (int) $resource->getKey(), $resource->resourceName(), $status, route("{$type}s.show", $resource->getKey()));
+        return new ResourceRefData($type, (int) $resource->getKey(), $resource->resourceName(), $status, route(Str::plural($type).'.show', $resource->getKey()));
     }
 
     private function servingPath(Site $site): string

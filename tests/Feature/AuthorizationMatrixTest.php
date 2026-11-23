@@ -9,6 +9,8 @@ use App\Models\GithubToken;
 use App\Models\Incident;
 use App\Models\MinimumVersion;
 use App\Models\Monitor;
+use App\Models\PackageMinimum;
+use App\Models\Repository;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\User;
@@ -65,6 +67,10 @@ $adminRoutes = [
     'set minimum version' => ['post', 'minimum-versions.store', null],
     'change minimum version' => ['put', 'minimum-versions.update', fn () => ['minimum_version' => MinimumVersion::factory()->create()]],
     'remove minimum version' => ['delete', 'minimum-versions.destroy', fn () => ['minimum_version' => MinimumVersion::factory()->create()]],
+    'set package minimum' => ['post', 'package-minimums.store', null],
+    'change package minimum' => ['put', 'package-minimums.update', fn () => ['package_minimum' => PackageMinimum::factory()->create()]],
+    'remove package minimum' => ['delete', 'package-minimums.destroy', fn () => ['package_minimum' => PackageMinimum::factory()->create()]],
+    'read repository now' => ['post', 'repositories.run-checks', fn () => ['repository' => Repository::factory()->create()]],
     'generate versions token' => ['post', 'servers.versions-token', fn () => ['server' => Server::factory()->create()]],
     'copy versions install command' => ['post', 'servers.versions.install-command', fn () => ['server' => Server::factory()->create()]],
     'download collector' => ['get', 'servers.collector', fn () => ['server' => Server::factory()->create()]],
