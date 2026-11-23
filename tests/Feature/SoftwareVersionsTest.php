@@ -1,10 +1,12 @@
 <?php
 
 use App\Checks\CheckCouldNotRun;
+use App\Enums\ChoiceList;
 use App\Enums\Software;
 use App\Enums\Status;
 use App\Jobs\RunMonitor;
 use App\Models\Activity;
+use App\Models\Choice;
 use App\Models\Incident;
 use App\Models\MinimumVersion;
 use App\Models\Monitor;
@@ -77,6 +79,71 @@ it('records nothing in the feed on the first reading, then every change', functi
         'software.upgraded' => 'web02: OpenSSL 3.0.13 → 3.0.15',
         'software.removed' => 'web02: PHP 8.2 8.2.20 removed',
     ])->and(ServerSoftware::query()->where('software', 'php')->pluck('branch')->all())->toBe(['8.3']);
+});
+
+it('sets the server OS to the matching list entry', function (array $os, string $label) {
+    record(versionsFile(['os' => $os]));
+
+    expect($this->web02->fresh()->os->label)->toBe($label)
+        ->and(Choice::ofList(ChoiceList::Os)->count())->toBe(9)
+        ->and(Activity::query()->where('type', 'server.updated')->exists())->toBeFalse();
+})->with([
+    'ubuntu point release' => [['id' => 'ubuntu', 'version_id' => '24.04', 'pretty_name' => 'Ubuntu 24.04.1 LTS'], 'Ubuntu 24.04 LTS'],
+    'debian' => [['id' => 'debian', 'version_id' => '12', 'pretty_name' => 'Debian GNU/Linux 12 (bookworm)'], 'Debian 12'],
+]);
+
+it('adds an OS the list does not have and follows OS changes', function () {
+    record(versionsFile());
+    record(versionsFile(['os' => ['id' => 'ubuntu', 'version_id' => '28.04', 'pretty_name' => 'Ubuntu 28.04.1 LTS']]));
+
+    $choice = $this->web02->fresh()->os;
+
+    expect($choice->label)->toBe('Ubuntu 28.04 LTS')
+        ->and($choice->position)->toBe(10);
+
+    record(versionsFile(['os' => ['id' => 'rocky', 'version_id' => '9.4', 'pretty_name' => 'Rocky Linux 9.4 (Blue Onyx)']]));
+    record(versionsFile(['os' => ['id' => 'rocky', 'version_id' => '9.4', 'pretty_name' => 'Rocky Linux 9.4 (Blue Onyx)']]));
+
+    expect($this->web02->fresh()->os->label)->toBe('Rocky Linux 9.4')
+        ->and(Choice::ofList(ChoiceList::Os)->count())->toBe(11);
+});
+
+it('leaves the OS choice alone when the file has no OS', function () {
+    $windows = Choice::ofList(ChoiceList::Os)->where('label', 'Windows Server 2022')->sole();
+    $this->web02->forceFill(['os_choice_id' => $windows->id])->saveQuietly();
+
+    record(versionsFile(['os' => null]));
+
+    expect($this->web02->fresh()->os_choice_id)->toBe($windows->id);
+});
+
+it('locks the OS on the server form while the endpoint reports it', function () {
+    record(versionsFile());
+    $ubuntu = $this->web02->fresh()->os_choice_id;
+    $debian = Choice::ofList(ChoiceList::Os)->where('label', 'Debian 12')->value('id');
+
+    $this->actingAs($this->admin)->get(route('servers.edit', $this->web02))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('form.os_choice_id', $ubuntu)
+            ->where('form.os_reported', 'Ubuntu 24.04.1 LTS'));
+
+    $this->put(route('servers.update', $this->web02), [
+        'name' => 'web02',
+        'os_choice_id' => $debian,
+        'versions_url' => VERSIONS_URL,
+        'addresses' => [['ip' => '192.0.2.12', 'is_primary' => true]],
+    ])->assertSessionHasNoErrors();
+
+    expect($this->web02->fresh()->os_choice_id)->toBe($ubuntu);
+
+    $this->put(route('servers.update', $this->web02), [
+        'name' => 'web02',
+        'os_choice_id' => $debian,
+        'versions_url' => null,
+        'addresses' => [['ip' => '192.0.2.12', 'is_primary' => true]],
+    ])->assertSessionHasNoErrors();
+
+    expect($this->web02->fresh()->os_choice_id)->toBe($debian);
 });
 
 it('is OK when everything is at or above the minimum', function () {

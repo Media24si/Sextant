@@ -18,11 +18,13 @@ class SaveServer
     public function handle(Server $server, array $input): Server
     {
         return DB::transaction(function () use ($server, $input): Server {
+            $osIsReported = $server->osIsReported() && ($input['versions_url'] ?? null) !== null;
+
             $server->fill([
                 'name' => $input['name'],
                 'hostname' => $input['hostname'] ?? null,
                 'provider' => $input['provider'] ?? null,
-                'os_choice_id' => $input['os_choice_id'] ?? null,
+                'os_choice_id' => $osIsReported ? $server->os_choice_id : ($input['os_choice_id'] ?? null),
                 'notes' => $input['notes'] ?? null,
                 'versions_url' => $input['versions_url'] ?? null,
             ])->save();

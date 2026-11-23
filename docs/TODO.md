@@ -327,6 +327,10 @@ Carried over from the previous version of this list (still open in SPEC v0.2):
 - [x] §5.4 asks for a DNS lookup "through each configured resolver"; `DnsResolver` tries its resolvers in turn, so the canary counts DNS as one target (three TCP targets + one DNS, healthy at 2).
 - [x] §4.4 doesn't say whether default monitors reach the change feed. Decision: they're written quietly (the resource's own `created` entry is the change); admin-added monitors are recorded. A new server's monitors attach in a queued job (`PortIsOpen` probes each port for up to 3 s).
 
+Found 2026-11-23:
+
+- [x] §11.5 kept two OS values (the admin's choice and `os_reported`) and showed both when they differed. Decision: a reporting server has one OS — the recorder sets `os_choice_id` to the matching `os` entry (adding one when none matches), and the form locks the choice while the endpoint reports.
+
 ## Out of scope for v1 (don't build)
 
 Server metrics or agents, checking that backups run, automatic CVE matching, multiple probe locations, public status page, teams or per-resource permissions, application checks (health endpoints, deployed versions), mobile apps, CDN-bypass origin checks, checks of external services, serving paths longer than front + backend, on-call/escalation policies, maintenance windows beyond "mute until", uptime/SLA reports, software versions on Windows (GOAL "Not in v1").

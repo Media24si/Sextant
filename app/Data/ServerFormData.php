@@ -29,6 +29,8 @@ class ServerFormData extends Data
         public ?string $versions_url = null,
         /** "sxt_••••a91f" once a token exists; the token itself never reaches the browser. */
         public ?string $versions_token_masked = null,
+        /** The OS the versions endpoint reports; the OS choice is locked while set. */
+        public ?string $os_reported = null,
     ) {}
 
     /**
@@ -52,6 +54,7 @@ class ServerFormData extends Data
             backup_location_ids: array_values($server->backupLocations->map(fn (Choice $choice): int => $choice->id)->all()),
             versions_url: $server->versions_url,
             versions_token_masked: ServerVersionsController::maskedToken($server),
+            os_reported: $server->osIsReported() ? $server->os_reported : null,
         );
     }
 }

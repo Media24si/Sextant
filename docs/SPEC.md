@@ -176,7 +176,7 @@ Unique `(list, label)`. Seeded:
 - `os`: Ubuntu 22.04 LTS, Ubuntu 24.04 LTS, Ubuntu 26.04 LTS, Debian 12, Debian 13, Windows Server 2019, Windows Server 2022, Windows Server 2025, Other.
 - `backup_location`: Provider snapshots, Backup server, Offsite cloud storage, Local disk on the server. (GOAL open question: the real list.)
 
-A choice in use can't be deleted, only renamed.
+A choice in use can't be deleted, only renamed. The versions recorder may add `os` entries (§11.5).
 
 `server_backup_location` is a pivot: `server_id` (cascade), `choice_id` (restrict), primary key on both.
 
@@ -1156,7 +1156,7 @@ Monitors start spread out (§5.1). The import summary lists created, needs-revie
 
 ### 10.7 Other entry points
 
-- **Server form**: name, hostname, provider, OS, backup locations, addresses, notes; optionally the versions endpoint (§11). On save, Sextant probes ping and ports and attaches default monitors.
+- **Server form**: name, hostname, provider, OS (read-only while the versions endpoint reports it), backup locations, addresses, notes; optionally the versions endpoint (§11). On save, Sextant probes ping and ports and attaches default monitors.
 - **External service form**: name, kind, ranges, range source, CNAME suffixes, headers.
 - **Re-run detection** on a site shows the same review and applies the changes the admin confirms.
 
@@ -1256,7 +1256,9 @@ location = /.sextant/versions.php {
 
 The first reading of a server records nothing in the feed.
 
-When `os_reported` doesn't correspond to the admin's OS choice, both are shown on the server page; there's no alert.
+- Sets `servers.os_choice_id` quietly to the `os` entry whose label names both the reading's `ID` and `VERSION_ID` (`ubuntu` 24.04 → "Ubuntu 24.04 LTS", `debian` 12 → "Debian 12"), first by position. When none does, it adds one from `PRETTY_NAME` without the point release or codename ("Ubuntu 28.04.1 LTS" → "Ubuntu 28.04 LTS").
+
+A server has one OS: while the versions endpoint is set up and reporting, the OS choice comes from the reading and can't be changed on the server form.
 
 ### 11.6 Minimum versions and comparison
 

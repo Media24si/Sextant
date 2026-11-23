@@ -17,7 +17,6 @@ class ServerVersionsPanelData extends Data
         public ?string $read_at,
         public ?string $fetched_at,
         public ?string $os_reported,
-        public ?string $os_set,
         /** The versions monitor's latest message, e.g. "Collector last ran 3 d ago" */
         public ?string $last_message,
         /** @var list<ServerVersionData> */

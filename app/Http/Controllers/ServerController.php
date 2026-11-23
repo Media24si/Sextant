@@ -203,7 +203,6 @@ class ServerController extends Controller
             read_at: $rows->max('read_at')?->toIso8601String(),
             fetched_at: $rows->max('fetched_at')?->toIso8601String(),
             os_reported: $server->os_reported,
-            os_set: $server->os?->label,
             last_message: $monitor?->state?->message,
             versions: array_values($rows->map(ServerVersionData::fromModel(...))->all()),
             collector_version: $server->collector_version,

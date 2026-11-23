@@ -208,9 +208,21 @@ function submit(): void {
                             label="Operating system"
                             for="os_choice_id"
                             :error="form.errors.os_choice_id"
-                            description="Also read from the versions endpoint once it's set up."
+                            :description="
+                                props.form.os_reported
+                                    ? `Read from the versions endpoint: ${props.form.os_reported}`
+                                    : 'Set from the versions endpoint once it reports.'
+                            "
                         >
+                            <Input
+                                v-if="props.form.os_reported"
+                                id="os_choice_id"
+                                :model-value="osLabel"
+                                readonly
+                                disabled
+                            />
                             <select
+                                v-else
                                 id="os_choice_id"
                                 v-model="form.os_choice_id"
                                 :class="fieldClasses"

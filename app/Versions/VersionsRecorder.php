@@ -12,12 +12,14 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Stores a server's readings (SPEC §11.5): one row per software and PHP
- * branch, removals deleted, `os_reported` and `collector_version` written
- * quietly, and a `detected` entry per change. The first reading records
- * nothing in the feed.
+ * branch, removals deleted, `os_reported`, the matching OS choice and
+ * `collector_version` written quietly, and a `detected` entry per change.
+ * The first reading records nothing in the feed.
  */
 class VersionsRecorder
 {
+    public function __construct(private OsChoiceMatcher $osChoiceMatcher) {}
+
     public function record(Server $server, VersionsFile $file, CarbonInterface $fetchedAt): void
     {
         DB::transaction(function () use ($server, $file, $fetchedAt): void {
@@ -59,8 +61,13 @@ class VersionsRecorder
             }
 
             $server->forceFill(['os_reported' => $file->osPrettyName, 'collector_version' => $file->collectorVersion]);
+            $os = collect($file->readings)->first(fn (SoftwareReading $reading): bool => $reading->software === Software::Os);
 
-            if ($server->isDirty(['os_reported', 'collector_version'])) {
+            if ($os !== null) {
+                $server->forceFill(['os_choice_id' => $this->osChoiceMatcher->forReading($os)->id]);
+            }
+
+            if ($server->isDirty(['os_reported', 'collector_version', 'os_choice_id'])) {
                 $server->saveQuietly();
             }
         });

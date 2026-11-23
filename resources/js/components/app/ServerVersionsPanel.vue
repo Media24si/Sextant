@@ -162,16 +162,8 @@ function refresh(): void {
                         <span
                             v-if="version.software === 'os'"
                             class="text-muted-foreground"
+                            >—</span
                         >
-                            <template
-                                v-if="
-                                    panel.os_set &&
-                                    panel.os_set !== panel.os_reported
-                                "
-                                >Set to {{ panel.os_set }}</template
-                            >
-                            <template v-else>—</template>
-                        </span>
                         <span
                             v-else-if="version.min_version"
                             class="font-mono"

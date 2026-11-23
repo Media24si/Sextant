@@ -116,6 +116,15 @@ class Server extends Model implements Monitorable
     }
 
     /**
+     * The OS comes from the versions endpoint (SPEC §11.5) while it's set up
+     * and reporting, so admins can't choose it.
+     */
+    public function osIsReported(): bool
+    {
+        return $this->versions_url !== null && $this->os_reported !== null;
+    }
+
+    /**
      * @return BelongsTo<Choice, $this>
      */
     public function os(): BelongsTo
