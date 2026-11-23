@@ -143,8 +143,12 @@ function restore(): void {
                         v-for="address in server.addresses"
                         :key="address.id"
                         class="font-mono text-foreground"
-                        >{{ address.ip
-                        }}<span
+                        ><a
+                            :href="`ssh://${address.ip}`"
+                            :title="`SSH into ${address.ip}`"
+                            class="hover:underline"
+                            >{{ address.ip }}</a
+                        ><span
                             v-if="address.is_primary"
                             class="font-sans text-muted-foreground"
                         >

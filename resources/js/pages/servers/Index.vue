@@ -102,7 +102,18 @@ const columns: ColumnDef<Row, unknown>[] = [
         id: 'primary_ip',
         enableHiding: true,
         header: 'Primary IP',
-        cell: ({ row }) => mono(row.original.primary_ip),
+        cell: ({ row }) =>
+            row.original.primary_ip
+                ? h(
+                      'a',
+                      {
+                          href: `ssh://${row.original.primary_ip}`,
+                          title: `SSH into ${row.original.primary_ip}`,
+                          class: 'font-mono hover:underline',
+                      },
+                      row.original.primary_ip,
+                  )
+                : mono(null),
     },
     {
         id: 'os',
