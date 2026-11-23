@@ -3,6 +3,7 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import type { ColumnDef } from '@tanstack/vue-table';
 import { computed, h } from 'vue';
 import ServerController from '@/actions/App/Http/Controllers/ServerController';
+import CopyText from '@/components/app/CopyText.vue';
 import DataTable from '@/components/app/DataTable.vue';
 import PageHeader from '@/components/app/PageHeader.vue';
 import StatusBadge from '@/components/app/StatusBadge.vue';
@@ -104,15 +105,10 @@ const columns: ColumnDef<Row, unknown>[] = [
         header: 'Primary IP',
         cell: ({ row }) =>
             row.original.primary_ip
-                ? h(
-                      'a',
-                      {
-                          href: `ssh://${row.original.primary_ip}`,
-                          title: `SSH into ${row.original.primary_ip}`,
-                          class: 'font-mono hover:underline',
-                      },
-                      row.original.primary_ip,
-                  )
+                ? h(CopyText, {
+                      text: row.original.primary_ip,
+                      class: 'font-mono',
+                  })
                 : mono(null),
     },
     {

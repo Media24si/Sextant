@@ -15,6 +15,7 @@ import MuteDialog from '@/components/app/MuteDialog.vue';
 import MuteController from '@/actions/App/Http/Controllers/MuteController';
 import Breadcrumbs from '@/components/app/Breadcrumbs.vue';
 import ConfirmDialog from '@/components/app/ConfirmDialog.vue';
+import CopyText from '@/components/app/CopyText.vue';
 import EmptyState from '@/components/app/EmptyState.vue';
 import ServingPath from '@/components/app/ServingPath.vue';
 import StatusBadge from '@/components/app/StatusBadge.vue';
@@ -143,12 +144,7 @@ function restore(): void {
                         v-for="address in server.addresses"
                         :key="address.id"
                         class="font-mono text-foreground"
-                        ><a
-                            :href="`ssh://${address.ip}`"
-                            :title="`SSH into ${address.ip}`"
-                            class="hover:underline"
-                            >{{ address.ip }}</a
-                        ><span
+                        ><CopyText :text="address.ip" /><span
                             v-if="address.is_primary"
                             class="font-sans text-muted-foreground"
                         >
