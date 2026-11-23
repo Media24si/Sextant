@@ -57,17 +57,17 @@ GRANT ALL ON sextant.* TO 'sextant'@'localhost';
 
 Copy `.env.example` to `.env` and set at least:
 
-| Variable                                      | Notes                                                                               |
-| --------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `APP_ENV=production`, `APP_DEBUG=false`       | `deploy.sh` refuses anything else: `local` accepts any password and shows stack traces |
-| `LOG_LEVEL=warning`                           | `debug` (the example's value) logs every request detail                             |
-| `APP_URL`, `APP_KEY`                          | `php artisan key:generate` once                                                     |
+| Variable                                      | Notes                                                                                                                                             |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `APP_ENV=production`, `APP_DEBUG=false`       | `deploy.sh` refuses anything else: `local` accepts any password and shows stack traces                                                            |
+| `LOG_LEVEL=warning`                           | `debug` (the example's value) logs every request detail                                                                                           |
+| `APP_URL`, `APP_KEY`                          | `php artisan key:generate` once                                                                                                                   |
 | `MAIL_MAILER`, `MAIL_HOST`, `MAIL_*`          | Password reset emails. With `MAIL_MAILER=log` (the default) production hides "Forgot your password?", since the links would land in `laravel.log` |
-| `DB_*`                                        | as above                                                                            |
-| `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis` | Horizon needs Redis                                                                 |
-| `DISCORD_WEBHOOK_URL`                         | Incident messages. A secret: never log or share it; rotate it in Discord if exposed |
-| `SENTRY_LARAVEL_DSN`                          | Sextant's own errors and cron check-ins; `SENTRY_TRACES_SAMPLE_RATE=0`              |
-| `SEXTANT_BACKEND_HEADER`                      | Optional, e.g. `X-Backend`; off by default (SPEC §10.3)                             |
+| `DB_*`                                        | as above                                                                                                                                          |
+| `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis` | Horizon needs Redis                                                                                                                               |
+| `DISCORD_WEBHOOK_URL`                         | Incident messages. A secret: never log or share it; rotate it in Discord if exposed                                                               |
+| `SENTRY_LARAVEL_DSN`                          | Sextant's own errors and cron check-ins; `SENTRY_TRACES_SAMPLE_RATE=0`                                                                            |
+| `SEXTANT_BACKEND_HEADER`                      | Optional, e.g. `X-Backend`; off by default (SPEC §10.3)                                                                                           |
 
 ### Build and release
 
