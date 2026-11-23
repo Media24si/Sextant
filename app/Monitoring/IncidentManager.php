@@ -234,7 +234,7 @@ class IncidentManager
      */
     private function outageOf(int $serverId, Site $site): ?Incident
     {
-        $webPorts = array_values(array_filter([80, 443, $site->port]));
+        $webPorts = array_filter([80, 443, $site->port]);
 
         return Incident::query()
             ->open()
@@ -246,8 +246,7 @@ class IncidentManager
             ->orderBy('opened_at')
             ->orderBy('id')
             ->get()
-            ->first(fn (Incident $outage): bool => $outage->monitor !== null
-                && in_array($this->registry->settings($outage->monitor)->arguments->int('port'), $webPorts, true));
+            ->first(fn (Incident $outage): bool => in_array($this->registry->settings($outage->monitor)->arguments->int('port'), $webPorts, true));
     }
 
     private function event(Incident $incident, IncidentEventType $type, string $message, bool $notify, ?int $userId = null, ?CarbonInterface $at = null): void

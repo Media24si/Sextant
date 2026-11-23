@@ -25,6 +25,9 @@ class NotificationFlusher
     /** No webhook configured: marked so the outbox doesn't grow forever. */
     public const SUPPRESSED_NO_WEBHOOK = 'no_webhook';
 
+    /** Discord refused the message (4xx other than 429); resending won't help. */
+    public const SUPPRESSED_REJECTED = 'rejected';
+
     public function __construct(private EmbedBuilder $embeds) {}
 
     /**
@@ -83,27 +86,38 @@ class NotificationFlusher
         }
 
         $webhook = config('sextant.notifications.discord_webhook_url');
-        $embeds = array_map(fn (NotificationGroup $group): array => $this->embeds->build($group, $now), array_values($groups));
-        $perMessage = max(1, (int) config('sextant.notifications.max_embeds_per_message'));
+        $hasWebhook = is_string($webhook) && $webhook !== '';
 
-        foreach (array_chunk(array_keys($embeds), $perMessage) as $indexes) {
-            if (is_string($webhook) && $webhook !== '') {
-                SendDiscordMessage::dispatch([
-                    'embeds' => array_map(fn (int $index): array => $embeds[$index], $indexes),
-                    'allowed_mentions' => ['parse' => []],
-                ])->onQueue('notifications');
-                $report['messages']++;
-            }
-        }
-
-        // Step 6.
+        // Step 6, before sending: marking first keeps the next flush from
+        // sending them again while the message waits in the queue. If it
+        // finally fails, the job puts its events back in the outbox
+        // (SendDiscordMessage::failed()).
         $sent = 0;
 
         foreach ($groups as $group) {
             foreach ($group->events as $event) {
-                $this->mark($event, $now, is_string($webhook) && $webhook !== '' ? null : self::SUPPRESSED_NO_WEBHOOK);
+                $this->mark($event, $now, $hasWebhook ? null : self::SUPPRESSED_NO_WEBHOOK);
                 $event->incident->forceFill(['last_notified_at' => $now])->save();
                 $sent++;
+            }
+        }
+
+        if ($hasWebhook) {
+            $groupList = array_values($groups);
+            $perMessage = max(1, (int) config('sextant.notifications.max_embeds_per_message'));
+
+            foreach (array_chunk($groupList, $perMessage) as $chunk) {
+                SendDiscordMessage::dispatch(
+                    [
+                        'embeds' => array_map(fn (NotificationGroup $group): array => $this->embeds->build($group, $now), $chunk),
+                        'allowed_mentions' => ['parse' => []],
+                    ],
+                    array_merge(...array_map(
+                        fn (NotificationGroup $group): array => array_map(fn (IncidentEvent $event): int => $event->id, $group->events),
+                        $chunk,
+                    )),
+                )->onQueue('notifications');
+                $report['messages']++;
             }
         }
 

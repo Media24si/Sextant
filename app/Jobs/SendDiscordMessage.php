@@ -2,17 +2,21 @@
 
 namespace App\Jobs;
 
+use App\Models\IncidentEvent;
 use App\Net\WebClient;
+use App\Notifications\Discord\NotificationFlusher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\RateLimited;
 use RuntimeException;
+use Throwable;
 
 /**
  * Posts one message to the Discord webhook (SPEC §12.1). Runs on the
  * single-worker `notifications` queue, limited to 20 per minute. A 429 is
  * honoured by waiting `retry_after`; after 5 failed sends the job fails and
- * Sentry hears about it.
+ * Sentry hears about it. Its events then go back to the outbox, so the next
+ * flush sends them again; a message Discord refuses (4xx) is marked rejected.
  */
 class SendDiscordMessage implements ShouldQueue
 {
@@ -25,8 +29,9 @@ class SendDiscordMessage implements ShouldQueue
 
     /**
      * @param  array{embeds: list<array<string, mixed>>, allowed_mentions: array{parse: list<string>}}  $payload
+     * @param  list<int>  $eventIds  the incident events this message reports
      */
-    public function __construct(public array $payload) {}
+    public function __construct(public array $payload, public array $eventIds = []) {}
 
     /** Rate-limit waits and 429s release the job; keep trying for an hour. */
     public function retryUntil(): \DateTimeInterface
@@ -73,7 +78,32 @@ class SendDiscordMessage implements ShouldQueue
 
         if ($response->failed()) {
             // Never include the webhook URL: it's a secret (docs/CLAUDE.md).
-            throw new RuntimeException("Discord answered HTTP {$response->status()}: ".mb_strimwidth($response->body(), 0, 300, '…'));
+            $exception = new RuntimeException("Discord answered HTTP {$response->status()}: ".mb_strimwidth($response->body(), 0, 300, '…'), $response->status());
+
+            if ($response->clientError()) {
+                // The same message would be refused again: fail now.
+                $this->fail($exception);
+
+                return;
+            }
+
+            throw $exception;
         }
+    }
+
+    /**
+     * Out of attempts, out of time (the worker was down for over an hour),
+     * or refused: never leave the events marked as sent.
+     */
+    public function failed(?Throwable $exception): void
+    {
+        $code = $exception?->getCode();
+        $rejected = is_int($code) && $code >= 400 && $code < 500;
+
+        IncidentEvent::query()
+            ->whereKey($this->eventIds)
+            ->update($rejected
+                ? ['suppressed_reason' => NotificationFlusher::SUPPRESSED_REJECTED]
+                : ['notified_at' => null, 'suppressed_reason' => null]);
     }
 }

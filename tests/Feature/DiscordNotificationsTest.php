@@ -259,8 +259,61 @@ it('waits out a 429 and fails loudly on other errors', function () {
     $job->handle();
     $job->assertReleased(delay: 2);
 
-    expect(fn () => (new SendDiscordMessage($payload))->handle())->toThrow(RuntimeException::class, 'Discord answered HTTP 400');
+    $refused = (new SendDiscordMessage($payload))->withFakeQueueInteractions();
+    $refused->handle();
+    $refused->assertFailedWith(RuntimeException::class);
     expect((new SendDiscordMessage($payload))->maxExceptions)->toBe(5);
+});
+
+it('throws on a server error so the queue retries it', function () {
+    config(['sextant.notifications.discord_webhook_url' => 'https://discord.test/api/webhooks/2/other']);
+    Http::fake(['https://discord.test/api/webhooks/2/*' => Http::response('Bad Gateway', 502)]);
+
+    expect(fn () => (new SendDiscordMessage(['embeds' => [], 'allowed_mentions' => ['parse' => []]]))->handle())
+        ->toThrow(RuntimeException::class, 'Discord answered HTTP 502');
+});
+
+it('tells the job which events each message carries', function () {
+    Queue::fake();
+    $first = siteIncident();
+    $second = siteIncident('warning');
+    $this->travel(21)->seconds();
+
+    flushNotifications();
+
+    Queue::assertPushed(SendDiscordMessage::class, fn (SendDiscordMessage $job): bool => $job->eventIds === [
+        $first->events()->sole()->id,
+        $second->events()->sole()->id,
+    ]);
+});
+
+it('puts the events back in the outbox when sending finally fails', function () {
+    Queue::fake();
+    $incident = siteIncident();
+    $this->travel(21)->seconds();
+    flushNotifications();
+    $event = $incident->events()->sole();
+    expect($event->notified_at)->not->toBeNull();
+
+    (new SendDiscordMessage(['embeds' => [], 'allowed_mentions' => ['parse' => []]], [$event->id]))
+        ->failed(new RuntimeException('Discord answered HTTP 503', 503));
+
+    expect($event->fresh()->notified_at)->toBeNull();
+
+    flushNotifications();
+
+    Queue::assertPushed(SendDiscordMessage::class, 2);
+});
+
+it('marks events Discord refused instead of sending them again', function () {
+    $incident = siteIncident();
+    $event = $incident->events()->sole();
+    $event->forceFill(['notified_at' => now()])->save();
+
+    (new SendDiscordMessage(['embeds' => [], 'allowed_mentions' => ['parse' => []]], [$event->id]))
+        ->failed(new RuntimeException('Discord answered HTTP 400', 400));
+
+    expect($event->fresh())->notified_at->not->toBeNull()->suppressed_reason->toBe('rejected');
 });
 
 it('queues a heartbeat on each watched queue', function () {
