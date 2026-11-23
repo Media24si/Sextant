@@ -7,6 +7,7 @@ import ServerController from '@/actions/App/Http/Controllers/ServerController';
 import SiteController from '@/actions/App/Http/Controllers/SiteController';
 import RunChecksController from '@/actions/App/Http/Controllers/RunChecksController';
 import ActivityList from '@/components/app/ActivityList.vue';
+import BlastRadius from '@/components/app/BlastRadius.vue';
 import IncidentList from '@/components/app/IncidentList.vue';
 import MonitorList from '@/components/app/MonitorList.vue';
 import ServerVersionsPanel from '@/components/app/ServerVersionsPanel.vue';
@@ -32,6 +33,7 @@ const props = defineProps<{
     checker_options: App.Data.Monitors.CheckerOptionData[];
     incidents: App.Data.Incidents.IncidentRowData[];
     versions: App.Data.ServerVersionsPanelData;
+    radius: App.Data.BlastRadiusData;
 }>();
 
 // Results arrive while the page is open (SPEC §13.7).
@@ -278,6 +280,12 @@ function restore(): void {
                 description="Choose this server as the backend when adding or editing a site."
             />
         </section>
+
+        <BlastRadius
+            v-if="sites_total > 0"
+            :name="server.name"
+            :radius="radius"
+        />
 
         <div class="grid items-start gap-6 lg:grid-cols-[3fr_2fr]">
             <section

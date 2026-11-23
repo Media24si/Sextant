@@ -153,7 +153,7 @@ class SearchController extends Controller
                 label: $service->name,
                 context: 'External service · in front of '.$this->count((int) $service->getAttribute('sites_count'), 'site'),
                 status: null,
-                url: route('external-services.index', [], false),
+                url: route('external-services.show', $service, false),
             ))
             ->all());
     }

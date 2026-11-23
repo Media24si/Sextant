@@ -34,6 +34,18 @@ id: number,
 name: string,
 role: App.Enums.UserRole,
 };
+export type BackendGroupData = {
+server_id: number | null,
+server: string | null,
+sites_count: number,
+first_site: string,
+};
+export type BlastRadiusData = {
+sites: number,
+applications: App.Data.DependentData[],
+domains: App.Data.DependentData[],
+hostnames: string[],
+};
 export type ChoiceData = {
 id: number,
 label: string,
@@ -43,6 +55,12 @@ id: number,
 label: string,
 position: number,
 servers_count: number,
+};
+export type DependentData = {
+id: number,
+name: string,
+affected: number,
+total: number,
 };
 export type DomainFormData = {
 id: number | null,
@@ -74,6 +92,17 @@ github_url: string | null,
 status: App.Enums.Status,
 serving_path: App.Data.ServingPathData,
 server_id: number | null,
+};
+export type ExternalServiceData = {
+id: number,
+name: string,
+kind: App.Enums.ExternalServiceKind,
+ranges: string[],
+ranges_source: App.Enums.RangeSource | null,
+cname_suffixes: string[],
+response_headers: string[],
+notes: string | null,
+deleted: boolean,
 };
 export type ExternalServiceFormData = {
 id: number | null,

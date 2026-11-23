@@ -101,6 +101,9 @@ test('the server page shows how traffic reaches it, its sites, their application
         ->where('sites.1.hostname', 'podjetje.svet24.si')
         ->where('sites.1.application_id', $svet24->id)
         ->where('sites.1.application', 'Svet24')
+        ->where('radius.sites', 3)
+        ->where('radius.applications', [['id' => $svet24->id, 'name' => 'Svet24', 'affected' => 2, 'total' => 2]])
+        ->where('radius.hostnames', ['media24.si', 'podjetje.svet24.si', 'svet24.si'])
         ->where('activity', fn ($activity) => collect($activity)->pluck('type')->contains('server.versions_token_rotated')
             && collect($activity)->pluck('type')->contains('site.created')));
 

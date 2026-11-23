@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\BackendGroupData;
+use App\Data\ExternalServiceData;
 use App\Data\ExternalServiceFormData;
 use App\Data\ExternalServiceRowData;
+use App\Data\ServedSiteData;
 use App\Http\Requests\ExternalServiceRequest;
 use App\Models\ExternalService;
+use App\Models\Site;
+use App\Support\BlastRadius;
 use App\Support\ReturnTo;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -44,6 +50,38 @@ class ExternalServiceController extends Controller
         ]);
     }
 
+    /**
+     * A service's page: where the traffic through it goes, the sites behind
+     * it, and what goes down with it.
+     */
+    public function show(ExternalService $externalService): Response
+    {
+        $sites = $externalService->sites()->with(['frontService', 'server', 'application'])->orderBy('hostname')->get();
+
+        $backends = $sites
+            ->groupBy(fn (Site $site): int => $site->server_id ?? 0)
+            ->map(function (Collection $group, int $serverId): BackendGroupData {
+                /** @var Site $first */
+                $first = $group->first();
+
+                return new BackendGroupData(
+                    server_id: $serverId === 0 ? null : $serverId,
+                    server: $first->server?->name,
+                    sites_count: $group->count(),
+                    first_site: $first->display_hostname,
+                );
+            })
+            ->sortBy(fn (BackendGroupData $group): string => ($group->server === null ? '1' : '0').$group->server)
+            ->values();
+
+        return Inertia::render('external-services/Show', [
+            'service' => ExternalServiceData::fromModel($externalService),
+            'backends' => $backends,
+            'sites' => $sites->map(ServedSiteData::fromModel(...))->values(),
+            'radius' => BlastRadius::of($sites),
+        ]);
+    }
+
     public function create(Request $request): Response
     {
         $ip = $request->query('ip');
@@ -61,7 +99,7 @@ class ExternalServiceController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => "External service {$service->name} added."]);
         $returnTo = ReturnTo::from($request);
 
-        return $returnTo !== null ? redirect($returnTo) : to_route('external-services.index');
+        return $returnTo !== null ? redirect($returnTo) : to_route('external-services.show', $service);
     }
 
     public function edit(ExternalService $externalService): Response
@@ -75,7 +113,7 @@ class ExternalServiceController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "External service {$externalService->name} saved."]);
 
-        return to_route('external-services.index');
+        return to_route('external-services.show', $externalService);
     }
 
     /**
@@ -110,7 +148,7 @@ class ExternalServiceController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "External service {$externalService->name} restored."]);
 
-        return to_route('external-services.index');
+        return to_route('external-services.show', $externalService);
     }
 
     /**

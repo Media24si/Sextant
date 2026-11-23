@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import type { ColumnDef } from '@tanstack/vue-table';
 import { computed, h } from 'vue';
 import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
+import SiteController from '@/actions/App/Http/Controllers/SiteController';
 import DataTable from '@/components/app/DataTable.vue';
 import PageHeader from '@/components/app/PageHeader.vue';
 import { Button } from '@/components/ui/button';
@@ -42,16 +43,14 @@ const columns: ColumnDef<Row, unknown>[] = [
         header: 'Name',
         enableSorting: true,
         cell: ({ row }) =>
-            canManage.value && !row.original.deleted
-                ? h(
-                      Link,
-                      {
-                          href: ExternalServiceController.edit(row.original.id),
-                          class: 'font-medium hover:underline',
-                      },
-                      () => row.original.name,
-                  )
-                : h('span', { class: 'font-medium' }, row.original.name),
+            h(
+                Link,
+                {
+                    href: ExternalServiceController.show(row.original.id),
+                    class: 'font-medium hover:underline',
+                },
+                () => row.original.name,
+            ),
     },
     {
         id: 'kind',
@@ -67,7 +66,21 @@ const columns: ColumnDef<Row, unknown>[] = [
         id: 'sites_count',
         header: 'Sites in front of',
         enableSorting: true,
-        cell: ({ row }) => row.original.sites_count,
+        cell: ({ row }) =>
+            row.original.sites_count > 0
+                ? h(
+                      Link,
+                      {
+                          href: SiteController.index({
+                              query: {
+                                  'filter[front]': String(row.original.id),
+                              },
+                          }),
+                          class: 'hover:underline',
+                      },
+                      () => row.original.sites_count,
+                  )
+                : 0,
     },
     {
         id: 'actions',

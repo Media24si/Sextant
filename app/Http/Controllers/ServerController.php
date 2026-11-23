@@ -23,6 +23,7 @@ use App\Models\ServerAddress;
 use App\Models\Site;
 use App\Monitoring\IncidentPresenter;
 use App\Monitoring\MonitorProps;
+use App\Support\BlastRadius;
 use App\Support\ReturnTo;
 use App\Support\TableQuery;
 use App\Versions\CollectorKit;
@@ -97,6 +98,7 @@ class ServerController extends Controller
             'sites' => $sites->take(self::SITES_SHOWN)->map(ServedSiteData::fromModel(...))->values(),
             'sites_total' => $sites->count(),
             'applications_total' => $sites->pluck('application_id')->filter()->unique()->count(),
+            'radius' => BlastRadius::of($sites),
             'activity' => Activity::query()
                 ->where('server_id', $server->id)
                 ->with('user')

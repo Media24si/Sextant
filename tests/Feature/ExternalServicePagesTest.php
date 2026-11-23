@@ -2,6 +2,8 @@
 
 use App\Enums\ExternalServiceKind;
 use App\Enums\RangeSource;
+use App\Models\Application;
+use App\Models\Domain;
 use App\Models\ExternalService;
 use App\Models\Server;
 use App\Models\Site;
@@ -29,8 +31,35 @@ test('readers see the external services with ranges and sites', function () {
             ->where('rows.data.1.sites_count', 3));
 });
 
+test('the service page shows where its traffic goes and what goes down with it', function () {
+    $varnish = ExternalService::factory()->create(['name' => 'Varnish']);
+    $web02 = Server::factory()->create(['name' => 'web02']);
+    $svet24 = Domain::factory()->create(['name' => 'svet24.si']);
+    $app = Application::factory()->create(['name' => 'Svet24']);
+    Site::factory()->for($svet24)->create(['hostname' => 'svet24.si', 'front_service_id' => $varnish->id, 'server_id' => $web02->id, 'application_id' => $app->id]);
+    Site::factory()->for($svet24)->create(['hostname' => 'podjetje.svet24.si', 'front_service_id' => $varnish->id, 'server_id' => $web02->id]);
+    Site::factory()->for($svet24)->create(['hostname' => 'ekipa.svet24.si', 'front_service_id' => $varnish->id]);
+    Site::factory()->for($svet24)->create(['hostname' => 'direct.svet24.si', 'server_id' => $web02->id, 'application_id' => $app->id]);
+
+    $this->actingAs(User::factory()->reader()->create())
+        ->get(route('external-services.show', $varnish))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('external-services/Show')
+            ->where('service.name', 'Varnish')
+            ->where('backends', [
+                ['server_id' => $web02->id, 'server' => 'web02', 'sites_count' => 2, 'first_site' => 'podjetje.svet24.si'],
+                ['server_id' => null, 'server' => null, 'sites_count' => 1, 'first_site' => 'ekipa.svet24.si'],
+            ])
+            ->has('sites', 3)
+            ->where('radius.sites', 3)
+            ->where('radius.applications', [['id' => $app->id, 'name' => 'Svet24', 'affected' => 1, 'total' => 2]])
+            ->where('radius.domains', [['id' => $svet24->id, 'name' => 'svet24.si', 'affected' => 3, 'total' => 4]])
+            ->where('radius.hostnames', ['ekipa.svet24.si', 'podjetje.svet24.si', 'svet24.si']));
+});
+
 test('an admin adds a service; textarea lines become clean lists', function () {
-    $this->actingAs($this->admin)
+    $response = $this->actingAs($this->admin)
         ->post(route('external-services.store'), [
             'name' => 'Varnish',
             'kind' => 'proxy',
@@ -40,10 +69,10 @@ test('an admin adds a service; textarea lines become clean lists', function () {
             'response_headers' => 'X-Varnish, Via',
             'notes' => 'In front of svet24',
         ])
-        ->assertSessionHasNoErrors()
-        ->assertRedirect(route('external-services.index'));
+        ->assertSessionHasNoErrors();
 
     $service = ExternalService::query()->where('name', 'Varnish')->sole();
+    $response->assertRedirect(route('external-services.show', $service));
 
     expect($service->kind)->toBe(ExternalServiceKind::Proxy)
         ->and($service->ranges)->toBe(['203.0.113.80', '2001:db8:80::/48'])
@@ -107,6 +136,6 @@ test('a service in front of sites is not deleted; an unused one is, and comes ba
     $this->delete(route('external-services.destroy', $varnish))->assertRedirect(route('external-services.index'));
     expect($varnish->fresh()->trashed())->toBeTrue();
 
-    $this->post(route('external-services.restore', $varnish))->assertRedirect(route('external-services.index'));
+    $this->post(route('external-services.restore', $varnish))->assertRedirect(route('external-services.show', $varnish));
     expect($varnish->fresh()->trashed())->toBeFalse();
 });

@@ -120,6 +120,7 @@ Route::middleware('auth')->group(function () {
     Route::get('domains/{domain}', [DomainController::class, 'show'])->withTrashed()->name('domains.show');
     Route::get('sites/{site}', [SiteController::class, 'show'])->withTrashed()->name('sites.show');
     Route::get('applications/{application}', [ApplicationController::class, 'show'])->withTrashed()->name('applications.show');
+    Route::get('external-services/{external_service}', [ExternalServiceController::class, 'show'])->withTrashed()->name('external-services.show');
     Route::get('monitors/{monitor}', [MonitorController::class, 'show'])->name('monitors.show');
 });
 
