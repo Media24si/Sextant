@@ -127,6 +127,30 @@ export type FilterOptionData = {
 value: string,
 label: string,
 };
+export type GithubOwnerRowData = {
+owner: string,
+repositories: string[],
+token_id: number | null,
+token_masked: string | null,
+expires_at: string | null,
+checked_at: string | null,
+last_error: string | null,
+set_by: string | null,
+updated_at: string | null,
+};
+export type GithubRepositoryTestData = {
+name: string,
+ok: boolean,
+error: string | null,
+default_branch: string | null,
+lock_files: string[],
+};
+export type GithubTestResultData = {
+ok: boolean,
+error: string | null,
+expires_at: string | null,
+repositories: App.Data.GithubRepositoryTestData[],
+};
 export type MinimumVersionRowData = {
 id: number,
 software: string,

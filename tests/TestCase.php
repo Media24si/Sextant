@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Net\Fake\FakeDnsResolver;
+use App\Net\Fake\FakeGithubClient;
 use App\Net\Fake\FakeHttpProbe;
 use App\Net\Fake\FakePingProbe;
 use App\Net\Fake\FakeRdapClient;
@@ -36,6 +37,7 @@ abstract class TestCase extends BaseTestCase
         FakeRdapClient::install();
         FakeWhoisClient::install();
         FakeVersionsClient::install();
+        FakeGithubClient::install();
         Http::preventStrayRequests();
         Storage::fake();
     }

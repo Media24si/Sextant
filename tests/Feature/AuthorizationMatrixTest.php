@@ -5,6 +5,7 @@ use App\Models\Application;
 use App\Models\Choice;
 use App\Models\Domain;
 use App\Models\ExternalService;
+use App\Models\GithubToken;
 use App\Models\Incident;
 use App\Models\MinimumVersion;
 use App\Models\Monitor;
@@ -74,6 +75,10 @@ $adminRoutes = [
     'rename list entry' => ['put', 'lists.update', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'move list entry' => ['post', 'lists.move', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'delete list entry' => ['delete', 'lists.destroy', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
+    'GitHub access page' => ['get', 'github-access.index', null],
+    'set GitHub token' => ['post', 'github-tokens.store', null],
+    'remove GitHub token' => ['delete', 'github-tokens.destroy', fn () => ['github_token' => GithubToken::factory()->create()]],
+    'test GitHub token' => ['post', 'github-tokens.test', fn () => ['github_token' => GithubToken::factory()->create()]],
     'users page' => ['get', 'users.index', null],
     'add application form' => ['get', 'applications.create', null],
     'store application' => ['post', 'applications.store', null],

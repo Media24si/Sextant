@@ -59,6 +59,17 @@ return [
         'install_link_minutes' => 30,
     ],
 
+    // Lock files read from GitHub with read-only tokens (§11.9).
+    'github' => [
+        'api_url' => 'https://api.github.com',
+        'api_version' => '2022-11-28',
+        'timeout' => 15,
+        'max_bytes' => 20 * 1024 * 1024,
+        'expiry_warning_days' => 14,
+        // Read from the root of the default branch, in this order.
+        'lock_files' => ['composer.lock', 'package-lock.json', 'pnpm-lock.yaml'],
+    ],
+
     'whois' => [
         'expiry_patterns' => [
             '/Registry Expiry Date:\s*(.+)/i',

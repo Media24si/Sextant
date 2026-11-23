@@ -17,6 +17,7 @@ class ResourceUrl
             'application' => route('applications.show', $id, false),
             'external_service' => route('external-services.show', $id, false),
             'minimum_version' => route('minimum-versions.index', [], false),
+            'github_token' => route('github-access.index', [], false),
             default => null,
         };
     }

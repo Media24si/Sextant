@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Application;
 use App\Models\Domain;
 use App\Models\ExternalService;
+use App\Models\GithubToken;
 use App\Models\Incident;
 use App\Models\MinimumVersion;
 use App\Models\Monitor;
@@ -12,10 +13,12 @@ use App\Models\Server;
 use App\Models\Site;
 use App\Models\User;
 use App\Net\DnsResolver;
+use App\Net\GithubClient;
 use App\Net\HttpProbe;
 use App\Net\PingProbe;
 use App\Net\RdapClient;
 use App\Net\Real\GuzzleHttpProbe;
+use App\Net\Real\HttpGithubClient;
 use App\Net\Real\HttpVersionsClient;
 use App\Net\Real\IanaRdapClient;
 use App\Net\Real\NetDnsResolver;
@@ -54,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(RdapClient::class, IanaRdapClient::class);
         $this->app->singleton(WhoisClient::class, SocketWhoisClient::class);
         $this->app->singleton(VersionsClient::class, HttpVersionsClient::class);
+        $this->app->singleton(GithubClient::class, HttpGithubClient::class);
         // Minimums are cached per request or job.
         $this->app->scoped(MinimumVersions::class);
     }
@@ -94,6 +98,7 @@ class AppServiceProvider extends ServiceProvider
             'monitor' => Monitor::class,
             'incident' => Incident::class,
             'minimum_version' => MinimumVersion::class,
+            'github_token' => GithubToken::class,
         ]);
     }
 

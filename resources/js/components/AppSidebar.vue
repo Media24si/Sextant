@@ -7,6 +7,7 @@ import {
     Boxes,
     Gauge,
     Globe,
+    KeyRound,
     LayoutGrid,
     List,
     Server,
@@ -20,6 +21,7 @@ import ApplicationController from '@/actions/App/Http/Controllers/ApplicationCon
 import ChoiceController from '@/actions/App/Http/Controllers/ChoiceController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
+import GithubAccessController from '@/actions/App/Http/Controllers/GithubAccessController';
 import IncidentController from '@/actions/App/Http/Controllers/IncidentController';
 import MinimumVersionController from '@/actions/App/Http/Controllers/MinimumVersionController';
 import MonitorController from '@/actions/App/Http/Controllers/MonitorController';
@@ -44,7 +46,7 @@ const page = usePage();
 /*
  * SPEC §13.4, grouped: the inventory first (what we have and how it
  * connects), then monitoring, then settings. Readers see every page they can
- * open; only Users is for admins.
+ * open; only Users and GitHub access are for admins.
  */
 const overviewItems: SidebarNavItem[] = [
     { title: 'Overview', href: dashboard(), icon: LayoutGrid },
@@ -100,7 +102,14 @@ const monitoringItems = computed<SidebarNavItem[]>(() => [
 const settingsItems = computed<SidebarNavItem[]>(() => [
     { title: 'Lists', href: ChoiceController.index(), icon: List },
     ...(page.props.can.manage
-        ? [{ title: 'Users', href: UserController.index(), icon: Users }]
+        ? [
+              { title: 'Users', href: UserController.index(), icon: Users },
+              {
+                  title: 'GitHub access',
+                  href: GithubAccessController.index(),
+                  icon: KeyRound,
+              },
+          ]
         : []),
 ]);
 </script>

@@ -6,6 +6,7 @@ use App\Http\Controllers\ChoiceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\ExternalServiceController;
+use App\Http\Controllers\GithubAccessController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\MinimumVersionController;
 use App\Http\Controllers\MonitorController;
@@ -109,6 +110,11 @@ Route::middleware('auth')->group(function () {
         Route::put('settings/lists/{choice}', [ChoiceController::class, 'update'])->name('lists.update');
         Route::post('settings/lists/{choice}/move', [ChoiceController::class, 'move'])->name('lists.move');
         Route::delete('settings/lists/{choice}', [ChoiceController::class, 'destroy'])->name('lists.destroy');
+
+        Route::get('settings/github', [GithubAccessController::class, 'index'])->name('github-access.index');
+        Route::post('settings/github/tokens', [GithubAccessController::class, 'store'])->name('github-tokens.store');
+        Route::delete('settings/github/tokens/{github_token}', [GithubAccessController::class, 'destroy'])->name('github-tokens.destroy');
+        Route::post('settings/github/tokens/{github_token}/test', [GithubAccessController::class, 'test'])->name('github-tokens.test');
 
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::post('users', [UserController::class, 'store'])->name('users.store');
