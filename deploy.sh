@@ -38,6 +38,8 @@ main() {
         previous_commit="${PREVIOUS_COMMIT:-$(git rev-parse HEAD)}"
     fi
 
+    check_environment
+
     step "Installing PHP dependencies"
     composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-progress
 
@@ -91,6 +93,34 @@ pull() {
     step "Pulling $branch"
     git fetch --prune origin "$branch"
     git merge --ff-only "origin/$branch"
+}
+
+# A production .env, so a server copied from .env.example doesn't run with
+# APP_ENV=local (no password rules, debug pages) and APP_DEBUG=true.
+check_environment() {
+    local app_env app_debug mailer
+
+    [[ -f .env ]] || fail ".env is missing; copy .env.example and see the README"
+
+    app_env="$(env_value APP_ENV)"
+    app_debug="$(env_value APP_DEBUG)"
+    mailer="$(env_value MAIL_MAILER)"
+
+    [[ "$app_env" == "production" ]] || fail "APP_ENV is '${app_env}' in .env; set APP_ENV=production"
+    [[ "$app_debug" == "false" ]] || fail "APP_DEBUG is '${app_debug}' in .env; set APP_DEBUG=false"
+
+    if [[ -z "$mailer" || "$mailer" == "log" ]]; then
+        warn "MAIL_MAILER is log: password resets are turned off until mail is set up"
+    fi
+}
+
+# The last value of a key in .env, without quotes.
+env_value() {
+    sed -n "s/^$1=//p" .env | tail -n 1 | tr -d "\"'"
+}
+
+warn() {
+    printf '\n\033[1;33mWarning: %s\033[0m\n' "$1" >&2
 }
 
 step() {

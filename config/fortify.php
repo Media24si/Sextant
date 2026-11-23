@@ -161,7 +161,9 @@ return [
     */
 
     'features' => [
-        Features::resetPasswords(),
+        // A reset link "mailed" through the log mailer lands in laravel.log
+        // as a working token, so production only offers resets with real mail.
+        ...(env('APP_ENV') === 'production' && env('MAIL_MAILER', 'log') === 'log' ? [] : [Features::resetPasswords()]),
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,
