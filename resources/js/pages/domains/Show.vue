@@ -209,77 +209,86 @@ function destroy(): void {
         </header>
 
         <div class="grid items-start gap-6 lg:grid-cols-[3fr_2fr]">
-            <section
-                class="overflow-hidden rounded-xl border bg-card"
-                aria-labelledby="sites"
-            >
-                <h2 id="sites" class="px-6 pt-5 pb-4 text-lg font-semibold">
-                    Sites
-                    <span class="font-normal text-muted-foreground">{{
-                        domain.sites.length
-                    }}</span>
-                </h2>
-                <ul v-if="domain.sites.length > 0" class="divide-y border-t">
-                    <li
-                        v-for="site in domain.sites"
-                        :key="site.id"
-                        class="grid items-center gap-3 px-6 py-3 text-sm md:grid-cols-[2fr_2fr_1fr]"
+            <div class="flex min-w-0 flex-col gap-6">
+                <section
+                    class="overflow-hidden rounded-xl border bg-card"
+                    aria-labelledby="sites"
+                >
+                    <h2 id="sites" class="px-6 pt-5 pb-4 text-lg font-semibold">
+                        Sites
+                        <span class="font-normal text-muted-foreground">{{
+                            domain.sites.length
+                        }}</span>
+                    </h2>
+                    <ul
+                        v-if="domain.sites.length > 0"
+                        class="divide-y border-t"
                     >
-                        <div>
-                            <span class="inline-flex items-center gap-2">
-                                <Link
-                                    :href="SiteController.show(site.id)"
-                                    class="font-mono hover:underline"
-                                    >{{ site.hostname }}</Link
+                        <li
+                            v-for="site in domain.sites"
+                            :key="site.id"
+                            class="grid items-center gap-3 px-6 py-3 text-sm md:grid-cols-[2fr_2fr_1fr]"
+                        >
+                            <div>
+                                <span class="inline-flex items-center gap-2">
+                                    <Link
+                                        :href="SiteController.show(site.id)"
+                                        class="font-mono hover:underline"
+                                        >{{ site.hostname }}</Link
+                                    >
+                                    <RepoLink
+                                        v-if="site.github_url"
+                                        :url="site.github_url"
+                                    />
+                                </span>
+                                <p
+                                    v-if="site.description"
+                                    class="text-muted-foreground"
                                 >
-                                <RepoLink
-                                    v-if="site.github_url"
-                                    :url="site.github_url"
-                                />
+                                    {{ site.description }}
+                                </p>
+                            </div>
+                            <ServingPath
+                                :path="site.serving_path"
+                                :backend-href="
+                                    site.server_id
+                                        ? ServerController.show(site.server_id)
+                                        : undefined
+                                "
+                            />
+                            <span class="inline-flex items-center gap-2">
+                                <StatusDot :status="site.status" />
+                                {{ statusLabels[site.status] }}
                             </span>
-                            <p
-                                v-if="site.description"
-                                class="text-muted-foreground"
-                            >
-                                {{ site.description }}
-                            </p>
-                        </div>
-                        <ServingPath
-                            :path="site.serving_path"
-                            :backend-href="
-                                site.server_id
-                                    ? ServerController.show(site.server_id)
-                                    : undefined
-                            "
-                        />
-                        <span class="inline-flex items-center gap-2">
-                            <StatusDot :status="site.status" />
-                            {{ statusLabels[site.status] }}
-                        </span>
-                    </li>
-                </ul>
-                <EmptyState v-else title="No sites on this domain yet" />
-            </section>
+                        </li>
+                    </ul>
+                    <EmptyState v-else title="No sites on this domain yet" />
+                </section>
 
-            <IncidentList :incidents="incidents" />
+                <MonitorList
+                    :monitors="monitors"
+                    :checker-options="checker_options"
+                    :resource="{ type: 'domain', id: domain.id }"
+                />
+            </div>
+            <div class="flex min-w-0 flex-col gap-6">
+                <IncidentList :incidents="incidents" />
 
-            <MonitorList
-                :monitors="monitors"
-                :checker-options="checker_options"
-                :resource="{ type: 'domain', id: domain.id }"
-            />
-
-            <section
-                class="rounded-xl border bg-card"
-                aria-labelledby="changes"
-            >
-                <h2 id="changes" class="px-6 pt-5 pb-4 text-lg font-semibold">
-                    Changes
-                </h2>
-                <div class="border-t px-6">
-                    <ActivityList :items="activity" />
-                </div>
-            </section>
+                <section
+                    class="rounded-xl border bg-card"
+                    aria-labelledby="changes"
+                >
+                    <h2
+                        id="changes"
+                        class="px-6 pt-5 pb-4 text-lg font-semibold"
+                    >
+                        Changes
+                    </h2>
+                    <div class="border-t px-6">
+                        <ActivityList :items="activity" />
+                    </div>
+                </section>
+            </div>
         </div>
 
         <ConfirmDialog

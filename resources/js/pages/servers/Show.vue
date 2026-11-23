@@ -295,140 +295,167 @@ function restore(): void {
         />
 
         <div class="grid items-start gap-6 lg:grid-cols-[3fr_2fr]">
-            <section
-                class="overflow-hidden rounded-xl border bg-card"
-                aria-labelledby="sites-served"
-            >
-                <div
-                    class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-6 pt-5 pb-4"
+            <div class="flex min-w-0 flex-col gap-6">
+                <section
+                    class="overflow-hidden rounded-xl border bg-card"
+                    aria-labelledby="sites-served"
                 >
-                    <h2 id="sites-served" class="text-lg font-semibold">
-                        Sites served
-                    </h2>
-                    <span
-                        v-if="sites_total > 0"
-                        class="text-sm text-muted-foreground"
-                        >{{ sites_total }}
-                        {{ sites_total === 1 ? 'site' : 'sites' }} ·
-                        {{ applications_total }}
-                        {{
-                            applications_total === 1
-                                ? 'application'
-                                : 'applications'
-                        }}</span
+                    <div
+                        class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-6 pt-5 pb-4"
                     >
-                </div>
-                <div v-if="sites.length > 0" class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="bg-muted text-left text-muted-foreground">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 font-medium">
-                                    Site
-                                </th>
-                                <th scope="col" class="px-3 py-3 font-medium">
-                                    Application
-                                </th>
-                                <th scope="col" class="px-3 py-3 font-medium">
-                                    Serving path
-                                </th>
-                                <th scope="col" class="px-6 py-3 font-medium">
-                                    Status
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                v-for="site in sites"
-                                :key="site.id"
-                                class="border-t"
+                        <h2 id="sites-served" class="text-lg font-semibold">
+                            Sites served
+                        </h2>
+                        <span
+                            v-if="sites_total > 0"
+                            class="text-sm text-muted-foreground"
+                            >{{ sites_total }}
+                            {{ sites_total === 1 ? 'site' : 'sites' }} ·
+                            {{ applications_total }}
+                            {{
+                                applications_total === 1
+                                    ? 'application'
+                                    : 'applications'
+                            }}</span
+                        >
+                    </div>
+                    <div v-if="sites.length > 0" class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead
+                                class="bg-muted text-left text-muted-foreground"
                             >
-                                <td class="px-6 py-3">
-                                    <Link
-                                        :href="SiteController.show(site.id)"
-                                        class="font-mono font-medium hover:underline"
-                                        >{{ site.hostname }}</Link
+                                <tr>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 font-medium"
                                     >
-                                    <span
-                                        v-if="site.description"
-                                        class="block text-xs text-muted-foreground"
-                                        >{{ site.description }}</span
+                                        Site
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-3 py-3 font-medium"
                                     >
-                                </td>
-                                <td class="px-3 py-3">
-                                    <Link
-                                        v-if="site.application_id"
-                                        :href="
-                                            ApplicationController.show(
-                                                site.application_id,
-                                            )
-                                        "
-                                        class="hover:underline"
-                                        >{{ site.application }}</Link
+                                        Application
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-3 py-3 font-medium"
                                     >
-                                    <span v-else class="text-muted-foreground"
-                                        >—</span
+                                        Serving path
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-6 py-3 font-medium"
                                     >
-                                </td>
-                                <td class="px-3 py-3">
-                                    <ServingPath :path="site.serving_path" />
-                                </td>
-                                <td class="px-6 py-3">
-                                    <span
-                                        class="inline-flex items-center gap-2"
-                                    >
-                                        <StatusDot :status="site.status" />
-                                        {{ statusLabels[site.status] }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <EmptyState v-else title="No sites yet" />
-                <div
-                    v-if="sites_total > 0"
-                    class="flex flex-wrap items-center justify-between gap-3 border-t px-6 py-3 text-sm"
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    v-for="site in sites"
+                                    :key="site.id"
+                                    class="border-t"
+                                >
+                                    <td class="px-6 py-3">
+                                        <Link
+                                            :href="SiteController.show(site.id)"
+                                            class="font-mono font-medium hover:underline"
+                                            >{{ site.hostname }}</Link
+                                        >
+                                        <span
+                                            v-if="site.description"
+                                            class="block text-xs text-muted-foreground"
+                                            >{{ site.description }}</span
+                                        >
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <Link
+                                            v-if="site.application_id"
+                                            :href="
+                                                ApplicationController.show(
+                                                    site.application_id,
+                                                )
+                                            "
+                                            class="hover:underline"
+                                            >{{ site.application }}</Link
+                                        >
+                                        <span
+                                            v-else
+                                            class="text-muted-foreground"
+                                            >—</span
+                                        >
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <ServingPath
+                                            :path="site.serving_path"
+                                        />
+                                    </td>
+                                    <td class="px-6 py-3">
+                                        <span
+                                            class="inline-flex items-center gap-2"
+                                        >
+                                            <StatusDot :status="site.status" />
+                                            {{ statusLabels[site.status] }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <EmptyState v-else title="No sites yet" />
+                    <div
+                        v-if="sites_total > 0"
+                        class="flex flex-wrap items-center justify-between gap-3 border-t px-6 py-3 text-sm"
+                    >
+                        <span class="text-muted-foreground"
+                            >Showing {{ sites.length }} of
+                            {{ sites_total }}</span
+                        >
+                        <Link
+                            :href="
+                                SiteController.index({
+                                    query: {
+                                        'filter[backend]': String(server.id),
+                                    },
+                                })
+                            "
+                            class="font-medium hover:underline"
+                            >View all sites on this server</Link
+                        >
+                    </div>
+                </section>
+
+                <IncidentList
+                    :incidents="incidents"
+                    description="Including the sites this server is the backend of."
+                    :all-query="{ 'filter[server]': String(server.id) }"
+                />
+
+                <section
+                    class="rounded-xl border bg-card"
+                    aria-labelledby="changes"
                 >
-                    <span class="text-muted-foreground"
-                        >Showing {{ sites.length }} of {{ sites_total }}</span
+                    <h2
+                        id="changes"
+                        class="px-6 pt-5 pb-4 text-lg font-semibold"
                     >
-                    <Link
-                        :href="
-                            SiteController.index({
-                                query: { 'filter[backend]': String(server.id) },
-                            })
-                        "
-                        class="font-medium hover:underline"
-                        >View all sites on this server</Link
-                    >
-                </div>
-            </section>
+                        Changes
+                    </h2>
+                    <div class="border-t px-6">
+                        <ActivityList :items="activity" />
+                    </div>
+                </section>
+            </div>
+            <div class="flex min-w-0 flex-col gap-6">
+                <ServerVersionsPanel :server-id="server.id" :panel="versions" />
 
-            <ServerVersionsPanel :server-id="server.id" :panel="versions" />
-
-            <IncidentList
-                :incidents="incidents"
-                description="Including the sites server serves as their backend."
-                :all-query="{ 'filter[server]': String(server.id) }"
-            />
-
-            <MonitorList
-                :monitors="monitors"
-                :checker-options="checker_options"
-                :resource="{ type: 'server', id: server.id }"
-            />
-
-            <section
-                class="rounded-xl border bg-card"
-                aria-labelledby="changes"
-            >
-                <h2 id="changes" class="px-6 pt-5 pb-4 text-lg font-semibold">
-                    Changes
-                </h2>
-                <div class="border-t px-6">
-                    <ActivityList :items="activity" />
-                </div>
-            </section>
+                <MonitorList
+                    :monitors="monitors"
+                    :checker-options="checker_options"
+                    :resource="{ type: 'server', id: server.id }"
+                />
+            </div>
         </div>
 
         <ConfirmDialog

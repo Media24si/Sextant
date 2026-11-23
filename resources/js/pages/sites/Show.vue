@@ -215,33 +215,41 @@ function destroy(): void {
         </section>
 
         <div class="grid items-start gap-6 lg:grid-cols-[3fr_2fr]">
-            <IncidentList :incidents="incidents" />
+            <div class="flex min-w-0 flex-col gap-6">
+                <IncidentList :incidents="incidents" />
 
-            <MonitorList
-                :monitors="monitors"
-                :checker-options="checker_options"
-                :resource="{ type: 'site', id: site.id }"
-            />
-            <section
-                class="rounded-xl border bg-card"
-                aria-labelledby="changes"
-            >
-                <h2 id="changes" class="px-6 pt-5 pb-4 text-lg font-semibold">
-                    Changes
-                </h2>
-                <div class="border-t px-6">
-                    <ActivityList :items="activity" />
-                </div>
-            </section>
-            <section
-                v-if="site.notes"
-                class="rounded-xl border bg-card p-6 lg:col-span-2"
-                aria-labelledby="notes"
-            >
-                <h2 id="notes" class="text-lg font-semibold">Notes</h2>
-                <p class="mt-2 text-sm whitespace-pre-line">{{ site.notes }}</p>
-            </section>
+                <section
+                    class="rounded-xl border bg-card"
+                    aria-labelledby="changes"
+                >
+                    <h2
+                        id="changes"
+                        class="px-6 pt-5 pb-4 text-lg font-semibold"
+                    >
+                        Changes
+                    </h2>
+                    <div class="border-t px-6">
+                        <ActivityList :items="activity" />
+                    </div>
+                </section>
+            </div>
+            <div class="flex min-w-0 flex-col gap-6">
+                <MonitorList
+                    :monitors="monitors"
+                    :checker-options="checker_options"
+                    :resource="{ type: 'site', id: site.id }"
+                />
+            </div>
         </div>
+
+        <section
+            v-if="site.notes"
+            class="rounded-xl border bg-card p-6"
+            aria-labelledby="notes"
+        >
+            <h2 id="notes" class="text-lg font-semibold">Notes</h2>
+            <p class="mt-2 text-sm whitespace-pre-line">{{ site.notes }}</p>
+        </section>
 
         <RedetectSiteDialog
             v-if="page.props.can.manage && !site.deleted"

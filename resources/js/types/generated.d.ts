@@ -323,6 +323,7 @@ last4: string,
 namespace Dashboard {
 export type DashboardData = {
 totals: App.Data.Dashboard.TotalsData,
+servers: App.Data.Dashboard.ServerTileData[],
 issues: App.Data.Dashboard.IssueGroupData[],
 muted: App.Data.Dashboard.IssueGroupData[],
 pending_count: number,
@@ -369,6 +370,13 @@ id: number,
 name: string,
 status: App.Enums.Status,
 url: string,
+};
+export type ServerTileData = {
+id: number,
+name: string,
+status: App.Enums.Status,
+sites_count: number,
+below_minimum: boolean,
 };
 export type SoftwareMinimumRowData = {
 software: string,

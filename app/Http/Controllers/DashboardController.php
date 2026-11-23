@@ -16,6 +16,7 @@ class DashboardController extends Controller
     {
         return Inertia::render('Dashboard', [
             'totals' => fn () => $dashboard->totals(),
+            'servers' => fn () => $dashboard->servers(),
             'issues' => fn () => $dashboard->issues(),
             'muted' => fn () => $dashboard->muted(),
             'pending_count' => fn () => $dashboard->pendingCount(),

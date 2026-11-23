@@ -52,7 +52,7 @@ test('the dashboard props follow the contract', function () {
             ->has('totals', fn (Assert $totals) => $totals
                 ->has('servers', fn (Assert $counts) => $counts->hasAll(['total', 'ok', 'warning', 'error', 'unknown']))
                 ->hasAll(['domains', 'sites', 'sites_unassigned', 'servers_below_minimum', 'servers_collector_outdated']))
-            ->hasAll(['issues', 'muted', 'pending_count', 'resolved', 'software', 'expiring', 'changes'])
+            ->hasAll(['servers', 'issues', 'muted', 'pending_count', 'resolved', 'software', 'expiring', 'changes'])
             ->has('system', fn (Assert $system) => $system->hasAll(['last_dispatch_at', 'checks_running', 'stale_monitors', 'network_healthy'])));
 });
 
@@ -66,6 +66,19 @@ test('totals count resources by status', function () {
             ->where('totals.servers', ['total' => 3, 'ok' => 0, 'warning' => 0, 'error' => 1, 'unknown' => 2])
             ->where('totals.sites.total', 1)
             ->where('totals.sites_unassigned', 1));
+});
+
+test('the server map lists every server with its status and sites', function () {
+    $web02 = Server::factory()->create(['name' => 'web02']);
+    $db01 = Server::factory()->create(['name' => 'db01']);
+    $web02->forceFill(['status' => Status::Warning])->saveQuietly();
+    Site::factory()->count(2)->create(['server_id' => $web02->id]);
+
+    $this->actingAs(User::factory()->reader()->create())->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page->where('servers', [
+            ['id' => $db01->id, 'name' => 'db01', 'status' => 'unknown', 'sites_count' => 0, 'below_minimum' => false],
+            ['id' => $web02->id, 'name' => 'web02', 'status' => 'warning', 'sites_count' => 2, 'below_minimum' => false],
+        ]));
 });
 
 test('issues are grouped by resource, worst first then oldest first, with sites under their server', function () {

@@ -8,6 +8,7 @@ use App\Data\Dashboard\IncidentItemData;
 use App\Data\Dashboard\IssueGroupData;
 use App\Data\Dashboard\ResolvedItemData;
 use App\Data\Dashboard\ResourceRefData;
+use App\Data\Dashboard\ServerTileData;
 use App\Data\Dashboard\SoftwareMinimumRowData;
 use App\Data\Dashboard\StatusCountsData;
 use App\Data\Dashboard\SystemHealthData;
@@ -51,7 +52,7 @@ class DashboardBuilder
 
     private const EXPIRING_DAYS = 60;
 
-    private const CHANGES_SHOWN = 50;
+    private const CHANGES_SHOWN = 15;
 
     /** Without a dispatch for this long, checks count as stopped (SPEC §13.7). */
     private const DISPATCH_GRACE_SECONDS = 180;
@@ -114,6 +115,30 @@ class DashboardBuilder
             servers_below_minimum: count($this->minimums->serverIdsBelow()),
             servers_collector_outdated: Server::query()->collectorOutdated($this->collector->version())->count(),
         );
+    }
+
+    /**
+     * Every server with its status and the sites it builds, by name: the
+     * map of what we run, next to what's broken.
+     *
+     * @return list<ServerTileData>
+     */
+    public function servers(): array
+    {
+        $below = array_flip($this->minimums->serverIdsBelow());
+
+        return array_values(Server::query()
+            ->withCount('sites')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Server $server): ServerTileData => new ServerTileData(
+                id: $server->id,
+                name: $server->name,
+                status: $server->status,
+                sites_count: (int) $server->getAttribute('sites_count'),
+                below_minimum: isset($below[$server->id]),
+            ))
+            ->all());
     }
 
     /**

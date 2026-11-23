@@ -10,6 +10,8 @@ class DashboardData extends Data
 {
     public function __construct(
         public TotalsData $totals,
+        /** @var list<ServerTileData> */
+        public array $servers,
         /** @var list<IssueGroupData> */
         public array $issues,
         /** @var list<IssueGroupData> */

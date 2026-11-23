@@ -29,6 +29,7 @@ import { Duration } from '@/lib/duration';
 // can't read a global type as a whole props object.
 const props = defineProps<{
     totals: App.Data.Dashboard.TotalsData;
+    servers: App.Data.Dashboard.ServerTileData[];
     issues: App.Data.Dashboard.IssueGroupData[];
     muted: App.Data.Dashboard.IssueGroupData[];
     pending_count: number;
@@ -45,6 +46,7 @@ const now = useNow();
 usePoll(10_000, {
     only: [
         'totals',
+        'servers',
         'issues',
         'muted',
         'pending_count',
@@ -110,13 +112,34 @@ const lastCheck = computed(() =>
 
 const since = (iso: string) => Duration.since(iso, now.value);
 
-/** "nginx on web03 · PHP 8.2 on web02", as in the prototype. */
-const belowSummary = computed(() => {
-    const items = props.software.flatMap((row) =>
-        row.below.map((below) => `${row.software} on ${below.server}`),
-    );
+/**
+ * Servers below a minimum per software, all PHP branches together:
+ * [{ software: 'nginx', servers: 4 }, { software: 'PHP', servers: 3 }].
+ */
+const belowBySoftware = computed(() => {
+    const servers = new Map<string, Set<string>>();
 
-    return items.length > 0 ? items.join(' · ') : null;
+    for (const row of props.software) {
+        const name = row.branch
+            ? row.software.slice(0, -row.branch.length).trim()
+            : row.software;
+
+        for (const below of row.below) {
+            servers.set(
+                name,
+                (servers.get(name) ?? new Set()).add(below.server),
+            );
+        }
+    }
+
+    return [...servers].map(([software, names]) => ({
+        software,
+        servers: names.size,
+    }));
+});
+
+const belowMinimumHref = ServerController.index({
+    query: { 'filter[show]': 'below_minimum' },
 });
 </script>
 
@@ -208,17 +231,26 @@ const belowSummary = computed(() => {
                             : 'servers'
                     }}
                 </span>
-                <span
-                    class="text-sm"
-                    :class="
-                        belowSummary
-                            ? 'text-status-warning-fg'
-                            : 'text-muted-foreground'
-                    "
-                    >{{
-                        belowSummary ??
-                        'Every reading is at or above its minimum.'
-                    }}</span
+                <ul
+                    v-if="belowBySoftware.length > 0"
+                    class="flex flex-wrap gap-1.5 text-sm"
+                >
+                    <li
+                        v-for="item in belowBySoftware"
+                        :key="item.software"
+                        class="rounded-full border border-status-warning/40 bg-card px-2.5 py-0.5 text-status-warning-fg"
+                    >
+                        {{ item.software }} · {{ item.servers }}
+                    </li>
+                </ul>
+                <span v-else class="text-sm text-muted-foreground"
+                    >Every reading is at or above its minimum.</span
+                >
+                <Link
+                    v-if="props.totals.servers_below_minimum > 0"
+                    :href="belowMinimumHref"
+                    class="text-sm font-medium text-status-warning-fg hover:underline"
+                    >Show these servers</Link
                 >
                 <Link
                     v-if="props.totals.servers_collector_outdated > 0"
@@ -419,6 +451,61 @@ const belowSummary = computed(() => {
                             </template>
                         </ul>
                     </details>
+                </section>
+
+                <section
+                    v-if="servers.length > 0"
+                    class="overflow-hidden rounded-xl border bg-card"
+                    aria-labelledby="server-map"
+                >
+                    <div
+                        class="flex items-center justify-between border-b px-5 py-4"
+                    >
+                        <h2 id="server-map" class="text-lg font-semibold">
+                            Servers
+                        </h2>
+                        <Link
+                            :href="ServerController.index()"
+                            class="text-sm text-primary hover:underline"
+                            >All servers</Link
+                        >
+                    </div>
+                    <ul
+                        class="grid grid-cols-2 gap-2 p-4 sm:grid-cols-3 xl:grid-cols-4"
+                    >
+                        <li v-for="server in servers" :key="server.id">
+                            <Link
+                                :href="ServerController.show(server.id)"
+                                class="flex h-full flex-col gap-1 rounded-lg border px-3 py-2.5 hover:border-ring"
+                                :class="{
+                                    'border-status-error/50 bg-status-error-bg/40':
+                                        server.status === 'error',
+                                    'border-status-warning/40 bg-status-warning-bg/30':
+                                        server.status === 'warning',
+                                }"
+                            >
+                                <span
+                                    class="flex items-center gap-2 font-mono font-medium"
+                                >
+                                    <StatusDot :status="server.status" label />
+                                    {{ server.name }}
+                                </span>
+                                <span class="text-xs text-muted-foreground"
+                                    >{{ server.sites_count }}
+                                    {{
+                                        server.sites_count === 1
+                                            ? 'site'
+                                            : 'sites'
+                                    }}<template v-if="server.below_minimum">
+                                        ·
+                                        <span class="text-status-warning-fg"
+                                            >below minimum</span
+                                        ></template
+                                    ></span
+                                >
+                            </Link>
+                        </li>
+                    </ul>
                 </section>
 
                 <section
