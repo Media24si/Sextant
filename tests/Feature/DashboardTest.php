@@ -17,10 +17,12 @@ test('authenticated users can visit the dashboard', function () {
 });
 
 use App\Checks\CheckResult;
+use App\Dashboard\DashboardBuilder;
 use App\Enums\IncidentResolution;
 use App\Enums\Status;
 use App\Models\Activity;
 use App\Models\Domain;
+use App\Models\ExternalService;
 use App\Models\Incident;
 use App\Models\Monitor;
 use App\Models\MonitorState;
@@ -29,6 +31,7 @@ use App\Models\Site;
 use App\Monitoring\IncidentManager;
 use App\Monitoring\MonitorClaimer;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -88,6 +91,26 @@ test('issues are grouped by resource, worst first then oldest first, with sites 
             ->where('issues.1.incidents.0.id', $later->id)
             ->where('issues.2.incidents.0.id', $warning->id)
             ->where('issues.2.resource.url', route('domains.show', $domain)));
+});
+
+test('current issues take as many queries for six failing sites as for one', function () {
+    $web02 = Server::factory()->create(['name' => 'web02']);
+    $varnish = ExternalService::factory()->create(['name' => 'Varnish']);
+    openIncidentOn($web02, 'server.tcp', 'error', 'HTTPS');
+    $failingSite = fn () => openIncidentOn(Site::factory()->create(['server_id' => $web02->id, 'front_service_id' => $varnish->id]), 'site.http', 'error');
+    $queries = function (): int {
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        app(DashboardBuilder::class)->issues();
+
+        return count(DB::getQueryLog());
+    };
+
+    $failingSite();
+    $forOne = $queries();
+    collect(range(1, 5))->each(fn () => $failingSite());
+
+    expect($queries())->toBe($forOne);
 });
 
 test('muted incidents are listed apart and pending checks are counted', function () {

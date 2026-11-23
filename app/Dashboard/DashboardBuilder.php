@@ -31,6 +31,7 @@ use App\Versions\MinimumVersions;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -262,10 +263,14 @@ class DashboardBuilder
                 ? $monitor->where('muted_until', '>', now())
                 : $monitor->where(fn (Builder $query) => $query->whereNull('muted_until')->orWhere('muted_until', '<=', now())))
             ->with([
-                'monitorable',
+                'monitorable' => $this->withServingPath(...),
                 'acknowledgedBy',
                 'monitor.state',
-                'children' => fn ($children) => $children->open()->with(['monitorable', 'acknowledgedBy', 'monitor.state'])->orderBy('opened_at'),
+                'children' => fn ($children) => $children->open()->with([
+                    'monitorable' => $this->withServingPath(...),
+                    'acknowledgedBy',
+                    'monitor.state',
+                ])->orderBy('opened_at'),
             ])
             ->get();
 
@@ -299,6 +304,17 @@ class DashboardBuilder
                 fn (IssueGroupData $a, IssueGroupData $b): int => $this->oldest($a) <=> $this->oldest($b),
             ])
             ->all());
+    }
+
+    /**
+     * Sites come with what their serving path names, so an outage with 80
+     * site incidents doesn't cost two queries per site on every poll.
+     *
+     * @param  MorphTo<Model, Incident>  $monitorable
+     */
+    private function withServingPath(MorphTo $monitorable): void
+    {
+        $monitorable->morphWith([Site::class => ['frontService', 'server']]);
     }
 
     private function item(Incident $incident): IncidentItemData
