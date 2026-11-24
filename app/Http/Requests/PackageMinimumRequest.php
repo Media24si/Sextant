@@ -12,8 +12,9 @@ use Illuminate\Validation\Rule;
 
 /**
  * A package minimum (SPEC §3.23, §11.9): one per package, with a version per
- * major such as `12.13, 13.39`. Typed as one text field; stored as a sorted
- * list. Composer names are stored lowercase, as Composer treats them.
+ * release line such as `12.13, 13.39` (per major) or `8.1.7, 8.2.5, 8.3.7`
+ * (per minor). Typed as one text field; stored as a sorted list. Composer
+ * names are stored lowercase, as Composer treats them.
  */
 class PackageMinimumRequest extends FormRequest
 {
@@ -58,7 +59,7 @@ class PackageMinimumRequest extends FormRequest
                     ->where('ecosystem', (string) $this->input('ecosystem'))
                     ->ignore($minimum instanceof PackageMinimum ? $minimum : null),
             ],
-            'min_versions' => ['required', 'array', 'min:1', 'max:20', $this->onePerMajor(...)],
+            'min_versions' => ['required', 'array', 'min:1', 'max:20', $this->onePerLine(...)],
             'min_versions.*' => ['string', 'max:50', 'regex:/^\d+(\.\d+)*$/'],
             'cve_url' => ['nullable', 'string', 'max:255', 'url:https,http'],
             'note' => ['nullable', 'string', 'max:255'],
@@ -66,26 +67,41 @@ class PackageMinimumRequest extends FormRequest
     }
 
     /**
+     * No two versions on the same line (`8.3.5, 8.3.7`), and none on a line
+     * another one already covers (`8.13` is for all of 8, so `8.3.7` with it
+     * would contradict it).
+     *
      * @param  Closure(string): mixed  $fail
      */
-    private function onePerMajor(string $attribute, mixed $versions, Closure $fail): void
+    private function onePerLine(string $attribute, mixed $versions, Closure $fail): void
     {
+        /** @var array<string, string> $seen line => version */
         $seen = [];
 
         foreach ((array) $versions as $version) {
-            $major = PackageVersion::branch((string) $version);
+            $line = PackageVersion::line((string) $version);
 
-            if ($major === null) {
+            if ($line === null) {
                 continue;
             }
 
-            if (isset($seen[$major])) {
-                $fail("One version per major: {$seen[$major]} and {$version} are both {$major}.x.");
+            foreach ($seen as $seenLine => $seenVersion) {
+                if ($seenLine === $line) {
+                    $fail("One version per line: {$seenVersion} and {$version} are both {$line}.x.");
 
-                return;
+                    return;
+                }
+
+                [$wide, $wideVersion, $narrowVersion] = substr_count($seenLine, '.') < substr_count($line, '.') ? [$seenLine, $seenVersion, $version] : [$line, $version, $seenVersion];
+
+                if (str_starts_with(PackageVersion::line($narrowVersion).'.', $wide.'.')) {
+                    $fail("{$wideVersion} covers every {$wide}.x, so {$narrowVersion} can't be listed with it.");
+
+                    return;
+                }
             }
 
-            $seen[$major] = $version;
+            $seen[$line] = (string) $version;
         }
     }
 

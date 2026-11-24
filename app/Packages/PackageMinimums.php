@@ -9,9 +9,9 @@ use Illuminate\Support\Collection;
 
 /**
  * Which locked packages are below the minimum an admin set (SPEC §11.9).
- * Each package has one minimum with a version per major; a package version
- * is compared with the version of the nearest listed major at or below its
- * own. Cached per request or job.
+ * Each package has one minimum with a version per release line; a package
+ * version is compared with the version PackageMinimum::floorFor() picks.
+ * Cached per request or job.
  */
 class PackageMinimums
 {

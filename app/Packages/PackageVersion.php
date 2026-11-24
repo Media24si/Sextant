@@ -23,6 +23,37 @@ final class PackageVersion
         return $normalised === null ? null : explode('.', $normalised)[0];
     }
 
+    /**
+     * The release line a listed minimum is for: every part but the last, so
+     * `8.3.7` is for `8.3` and `12.13` for all of `12` (a lone `3` is `3`).
+     */
+    public static function line(string $version): ?string
+    {
+        $normalised = self::normalise($version);
+
+        if ($normalised === null) {
+            return null;
+        }
+
+        $parts = explode('.', $normalised);
+
+        return implode('.', array_slice($parts, 0, max(1, count($parts) - 1)));
+    }
+
+    /** Whether a version is on the given line or a newer one: `8.4.0` and `8.3.9` are at or above `8.3`. */
+    public static function isAtOrAboveLine(string $version, string $line): bool
+    {
+        $normalised = self::normalise($version);
+
+        if ($normalised === null) {
+            return false;
+        }
+
+        $truncated = implode('.', array_slice(explode('.', $normalised), 0, count(explode('.', $line))));
+
+        return version_compare($truncated, $line, '>=');
+    }
+
     public static function isBelow(string $version, string $minimum): bool
     {
         $normalised = self::normalise($version);

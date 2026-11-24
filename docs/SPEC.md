@@ -462,7 +462,7 @@ Unique `(repository_id, ecosystem, name, version)`: npm can lock several version
 | Column | Type | Notes |
 |---|---|---|
 | `ecosystem`, `name` | | Unique together |
-| `min_versions` | json | One per major, sorted, e.g. `["12.13", "13.39"]` |
+| `min_versions` | json | One per release line (every part but the last), sorted, e.g. `["12.13", "13.39"]` or `["8.1.7", "8.2.5", "8.3.7"]` |
 | `cve_url` | varchar(255) null | |
 | `note` | varchar(255) null | |
 | `set_by` | FK → users | |
@@ -1363,12 +1363,12 @@ Setting up or updating a server is one command, run there as root. Sextant still
 
 ### 11.9 Application packages from GitHub
 
-Sextant reads the lock files of the repositories that sites and applications link to and compares the locked packages with minimums per major, the same way it treats server software.
+Sextant reads the lock files of the repositories that sites and applications link to and compares the locked packages with minimums per release line, the same way it treats server software.
 
 - **Access.** One fine-grained personal access token per owner (a fine-grained token targets one resource owner), entered by an admin on Settings → GitHub access. Only fine-grained tokens are accepted (`github_pat_…`): a classic token can't be limited to chosen repositories or to reading. Recommended set-up: a dedicated account that only reads; Resource owner = the organisation; Repository access = only the linked repositories; Repository permissions = **Contents: Read-only** (Metadata: Read-only comes with it); nothing else. Sextant calls only `GET /repos/{owner}/{repo}` and `GET /repos/{owner}/{repo}/contents[/{path}]`. **Test** reads every linked repository of the owner and lists the lock files found, and stores the token's expiry and the first error.
 - **What is read.** The root of the default branch: `composer.lock` (with `composer.json` for direct packages), `package-lock.json` v1–v3 (v1 with `package.json`), `pnpm-lock.yaml` v5, v6 and v9 (read line by line, no YAML parser). Git, tarball, link and workspace entries are skipped. Monorepo subfolders and `yarn.lock` are not read.
-- **Comparison.** Every locked package is compared, direct or not: a minimum on `livewire/livewire` also catches repositories that get it through `filament/filament`. `direct` and `dev` only label packages. A package's branch is its major version. Normalisation: drop a leading `v`, keep the leading `\d+(\.\d+)*` (`v12.9.1` → `12.9.1`, `4.0.0-beta.1` → `4.0.0`); a branch such as `dev-main` is never below. The listed minimum is chosen as in §11.6: with `12.13, 13.39`, 12.9.1 is below, 13.40 isn't, 11.x is below (older than every listed major) and 14.x never is.
-- **Package minimums** live on the Minimum versions page under Packages: ecosystem, package name (suggestions from every package seen), versions one per major, CVE link, note. Setting, changing or removing one claims an immediate run of every enabled `repository.packages` monitor (§6.4).
+- **Comparison.** Every locked package is compared, direct or not: a minimum on `livewire/livewire` also catches repositories that get it through `filament/filament`. `direct` and `dev` only label packages. A package's branch is its major version. Normalisation: drop a leading `v`, keep the leading `\d+(\.\d+)*` (`v12.9.1` → `12.9.1`, `4.0.0-beta.1` → `4.0.0`); a branch such as `dev-main` is never below. A listed minimum is for its **line**, every part but the last (`12.13` for all of 12, `8.3.7` for 8.3), so a fix released on several minors can be listed per minor. When some listed minimums share the package's major, it is compared with the one on the nearest line at or below its own, or the lowest of that major when it is older than all of them; otherwise the listed minimum is chosen by major as in §11.6. With `12.13, 13.39`, 12.9.1 is below, 13.40 isn't, 11.x is below (older than every listed major) and 14.x never is. With vite `6.4.6, 7.3.8, 8.1.7, 8.2.5, 8.3.7`, 8.2.3 is below, 8.3.9 and 8.4.0 aren't, 8.0.x is below (older than every listed line of 8), 7.4.0 isn't and 9.x never is.
+- **Package minimums** live on the Minimum versions page under Packages: ecosystem, package name (suggestions from every package seen), versions one per release line (two on the same line, or `8.13` with `8.3.7`, are refused), CVE link, note. Setting, changing or removing one claims an immediate run of every enabled `repository.packages` monitor (§6.4).
 - **Pages.** Repositories list and repository page (§13.6); a Packages card on application and site pages with the repository's status, read time and only the packages that have a minimum (direct or indirect, marked), below first; Packages vs minimum on the dashboard; packages below minimum in Discord with the CVE link (§12.1).
 
 ## 12. Notifications and self-monitoring
@@ -1530,7 +1530,7 @@ Shared components in `resources/js/components/app`:
 | **Monitors** | Global list (filters: checker, status, enabled, muted, pending); monitor drawer with effective settings, state, last 100 runs; form with `MonitorArgumentsForm` |
 | **Incidents** | List (filters: open / acknowledged / resolved, severity, resource type, server, checker) and incident page (timeline, children, first/last result, links) |
 | **Activity** | Feed with filters: category, type, resource, server, user |
-| **Minimum versions** | Software, branch, minimum, CVE link, note, servers below (count + names), set by, date; then Packages: package, ecosystem, minimum per major, CVE link, note, repositories below (§11.9) |
+| **Minimum versions** | Software, branch, minimum, CVE link, note, servers below (count + names), set by, date; then Packages: package, ecosystem, minimum per release line, CVE link, note, repositories below (§11.9) |
 | **Repositories** | Repository with status, used by (applications and sites), package count with lock files, packages below minimum, read time; "No GitHub token" when the owner has none |
 | **Repository page** | Name, GitHub link, default branch, read time, token expiry; packages (find, Direct and with a minimum / All / Below minimum) with locked version, minimum and kind; used by; monitors; incidents; action: Read now (admins) |
 | **GitHub access** (admins) | How to create a read-only token; each owner of a linked repository with its repositories and token (masked, expiry, last Test); add, replace, remove, Test |

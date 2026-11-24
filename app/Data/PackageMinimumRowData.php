@@ -13,7 +13,7 @@ class PackageMinimumRowData extends Data
         public int $id,
         public Ecosystem $ecosystem,
         public string $name,
-        /** @var list<string> one per major, e.g. ["12.13", "13.39"] */
+        /** @var list<string> one per release line, e.g. ["12.13", "13.39"] or ["8.1.7", "8.2.5"] */
         public array $min_versions,
         public ?string $cve_url,
         public ?string $note,

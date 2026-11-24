@@ -113,9 +113,9 @@ const versionsError = computed(
 );
 
 /*
- * Package minimums (SPEC §11.9): one version per major, e.g.
- * laravel/framework 12.13, 13.39. Repositories whose lock file has the
- * package below it get a warning.
+ * Package minimums (SPEC §11.9): one version per major or minor line, e.g.
+ * laravel/framework 12.13, 13.39 or vite 8.1.7, 8.2.5, 8.3.7. Repositories
+ * whose lock file has the package below it get a warning.
  */
 const editingPackage = ref<PackageRow | null>(null);
 const packageOpen = ref(false);
@@ -312,10 +312,11 @@ const fieldClasses =
                 <h2 class="text-xl font-bold tracking-tight">Packages</h2>
                 <p class="mt-1 text-muted-foreground">
                     Composer and npm packages locked in the repositories that
-                    sites and applications link to, one version per major. Every
-                    package in the lock files is checked, including ones pulled
-                    in by other packages (e.g. livewire/livewire through
-                    filament/filament). Repositories below it get a warning.
+                    sites and applications link to, one version per major or
+                    minor line. Every package in the lock files is checked,
+                    including ones pulled in by other packages (e.g.
+                    livewire/livewire through filament/filament). Repositories
+                    below it get a warning.
                 </p>
             </div>
             <Button v-if="page.props.can.manage" @click="addPackage"
@@ -495,7 +496,7 @@ const fieldClasses =
                         label="Minimum versions"
                         for="package-min-versions"
                         :error="packageVersionsError"
-                        description="One per major version, separated by commas, e.g. 12.13, 13.39. A major older than the oldest listed is always below; a newer one never is."
+                        description="One per major or minor line, separated by commas, e.g. 12.13, 13.39 or 8.1.7, 8.2.5, 8.3.7. A version older than the oldest listed is always below; a newer one never is."
                         required
                     >
                         <Input

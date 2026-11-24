@@ -219,13 +219,21 @@ it('re-reads every repository when a package minimum is set, changed or removed'
         ]);
 });
 
+it('accepts a version per minor line', function () {
+    $this->actingAs($this->admin)->post(route('package-minimums.store'), ['ecosystem' => 'npm', 'name' => 'vite', 'min_versions' => '8.3.7, 8.2.5, 8.1.7, 7.3.8, 6.4.6'])
+        ->assertSessionHasNoErrors();
+
+    expect(PackageMinimum::query()->sole()->min_versions)->toBe(['6.4.6', '7.3.8', '8.1.7', '8.2.5', '8.3.7']);
+});
+
 it('validates package minimums', function (array $input, string $field, string $message) {
     PackageMinimum::factory()->create(['name' => 'laravel/framework']);
 
     $this->actingAs($this->admin)->post(route('package-minimums.store'), $input)->assertSessionHasErrors([$field => $message]);
 })->with([
     'one per package' => [['ecosystem' => 'composer', 'name' => 'laravel/framework', 'min_versions' => '13.40'], 'name', 'This package already has a minimum; change that one instead.'],
-    'one per major' => [['ecosystem' => 'npm', 'name' => 'axios', 'min_versions' => '1.8.2, 1.7.9'], 'min_versions', 'One version per major: 1.7.9 and 1.8.2 are both 1.x.'],
+    'one per line' => [['ecosystem' => 'npm', 'name' => 'axios', 'min_versions' => '1.8.5, 1.8.2'], 'min_versions', 'One version per line: 1.8.2 and 1.8.5 are both 1.8.x.'],
+    'a major-wide version covers its lines' => [['ecosystem' => 'npm', 'name' => 'axios', 'min_versions' => '1.13, 1.8.2'], 'min_versions', "1.13 covers every 1.x, so 1.8.2 can't be listed with it."],
     'composer names have a vendor' => [['ecosystem' => 'composer', 'name' => 'framework', 'min_versions' => '1.0'], 'name', 'Enter the package as vendor/name, e.g. laravel/framework.'],
     'not a version' => [['ecosystem' => 'npm', 'name' => '@inertiajs/vue3', 'min_versions' => 'latest'], 'min_versions.0', 'Enter versions such as 12.13 or 13.39.1, separated by commas.'],
 ]);

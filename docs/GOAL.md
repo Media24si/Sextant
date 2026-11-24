@@ -83,7 +83,7 @@ A domain can also be added with several subdomains at once, and a list of URLs c
 - Upgrades and downgrades go into the change feed.
 - **Minimum safe versions**: after a CVE, an admin sets the lowest safe version per software (per branch for PHP), with a link to the CVE. Servers below it turn orange (Warning), appear under current issues and are posted to Discord as a warning. Upgrading clears it at the next read.
 - Every server we monitor runs PHP. Windows servers can't run the bash collector, so their versions stay empty in v1.
-- **Application packages** (added 2026-11-23): Sextant reads `composer.lock`, `package-lock.json` and `pnpm-lock.yaml` from the GitHub repositories that sites and applications link to, with one read-only token per GitHub owner (fine-grained, Contents: Read-only, only the linked repositories). After a CVE, an admin sets the lowest safe version of a package per major version (e.g. `laravel/framework` 12.13, 13.39); repositories below it, and the applications and sites using them, show it, and Discord gets a warning, exactly as for server software.
+- **Application packages** (added 2026-11-23): Sextant reads `composer.lock`, `package-lock.json` and `pnpm-lock.yaml` from the GitHub repositories that sites and applications link to, with one read-only token per GitHub owner (fine-grained, Contents: Read-only, only the linked repositories). After a CVE, an admin sets the lowest safe version of a package per major or minor line (e.g. `laravel/framework` 12.13, 13.39; `vite` 8.1.7, 8.2.5, 8.3.7); repositories below it, and the applications and sites using them, show it, and Discord gets a warning, exactly as for server software.
 
 ### 6. Monitoring
 
