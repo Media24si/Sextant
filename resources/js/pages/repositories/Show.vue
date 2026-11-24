@@ -58,7 +58,8 @@ const shown = computed(() => {
             scope.value === 'below'
                 ? item.below_minimum
                 : scope.value === 'direct'
-                  ? item.direct || item.below_minimum
+                  ? // Indirect packages that have a minimum are checked too, so they show here.
+                    item.direct || item.min_version !== null
                   : true,
         )
         .filter((item) => term === '' || item.name.toLowerCase().includes(term))
@@ -187,7 +188,9 @@ const selectClasses =
                             :class="selectClasses"
                             aria-label="Which packages"
                         >
-                            <option value="direct">Direct</option>
+                            <option value="direct">
+                                Direct and with a minimum
+                            </option>
                             <option value="all">All</option>
                             <option value="below">Below minimum</option>
                         </select>

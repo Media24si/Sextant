@@ -239,7 +239,7 @@ Until step 2, the versions check is Unknown ("Token rejected (401)"). That doesn
 
 ## Reading lock files from GitHub
 
-Sextant reads `composer.lock`, `package-lock.json` and `pnpm-lock.yaml` from the repositories that sites and applications link to, with one read-only token per GitHub owner. For each organisation (or user) listed under **Settings → GitHub access**:
+Sextant reads `composer.lock`, `package-lock.json` and `pnpm-lock.yaml` from the repositories that sites and applications link to, with one read-only token per GitHub owner. Package minimums apply to every package in those files, including ones pulled in by other packages (e.g. `livewire/livewire` through `filament/filament`). For each organisation (or user) listed under **Settings → GitHub access**:
 
 1. Sign in to GitHub as a member of the organisation, ideally a dedicated account that only reads.
 2. **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.**

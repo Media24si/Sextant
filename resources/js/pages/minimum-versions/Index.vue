@@ -312,8 +312,10 @@ const fieldClasses =
                 <h2 class="text-xl font-bold tracking-tight">Packages</h2>
                 <p class="mt-1 text-muted-foreground">
                     Composer and npm packages locked in the repositories that
-                    sites and applications link to, one version per major.
-                    Repositories below it get a warning.
+                    sites and applications link to, one version per major. Every
+                    package in the lock files is checked, including ones pulled
+                    in by other packages (e.g. livewire/livewire through
+                    filament/filament). Repositories below it get a warning.
                 </p>
             </div>
             <Button v-if="page.props.can.manage" @click="addPackage"

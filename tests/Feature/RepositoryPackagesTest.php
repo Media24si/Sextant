@@ -142,6 +142,27 @@ it('warns about every package below its minimum, with the CVE link', function ()
         ]);
 });
 
+it('checks packages pulled in by other packages, and the site lists only those with a minimum', function () {
+    PackageMinimum::factory()->create(['name' => 'guzzlehttp/guzzle', 'min_versions' => ['7.9.3']]);
+    $repository = svet24(fixtureFiles(['composer.lock', 'composer.json']));
+    $site = Site::factory()->create(['application_id' => Application::query()->sole()->id]);
+
+    RunMonitor::dispatchSync(packagesMonitor($repository)->id);
+
+    expect(Incident::query()->sole()->message)->toBe('guzzlehttp/guzzle 7.9.2 < 7.9.3');
+
+    $this->actingAs($this->admin)->get(route('sites.show', $site))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('repository.packages_count', 5)
+            ->has('repository.watched', 1)
+            ->where('repository.watched.0.name', 'guzzlehttp/guzzle')
+            ->where('repository.watched.0.direct', false)
+            ->where('repository.watched.0.below_minimum', true));
+
+    $this->get(route('minimum-versions.index'))
+        ->assertInertia(fn (Assert $page) => $page->where('package_names', fn ($names) => collect($names)->contains('guzzlehttp/guzzle')));
+});
+
 it('is Unknown and keeps the last packages when it can\'t read them', function (Closure $setUp, string $message) {
     $repository = svet24(fixtureFiles(['composer.lock', 'composer.json']));
     RunMonitor::dispatchSync(packagesMonitor($repository)->id);

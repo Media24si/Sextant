@@ -10,7 +10,8 @@ import { statusLabels } from '@/lib/status';
 /*
  * The Packages card of an application or site page (SPEC §11.9, §13.6): the
  * repository its GitHub link points to, when it was last read, and every
- * locked package that has a minimum, below it first. The full list is on the
+ * locked package that has a minimum, below it first, including packages
+ * pulled in by other packages (marked indirect). The full list is on the
  * repository page.
  */
 const props = defineProps<{
@@ -77,7 +78,15 @@ const belowCount = computed(
                         v-for="item in repository.watched"
                         :key="`${item.ecosystem}:${item.name}@${item.version}`"
                     >
-                        <td class="py-1 pr-3 font-mono">{{ item.name }}</td>
+                        <td class="py-1 pr-3">
+                            <span class="font-mono">{{ item.name }}</span>
+                            <span
+                                v-if="!item.direct"
+                                class="ml-1 text-muted-foreground"
+                                title="Required by another package, not by the project itself"
+                                >indirect</span
+                            >
+                        </td>
                         <td class="py-1 pr-3">
                             <VersionCell
                                 :version="item.version"

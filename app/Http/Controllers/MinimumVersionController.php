@@ -38,8 +38,8 @@ class MinimumVersionController extends Controller
             )),
             'package_minimums' => $repositories->minimumRows(),
             'ecosystems' => array_map(fn (Ecosystem $ecosystem): array => ['value' => $ecosystem->value, 'label' => $ecosystem->label()], Ecosystem::cases()),
-            // Package names seen in repositories, for the name field's suggestions.
-            'package_names' => RepositoryPackage::query()->where('direct', true)->distinct()->orderBy('name')->limit(2000)->pluck('name'),
+            // Every package name locked in a repository, direct or pulled in by another, for the name field's suggestions.
+            'package_names' => RepositoryPackage::query()->distinct()->orderBy('name')->limit(5000)->pluck('name'),
         ]);
     }
 
