@@ -17,7 +17,7 @@ Fictional demo data (`database/seeders/DemoSeeder.php`), light and dark.
 | ![Overview, light](docs/screenshots/overview-light.png)                 | ![Overview, dark](docs/screenshots/overview-dark.png) |
 | **Domains**: every subdomain and how it's served                        |                                                       |
 | ![Domains, light](docs/screenshots/domains-light.png)                   | ![Domains, dark](docs/screenshots/domains-dark.png)   |
-| **Server**: traffic into it, sites it serves, software versions         |                                                       |
+| **Server**: traffic in, what fails with it, sites, software versions    |                                                       |
 | ![Server, light](docs/screenshots/server-light.png)                     | ![Server, dark](docs/screenshots/server-dark.png)     |
 | **Site**: serving path, monitors, incidents                             |                                                       |
 | ![Site, light](docs/screenshots/site-light.png)                         | ![Site, dark](docs/screenshots/site-dark.png)         |

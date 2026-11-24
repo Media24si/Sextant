@@ -67,12 +67,12 @@ class DemoSeeder extends Seeder
      * @var array<string, array<string, mixed>>
      */
     private const SERVERS = [
-        'web01' => ['ip' => '203.0.113.10', 'ipv6' => '2001:db8:10::1', 'provider' => 'Hetzner', 'os' => 'Ubuntu 24.04 LTS', 'ports' => [22, 80, 443], 'ping' => true, 'nginx' => '1.26.3', 'php' => ['8.3' => '8.3.14', '8.4' => '8.4.2'], 'mysql' => null, 'kernel' => '6.8.0-51-generic', 'pretty' => 'Ubuntu 24.04.1 LTS', 'collector' => 4],
-        'web02' => ['ip' => '203.0.113.11', 'ipv6' => null, 'provider' => 'Hetzner', 'os' => 'Ubuntu 24.04 LTS', 'ports' => [22, 80, 443], 'ping' => true, 'nginx' => '1.26.3', 'php' => ['8.3' => '8.3.14'], 'mysql' => null, 'kernel' => '6.8.0-51-generic', 'pretty' => 'Ubuntu 24.04.1 LTS', 'collector' => 4],
-        'web03' => ['ip' => '198.51.100.20', 'ipv6' => null, 'provider' => 'Arnes', 'os' => 'Ubuntu 22.04 LTS', 'ports' => [22, 80, 443], 'ping' => true, 'nginx' => '1.24.0', 'php' => ['8.2' => '8.2.26', '8.1' => '8.1.31'], 'mysql' => null, 'kernel' => '5.15.0-126-generic', 'pretty' => 'Ubuntu 22.04.5 LTS', 'collector' => 4],
-        'db01' => ['ip' => '203.0.113.30', 'ipv6' => null, 'provider' => 'Hetzner', 'os' => 'Debian 12', 'ports' => [22], 'ping' => true, 'nginx' => null, 'php' => [], 'mysql' => '8.4.3', 'kernel' => '6.1.0-28-amd64', 'pretty' => 'Debian GNU/Linux 12 (bookworm)', 'collector' => 4],
-        'legacy01' => ['ip' => '192.0.2.40', 'ipv6' => null, 'provider' => 'DigitalOcean', 'os' => 'Ubuntu 22.04 LTS', 'ports' => [22, 80, 443], 'ping' => true, 'nginx' => '1.26.2', 'php' => ['7.4' => '7.4.33'], 'mysql' => '8.0.40', 'kernel' => '5.15.0-122-generic', 'pretty' => 'Ubuntu 22.04.5 LTS', 'collector' => 3],
-        'win01' => ['ip' => '198.51.100.50', 'ipv6' => null, 'provider' => null, 'os' => 'Windows Server 2022', 'ports' => [80, 443], 'ping' => false, 'nginx' => null, 'php' => [], 'mysql' => null, 'kernel' => null, 'pretty' => null, 'collector' => null],
+        'web01' => ['ip' => '203.0.113.10', 'provider' => 'Hetzner', 'os' => 'Ubuntu 24.04 LTS', 'ports' => [22, 80, 443], 'ping' => true, 'nginx' => '1.26.3', 'php' => ['8.3' => '8.3.14', '8.4' => '8.4.2'], 'mysql' => null, 'kernel' => '6.8.0-51-generic', 'pretty' => 'Ubuntu 24.04.1 LTS', 'collector' => 5],
+        'web02' => ['ip' => '203.0.113.11', 'provider' => 'Hetzner', 'os' => 'Ubuntu 24.04 LTS', 'ports' => [22, 80, 443], 'ping' => true, 'nginx' => '1.26.3', 'php' => ['8.3' => '8.3.14'], 'mysql' => null, 'kernel' => '6.8.0-51-generic', 'pretty' => 'Ubuntu 24.04.1 LTS', 'collector' => 5],
+        'web03' => ['ip' => '198.51.100.20', 'provider' => 'Arnes', 'os' => 'Ubuntu 22.04 LTS', 'ports' => [22, 80, 443], 'ping' => true, 'nginx' => '1.24.0', 'php' => ['8.2' => '8.2.26', '8.1' => '8.1.31'], 'mysql' => null, 'kernel' => '5.15.0-126-generic', 'pretty' => 'Ubuntu 22.04.5 LTS', 'collector' => 5],
+        'db01' => ['ip' => '203.0.113.30', 'provider' => 'Hetzner', 'os' => 'Debian 12', 'ports' => [22], 'ping' => true, 'nginx' => null, 'php' => [], 'mysql' => '8.4.3', 'kernel' => '6.1.0-28-amd64', 'pretty' => 'Debian GNU/Linux 12 (bookworm)', 'collector' => 5],
+        'legacy01' => ['ip' => '192.0.2.40', 'provider' => 'DigitalOcean', 'os' => 'Ubuntu 22.04 LTS', 'ports' => [22, 80, 443], 'ping' => true, 'nginx' => '1.26.2', 'php' => ['7.4' => '7.4.33'], 'mysql' => '8.0.40', 'kernel' => '5.15.0-122-generic', 'pretty' => 'Ubuntu 22.04.5 LTS', 'collector' => 3],
+        'win01' => ['ip' => '198.51.100.50', 'provider' => null, 'os' => 'Windows Server 2022', 'ports' => [80, 443], 'ping' => false, 'nginx' => null, 'php' => [], 'mysql' => null, 'kernel' => null, 'pretty' => null, 'collector' => null],
     ];
 
     /**
@@ -185,10 +185,6 @@ class DemoSeeder extends Seeder
                 },
             ]);
             $server->addresses()->create(['ip' => $spec['ip'], 'is_primary' => true]);
-
-            if ($spec['ipv6'] !== null) {
-                $server->addresses()->create(['ip' => $spec['ipv6'], 'is_primary' => false]);
-            }
 
             if ($spec['collector'] !== null) {
                 $server->forceFill([
