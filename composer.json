@@ -4,7 +4,7 @@
     "type": "project",
     "description": "Overview and monitoring of Media24 domains, sites and servers.",
     "keywords": [],
-    "license": "proprietary",
+    "license": "MIT",
     "require": {
         "php": "^8.4",
         "ext-curl": "*",

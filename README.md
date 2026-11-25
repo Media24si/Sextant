@@ -288,3 +288,9 @@ gunzip -c sextant-2026-11-21.sql.gz | mysql sextant_restore_test
 ```
 
 Incidents, software history and the change feed are in the dump; `.env` (with `APP_KEY`, which decrypts the version tokens) must be backed up separately.
+
+---
+
+## License
+
+MIT, see [`LICENSE`](LICENSE).
