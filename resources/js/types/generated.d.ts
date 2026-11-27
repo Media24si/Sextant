@@ -618,6 +618,19 @@ nullable: boolean,
 options: Record<string, string> | null,
 default: any,
 };
+export type CheckerDefaultsData = {
+key: string,
+name: string,
+resource_type: string,
+interval: number,
+failures_before_incident: number,
+successes_before_resolve: number,
+arguments: App.Data.Monitors.ArgumentSchemaData[],
+overrides: Record<string, any>,
+interval_minutes: number | null,
+failures_before_incident_override: number | null,
+successes_before_resolve_override: number | null,
+};
 export type CheckerOptionData = {
 key: string,
 name: string,

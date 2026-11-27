@@ -2,6 +2,7 @@
 
 use App\Checks\CheckerRegistry;
 use App\Checks\Server\TcpChecker;
+use App\Models\CheckerSetting;
 use App\Models\Monitor;
 use App\Models\Site;
 
@@ -56,4 +57,44 @@ it('gives the schema with registry defaults for the form', function () {
 
     expect($schema['expected_status'])->toMatchArray(['type' => 'intList', 'default' => [200]])
         ->and($schema['contains'])->toMatchArray(['nullable' => true, 'default' => null]);
+});
+
+it('puts stored checker defaults between the config and the monitor', function () {
+    CheckerSetting::factory()->create([
+        'checker' => 'site.ssl',
+        'arguments' => ['warning_days' => 10, 'error_days' => 3, 'gone' => 1],
+        'interval_minutes' => 60,
+    ]);
+    $site = Site::factory()->create();
+    $registry = app(CheckerRegistry::class);
+
+    $inherits = $registry->settings(Monitor::factory()->on($site, 'site.ssl')->make());
+    $overrides = $registry->settings(Monitor::factory()->on($site, 'site.ssl')->make(['arguments' => ['warning_days' => 20]]));
+
+    expect($inherits->arguments->int('warning_days'))->toBe(10)
+        ->and($inherits->arguments->int('error_days'))->toBe(3)
+        ->and($inherits->arguments->int('port'))->toBe(443)
+        ->and($inherits->interval)->toBe(60)
+        ->and($inherits->failuresBeforeIncident)->toBe(2)
+        ->and($overrides->arguments->int('warning_days'))->toBe(20)
+        ->and($registry->entry('site.ssl')['arguments'])->not->toHaveKey('gone')
+        ->and(collect($registry->schema('site.ssl'))->firstWhere('name', 'warning_days')['default'])->toBe(10)
+        ->and($registry->validate())->toBe([]);
+});
+
+it('goes back to the config when the stored defaults are deleted', function () {
+    $setting = CheckerSetting::factory()->create(['checker' => 'site.ssl', 'arguments' => ['warning_days' => 10]]);
+    $registry = app(CheckerRegistry::class);
+
+    expect($registry->entry('site.ssl')['arguments']['warning_days'])->toBe(10);
+
+    $setting->delete();
+
+    expect($registry->entry('site.ssl')['arguments']['warning_days'])->toBe(14);
+});
+
+it('ignores a stored default for an argument that depends on the resource', function () {
+    CheckerSetting::factory()->create(['checker' => 'server.tcp', 'arguments' => ['address' => '10.0.0.1', 'timeout' => 9]]);
+
+    expect(app(CheckerRegistry::class)->entry('server.tcp')['arguments'])->toMatchArray(['address' => null, 'timeout' => 9]);
 });

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\CheckerSettingController;
 use App\Http\Controllers\ChoiceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DomainController;
@@ -117,6 +118,9 @@ Route::middleware('auth')->group(function () {
         Route::put('settings/lists/{choice}', [ChoiceController::class, 'update'])->name('lists.update');
         Route::post('settings/lists/{choice}/move', [ChoiceController::class, 'move'])->name('lists.move');
         Route::delete('settings/lists/{choice}', [ChoiceController::class, 'destroy'])->name('lists.destroy');
+
+        Route::get('settings/monitor-defaults', [CheckerSettingController::class, 'index'])->name('checker-settings.index');
+        Route::put('settings/monitor-defaults/{checker}', [CheckerSettingController::class, 'update'])->name('checker-settings.update');
 
         Route::get('settings/github', [GithubAccessController::class, 'index'])->name('github-access.index');
         Route::post('settings/github/tokens', [GithubAccessController::class, 'store'])->name('github-tokens.store');

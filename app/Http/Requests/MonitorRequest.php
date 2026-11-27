@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Checks\Argument;
-use App\Checks\ArgumentType;
+use App\Checks\ArgumentOverrides;
 use App\Checks\CheckerRegistry;
 use App\Models\Concerns\Monitorable;
 use App\Models\Domain;
@@ -38,7 +38,7 @@ class MonitorRequest extends FormRequest
 
         // Empty fields inherit: drop them before validating.
         if (is_array($arguments)) {
-            $this->merge(['arguments' => array_filter($arguments, fn (mixed $value): bool => $value !== null && $value !== '' && $value !== [])]);
+            $this->merge(['arguments' => ArgumentOverrides::withoutEmpty($arguments)]);
         }
 
         if ($this->has('label')) {
@@ -68,7 +68,7 @@ class MonitorRequest extends FormRequest
             ] : []),
             'label' => ['nullable', 'string', 'max:100'],
             'arguments' => ['array'],
-            ...$this->argumentRules(),
+            ...ArgumentOverrides::rules($this->schema()),
             'interval_minutes' => ['nullable', 'integer', 'between:1,10080'],
             'failures_before_incident' => ['nullable', 'integer', 'between:1,20'],
             'successes_before_resolve' => ['nullable', 'integer', 'between:1,20'],
@@ -118,22 +118,7 @@ class MonitorRequest extends FormRequest
      */
     public function arguments(): ?array
     {
-        $values = [];
-        $schema = collect($this->schema())->keyBy('name');
-
-        foreach ((array) $this->validated('arguments', []) as $key => $value) {
-            $argument = $schema->get($key);
-
-            $values[$key] = match ($argument?->type) {
-                ArgumentType::Int => (int) $value,
-                ArgumentType::Bool => filter_var($value, FILTER_VALIDATE_BOOLEAN),
-                ArgumentType::IntList => array_values(array_map('intval', (array) $value)),
-                ArgumentType::StringList => array_values(array_map('strval', (array) $value)),
-                default => $value,
-            };
-        }
-
-        return $values === [] ? null : $values;
+        return ArgumentOverrides::cast($this->schema(), (array) $this->validated('arguments', []));
     }
 
     public function resource(): (Model&Monitorable)|null
@@ -180,33 +165,10 @@ class MonitorRequest extends FormRequest
     }
 
     /**
-     * @return array<string, list<mixed>>
-     */
-    private function argumentRules(): array
-    {
-        $rules = [];
-
-        foreach ($this->schema() as $argument) {
-            foreach ($argument->validationRules("arguments.{$argument->name}") as $field => $fieldRules) {
-                // Every argument is optional here: missing = inherit.
-                $rules[$field] = ['sometimes', ...array_values(array_filter($fieldRules, fn (mixed $rule): bool => ! in_array($rule, ['present', 'required', 'nullable'], true)))];
-            }
-        }
-
-        return $rules;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function attributes(): array
     {
-        $attributes = [];
-
-        foreach ($this->schema() as $argument) {
-            $attributes["arguments.{$argument->name}"] = strtolower($argument->label);
-        }
-
-        return [...$attributes, 'interval_minutes' => 'interval'];
+        return [...ArgumentOverrides::attributes($this->schema()), 'interval_minutes' => 'interval'];
     }
 }

@@ -4,13 +4,16 @@ namespace App\Checks;
 
 use App\Checks\Conditions\Condition;
 use App\Enums\Status;
+use App\Models\CheckerSetting;
 use App\Models\Monitor;
 use Illuminate\Database\Eloquent\Model;
 use Throwable;
 
 /**
- * Reads `config/checkers.php` (SPEC §4.3) and resolves a monitor's settings
- * (§4.5). The only place that knows checker classes.
+ * Reads `config/checkers.php` (SPEC §4.3) with the defaults set on the Monitor
+ * defaults page on top, and resolves a monitor's settings (§4.5): config ←
+ * stored checker defaults ← monitor overrides. The only place that knows
+ * checker classes.
  *
  * @phpstan-type Entry array{class: class-string<Checker>, queue: string, interval: int, failures_before_incident: int, successes_before_resolve: int, max_severity?: string, requires_network?: bool, arguments: array<string, mixed>}
  * @phpstan-type DefaultEntry array{checker: string, label?: string|null, arguments?: array<string, mixed>, only_if?: class-string<Condition>}
@@ -26,14 +29,45 @@ class CheckerRegistry
     ];
 
     /**
+     * Config entries with the stored defaults merged in.
+     *
      * @return array<string, Entry>
      */
     public function entries(): array
+    {
+        $entries = $this->configEntries();
+        $stored = CheckerSetting::cached();
+
+        foreach ($entries as $key => $entry) {
+            if (isset($stored[$key]) && class_exists($entry['class'])) {
+                $entries[$key] = $this->withStored($entry, $stored[$key]);
+            }
+        }
+
+        return $entries;
+    }
+
+    /**
+     * The entries as `config/checkers.php` has them, without stored defaults.
+     *
+     * @return array<string, Entry>
+     */
+    public function configEntries(): array
     {
         /** @var array<string, Entry> $entries */
         $entries = (array) config('checkers.checkers', []);
 
         return $entries;
+    }
+
+    /**
+     * @return Entry
+     *
+     * @throws UnknownChecker
+     */
+    public function configEntry(string $key): array
+    {
+        return $this->configEntries()[$key] ?? throw UnknownChecker::key($key);
     }
 
     public function has(string $key): bool
@@ -102,6 +136,29 @@ class CheckerRegistry
             requiresNetwork: $entry['requires_network'] ?? true,
             queue: $entry['queue'],
         );
+    }
+
+    /**
+     * The checker's schema arguments a stored row sets replace the config
+     * ones; stale keys are ignored. Null thresholds keep the config value.
+     *
+     * @param  Entry  $entry
+     * @param  array{arguments: array<string, mixed>, interval_minutes: int|null, failures_before_incident: int|null, successes_before_resolve: int|null}  $stored
+     * @return Entry
+     */
+    private function withStored(array $entry, array $stored): array
+    {
+        foreach ($entry['class']::arguments() as $argument) {
+            if (array_key_exists($argument->name, $stored['arguments']) && ! $argument->isPerResource()) {
+                $entry['arguments'][$argument->name] = $stored['arguments'][$argument->name];
+            }
+        }
+
+        $entry['interval'] = $stored['interval_minutes'] ?? $entry['interval'];
+        $entry['failures_before_incident'] = $stored['failures_before_incident'] ?? $entry['failures_before_incident'];
+        $entry['successes_before_resolve'] = $stored['successes_before_resolve'] ?? $entry['successes_before_resolve'];
+
+        return $entry;
     }
 
     /**

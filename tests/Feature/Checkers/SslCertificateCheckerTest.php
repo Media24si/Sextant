@@ -32,7 +32,8 @@ it('grades the days left', function (string $expires, Status $status, string $me
         ->and($result->data)->toHaveKeys(['fingerprint_sha256', 'issuer', 'days_remaining', 'chain_valid']);
 })->with([
     '100 days' => ['+100 days', Status::Ok, "(100 days), Let's Encrypt"],
-    '20 days' => ['+20 days', Status::Warning, '(20 days)'],
+    '20 days' => ['+20 days', Status::Ok, '(20 days)'],
+    '10 days' => ['+10 days', Status::Warning, '(10 days)'],
     '5 days' => ['+5 days', Status::Error, '(5 days)'],
     'expired' => ['-1 day', Status::Error, 'Expired on'],
 ]);

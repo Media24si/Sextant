@@ -88,7 +88,7 @@ return [
             'interval' => 720,
             'failures_before_incident' => 2,
             'successes_before_resolve' => 1,
-            'arguments' => ['warning_days' => 30, 'error_days' => 7, 'port' => 443],
+            'arguments' => ['warning_days' => 14, 'error_days' => 7, 'port' => 443],
         ],
 
         'site.path' => [

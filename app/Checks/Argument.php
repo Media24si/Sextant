@@ -90,6 +90,12 @@ final class Argument
         return $this->nullable;
     }
 
+    /** A select whose options depend on the resource, e.g. a server's addresses: no checker-wide default. */
+    public function isPerResource(): bool
+    {
+        return $this->options instanceof Closure;
+    }
+
     /**
      * Rules for the value, plus `.*` rules for list items, keyed by field.
      *

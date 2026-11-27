@@ -81,6 +81,8 @@ $adminRoutes = [
     'rename list entry' => ['put', 'lists.update', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'move list entry' => ['post', 'lists.move', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
     'delete list entry' => ['delete', 'lists.destroy', fn () => ['choice' => Choice::ofList(ChoiceList::Os)->firstOrFail()]],
+    'monitor defaults page' => ['get', 'checker-settings.index', null],
+    'save monitor defaults' => ['put', 'checker-settings.update', fn () => ['checker' => 'site.ssl']],
     'GitHub access page' => ['get', 'github-access.index', null],
     'set GitHub token' => ['post', 'github-tokens.store', null],
     'remove GitHub token' => ['delete', 'github-tokens.destroy', fn () => ['github_token' => GithubToken::factory()->create()]],

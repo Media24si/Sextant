@@ -13,12 +13,14 @@ import {
     List,
     Server,
     ShieldCheck,
+    SlidersHorizontal,
     SquareDashed,
     TriangleAlert,
     Users,
 } from '@lucide/vue';
 import ActivityController from '@/actions/App/Http/Controllers/ActivityController';
 import ApplicationController from '@/actions/App/Http/Controllers/ApplicationController';
+import CheckerSettingController from '@/actions/App/Http/Controllers/CheckerSettingController';
 import ChoiceController from '@/actions/App/Http/Controllers/ChoiceController';
 import DomainController from '@/actions/App/Http/Controllers/DomainController';
 import ExternalServiceController from '@/actions/App/Http/Controllers/ExternalServiceController';
@@ -48,7 +50,7 @@ const page = usePage();
 /*
  * SPEC §13.4, grouped: the inventory first (what we have and how it
  * connects), then monitoring, then settings. Readers see every page they can
- * open; only Users and GitHub access are for admins.
+ * open; only Users, Monitor defaults and GitHub access are for admins.
  */
 const overviewItems: SidebarNavItem[] = [
     { title: 'Overview', href: dashboard(), icon: LayoutGrid },
@@ -111,6 +113,11 @@ const settingsItems = computed<SidebarNavItem[]>(() => [
     ...(page.props.can.manage
         ? [
               { title: 'Users', href: UserController.index(), icon: Users },
+              {
+                  title: 'Monitor defaults',
+                  href: CheckerSettingController.index(),
+                  icon: SlidersHorizontal,
+              },
               {
                   title: 'GitHub access',
                   href: GithubAccessController.index(),
